@@ -118,12 +118,13 @@
     .average-row td {
       background-color: var(--average-row);
       position: sticky;
-      top: 52px;
+      bottom: 0;
       z-index: 9;
       font-weight: 600;
       color: var(--text-primary);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
     }
 
     tr.game-row {
@@ -262,6 +263,10 @@
             <th data-field="fta">FTA<span class="sort-arrow">↓</span></th>
             <th data-field="ftPct">FT%<span class="sort-arrow">↓</span></th>
           </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+        <tfoot>
           <tr id="average-row" class="average-row">
             <td id="avg-id">0 Games</td>
             <td id="avg-mpg">0</td>
@@ -281,9 +286,7 @@
             <td id="avg-fta">0</td>
             <td id="avg-ftPct">0</td>
           </tr>
-        </thead>
-        <tbody id="table-body">
-        </tbody>
+        </tfoot>
       </table>
     </section>
 
