@@ -300,14 +300,13 @@
 
   <script>
     const FIELDS = ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'];
-    const COMPUTED = ['fgPct', 'tpPct', 'ftPct'];
+    const COMPUTED = ['ppg', 'fgPct', 'tpPct', 'ftPct'];
 
     let games = [
       { id: 3, mpg: 36.0, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
       { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
       { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
     ];
-    let nextId = 4;
     let sortCol = null;
     let sortAsc = true;
 
@@ -329,6 +328,10 @@
       g.fgPct = g.fga > 0 ? (g.fgm / g.fga) * 100 : 0;
       g.tpPct = g.tpa > 0 ? (g.tpm / g.tpa) * 100 : 0;
       g.ftPct = g.fta > 0 ? (g.ftm / g.fta) * 100 : 0;
+      let fgmMade = g.fgm || 0;
+      let tpmMade = g.tpm || 0;
+      let ftmMade = g.ftm || 0;
+      g.ppg = (Math.max(0, fgmMade - tpmMade) * 2) + (tpmMade * 3) + ftmMade;
     }
 
     function createRowDom(game) {
@@ -348,7 +351,7 @@
       `;
         } else if (COMPUTED.includes(field)) {
           td.className = 'computed';
-          td.innerHTML = `<span class="value">${formatPercent(game[field])}</span>`;
+          td.innerHTML = `<span class="value">${field === 'ppg' ? formatVal(game[field]) : formatPercent(game[field])}</span>`;
         } else {
           td.className = 'editable';
           td.innerHTML = `<span class="value">${formatVal(game[field])}</span>`;
@@ -401,7 +404,7 @@
         if (!td) return;
 
         let isComputed = COMPUTED.includes(field);
-        let newValue = (field === 'id') ? avg.id.toString() : (isComputed ? formatPercent(avg[field]) : formatVal(avg[field]));
+        let newValue = (field === 'id') ? avg.id.toString() : (isComputed && field !== 'ppg' ? formatPercent(avg[field]) : formatVal(avg[field]));
 
         let existingText = td.textContent;
         if (existingText !== newValue) {
@@ -471,6 +474,7 @@
         row.querySelector('[data-field="fgPct"] .value').textContent = formatPercent(game.fgPct);
         row.querySelector('[data-field="tpPct"] .value').textContent = formatPercent(game.tpPct);
         row.querySelector('[data-field="ftPct"] .value').textContent = formatPercent(game.ftPct);
+        row.querySelector('[data-field="ppg"] .value').textContent = formatVal(game.ppg);
 
         input.remove();
         span.style.display = '';
@@ -518,8 +522,9 @@
     }
 
     function addGame() {
+      let maxId = games.length > 0 ? Math.max(...games.map(g => g.id)) : 0;
       let newGame = {
-        id: nextId++, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
+        id: maxId + 1, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
         fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
       };
       games.unshift(newGame);
