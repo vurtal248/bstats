@@ -305,11 +305,26 @@
     const FIELDS = ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'];
     const COMPUTED = ['ppg', 'fgPct', 'tpPct', 'ftPct'];
 
-    let games = [
+    const defaultGames = [
       { id: 3, mpg: 36.0, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
       { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
       { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
     ];
+    let games = defaultGames;
+    try {
+      const stored = localStorage.getItem('bstats_games');
+      if (stored) games = JSON.parse(stored);
+    } catch (e) {
+      console.error('Failed to parse stats from local storage', e);
+    }
+
+    function saveGames() {
+      try {
+        localStorage.setItem('bstats_games', JSON.stringify(games));
+      } catch (e) {
+        console.error('Failed to save stats to local storage', e);
+      }
+    }
     let sortCol = null;
     let sortAsc = true;
 
@@ -482,6 +497,7 @@
         input.remove();
         span.style.display = '';
 
+        saveGames();
         updateAverages();
       };
 
@@ -498,6 +514,7 @@
     function deleteRow(tr) {
       let id = parseInt(tr.dataset.id);
       games = games.filter(g => g.id !== id);
+      saveGames();
       tr.style.pointerEvents = 'none';
 
       anime.timeline()
@@ -531,6 +548,7 @@
         fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
       };
       games.unshift(newGame);
+      saveGames();
 
       let tr = createRowDom(newGame);
       tBody.prepend(tr);
@@ -582,6 +600,7 @@
         let valB = b[field] || 0;
         return sortAsc ? valA - valB : valB - valA;
       });
+      saveGames();
 
       games.forEach(g => {
         let r = rows.find(row => parseInt(row.dataset.id) === g.id);
