@@ -20,19 +20,19 @@
       // Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
     */
     :root {
-      --clr-bg: #030305;
-      --clr-surface: rgba(15, 15, 20, 0.65);
-      --clr-surface-hover: rgba(25, 25, 30, 0.85);
-      --clr-border: rgba(255, 255, 255, 0.04);
-      --clr-border-active: rgba(0, 240, 255, 0.3);
+      --clr-bg: #050505;
+      --clr-surface: rgba(255, 255, 255, 0.03);
+      --clr-surface-hover: rgba(255, 255, 255, 0.08);
+      --clr-border: rgba(255, 255, 255, 0.08);
+      --clr-border-active: rgba(255, 255, 255, 0.4);
 
       --clr-text-primary: #FFFFFF;
-      --clr-text-secondary: #8A8A93;
-      --clr-text-dim: #4B4B55;
+      --clr-text-secondary: #888888;
+      --clr-text-dim: #444444;
 
-      --clr-accent: #00F0FF;
-      --clr-accent-glow: rgba(0, 240, 255, 0.4);
-      --clr-danger: #FF2A5F;
+      --clr-accent: #FFFFFF;
+      --clr-accent-glow: rgba(255, 255, 255, 0.3);
+      --clr-danger: #FFFFFF;
 
       --font-display: 'Syne', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
@@ -68,8 +68,8 @@
       z-index: -1;
       pointer-events: none;
       background:
-        radial-gradient(circle at 15% 0%, rgba(0, 240, 255, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 85% 100%, rgba(112, 0, 255, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 85% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
     }
 
     .ambient-noise {
@@ -238,7 +238,7 @@
       font-weight: 600;
       letter-spacing: 0.1em;
       color: var(--clr-text-secondary);
-      background: rgba(10, 10, 12, 0.95);
+      background: rgba(10, 10, 10, 0.95);
       position: sticky;
       top: 0;
       z-index: 20;
@@ -387,7 +387,7 @@
     }
 
     .stats-grid tfoot td {
-      background: rgba(5, 5, 7, 0.95);
+      background: rgba(5, 5, 5, 0.95);
       border-top: 1px solid var(--clr-border);
       border-bottom: none;
       font-weight: 700;
@@ -398,7 +398,7 @@
     }
 
     .stats-grid tfoot td:first-child {
-      background: rgba(5, 5, 7, 0.95);
+      background: rgba(5, 5, 5, 0.95);
     }
 
     /* Empty State Context */
@@ -824,8 +824,8 @@
         if (animate && updatedNodes.length) {
           anime({
             targets: updatedNodes,
-            color: ['#00F0FF', '#FFFFFF'],
-            textShadow: ['0 0 16px rgba(0,240,255,0.6)', 'none'],
+            color: ['#888888', '#FFFFFF'],
+            textShadow: ['0 0 16px rgba(255,255,255,0.6)', 'none'],
             duration: 600,
             easing: 'easeOutExpo'
           });
@@ -871,7 +871,7 @@
           input.remove();
           span.style.display = '';
 
-          anime({ targets: tdNode, backgroundColor: ['rgba(0,240,255,0.15)', 'transparent'], duration: 500, easing: 'easeOutExpo' });
+          anime({ targets: tdNode, backgroundColor: ['rgba(255,255,255,0.15)', 'transparent'], duration: 500, easing: 'easeOutExpo' });
           this.updateAggregates(true);
         };
 
@@ -916,7 +916,7 @@
             targets: tr,
             translateY: [-30, 0],
             opacity: [0, 1],
-            backgroundColor: ['rgba(0,240,255,0.1)', 'transparent'],
+            backgroundColor: ['rgba(255,255,255,0.1)', 'transparent'],
             duration: 600,
             easing: 'easeOutExpo'
           });
