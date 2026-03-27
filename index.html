@@ -4,66 +4,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Basketball Stats Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400;600&display=swap"
+  <meta name="description" content="Premium, high-performance basketball statistics tracker.">
+  <title>Elite Stats Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;800&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
   <style>
+    /* CSS Variables & Foundation */
+    :root {
+      --bg-color: #030303;
+      --surface-color: #0d0d0d;
+      --surface-hover: #141414;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --border-active: rgba(255, 255, 255, 0.2);
+
+      --text-main: #FAFAFA;
+      --text-muted: #888888;
+      --text-dim: #444444;
+
+      --accent: #FFFFFF;
+      --danger: #FF3333;
+      --focus-ring: rgba(255, 255, 255, 0.4);
+      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     * {
       box-sizing: border-box;
     }
 
-    :root {
-      --bg: #000000;
-      --surface: #0d0d0d;
-      --card: #141414;
-      --average-row: #1f1f1f;
-      --border: #2a2a2a;
-      --text-primary: #ffffff;
-      --text-secondary: #888888;
-      --text-muted: #444444;
-      --highlight: #ffffff;
-    }
-
-    body,
-    html {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      background-color: var(--bg);
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Accessibility */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* Layout */
     .app-container {
-      max-width: 1500px;
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: clamp(20px, 4vw, 60px);
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      margin-bottom: 2rem;
-      opacity: 0;
+      margin-bottom: clamp(30px, 5vw, 60px);
+      will-change: transform, opacity;
     }
 
     h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      font-size: 2.25rem;
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 800;
       letter-spacing: -0.04em;
       margin: 0;
-      color: var(--text-primary);
+      line-height: 1;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #FFFFFF 0%, #777777 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .table-container {
+    .header-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Table Container */
+    .grid-wrapper {
+      position: relative;
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 1px;
+      background: rgba(13, 13, 13, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      will-change: opacity, transform;
+    }
+
+    .table-scroll {
       width: 100%;
       overflow-x: auto;
-      background-color: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      position: relative;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--text-dim) transparent;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .table-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: var(--text-dim);
+      border-radius: 2px;
     }
 
     table {
@@ -71,166 +149,243 @@
       min-width: 1300px;
       border-collapse: separate;
       border-spacing: 0;
+      font-variant-numeric: tabular-nums;
     }
 
     th,
     td {
-      padding: 0 16px;
+      padding: 16px;
       text-align: right;
-      vertical-align: middle;
-      height: 52px;
+      border-bottom: 1px solid var(--border-color);
       white-space: nowrap;
     }
 
     th:first-child,
     td:first-child {
       text-align: center;
-      width: 90px;
+      width: 80px;
+      position: relative;
     }
 
+    /* Headers */
     th {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      background-color: var(--surface);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      border-bottom: 1px solid var(--border);
-      user-select: none;
-    }
-
-    .sort-arrow {
-      display: inline-block;
-      opacity: 0;
-      margin-left: 4px;
+      font-family: 'Syne', sans-serif;
       font-size: 0.8rem;
-    }
-
-    .average-row {
-      opacity: 0;
-    }
-
-    .average-row td {
-      background-color: var(--average-row);
-      position: sticky;
-      bottom: 0;
-      z-index: 9;
       font-weight: 600;
-      color: var(--text-primary);
-      border-top: 1px solid var(--border);
-      border-bottom: none;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    tr.game-row {
-      position: relative;
-      border-bottom: 1px solid var(--border);
-      background-color: transparent;
-    }
-
-    tr.game-row:last-child {
-      border-bottom: none;
-    }
-
-    td {
-      font-family: 'Inter', monospace;
-      font-variant-numeric: tabular-nums;
-      font-size: 0.95rem;
-    }
-
-    td:first-child {
-      position: relative;
-    }
-
-    .row-highlight {
-      position: absolute;
-      left: 0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      position: sticky;
       top: 0;
-      bottom: 0;
-      width: 3px;
-      background-color: var(--highlight);
-      opacity: 0;
-      z-index: 2;
+      z-index: 20;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s var(--ease-fluid);
+      background: rgba(13, 13, 13, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .delete-btn {
+    th:hover,
+    th:focus-visible {
+      color: var(--text-main);
+    }
+
+    .sort-icon {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-left: 6px;
+      opacity: 0;
+      transition: transform 0.4s var(--ease-fluid), opacity 0.3s;
+    }
+
+    .sort-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    th[aria-sort="ascending"] .sort-icon {
+      opacity: 1;
+      transform: rotate(180deg);
+      color: var(--text-main);
+    }
+
+    th[aria-sort="descending"] .sort-icon {
+      opacity: 1;
+      transform: rotate(0deg);
+      color: var(--text-main);
+    }
+
+    /* Rows */
+    tbody tr {
+      transition: background-color 0.3s var(--ease-fluid);
+    }
+
+    tbody tr:hover,
+    tbody tr:focus-within {
+      background-color: var(--surface-hover);
+    }
+
+    /* Cells */
+    .cell-editable {
+      cursor: pointer;
+      position: relative;
+      transition: color 0.3s var(--ease-fluid), text-shadow 0.3s;
+    }
+
+    .cell-editable:hover {
+      color: var(--accent);
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .cell-computed {
+      color: var(--text-muted);
+    }
+
+    /* Inline Input */
+    .edit-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--accent);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: inherit;
+      text-align: right;
+      padding: 0;
+      outline: none;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Row Actions */
+    .row-actions {
       position: absolute;
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
-      cursor: pointer;
       opacity: 0;
-      line-height: 1;
-      padding: 4px;
-      z-index: 2;
+      transition: opacity 0.3s var(--ease-fluid);
+      display: flex;
     }
 
-    .delete-btn:hover {
-      color: var(--highlight);
+    tbody tr:hover .row-actions,
+    tbody tr:focus-within .row-actions {
+      opacity: 1;
     }
 
-    .editable {
+    .btn-delete {
+      background: none;
+      border: none;
+      color: var(--text-dim);
       cursor: pointer;
-    }
-
-    .computed {
-      color: var(--text-primary);
-    }
-
-    input.edit-input {
-      width: 100%;
-      background: transparent;
-      border: 1px solid transparent;
-      border-bottom-color: var(--highlight);
-      color: var(--text-primary);
-      text-align: right;
-      font-family: inherit;
-      font-size: inherit;
       padding: 4px;
-      outline: none;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .fab-container {
-      position: fixed;
-      bottom: 40px;
-      right: 40px;
-      z-index: 100;
-    }
-
-    .fab-wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: color 0.3s var(--ease-fluid), transform 0.3s var(--ease-fluid);
     }
 
-    .fab {
-      width: 60px;
-      height: 60px;
+    .btn-delete:hover {
+      color: var(--danger);
+      transform: scale(1.1);
+    }
+
+    .btn-delete svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Footer / Averages */
+    tfoot {
+      position: relative;
+      z-index: 15;
+    }
+
+    .row-average td {
+      background: var(--surface-color);
+      border-bottom: none;
+      font-weight: 700;
+      color: var(--text-main);
+      padding-top: 24px;
+      padding-bottom: 24px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: color 0.4s var(--ease-fluid), background 0.4s var(--ease-fluid);
+    }
+
+    /* Empty State */
+    .empty-state {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .empty-state.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    /* FAB */
+    .fab-area {
+      position: fixed;
+      bottom: clamp(20px, 4vw, 40px);
+      right: clamp(20px, 4vw, 40px);
+      z-index: 100;
+      will-change: transform;
+    }
+
+    .btn-fab {
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
-      background-color: var(--text-primary);
-      color: var(--bg);
+      background: var(--text-main);
+      color: var(--bg-color);
       border: none;
       cursor: pointer;
-      box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
     }
 
-    .fab svg {
+    .btn-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-fab:active {
+      transform: scale(0.95);
+    }
+
+    .btn-fab svg {
       width: 24px;
       height: 24px;
-      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
     }
   </style>
 </head>
@@ -238,431 +393,488 @@
 <body>
 
   <main class="app-container">
-    <header id="header">
-      <h1>Stats Tracker</h1>
+    <header class="app-header">
+      <h1>Data Grid</h1>
+      <div class="header-sub">Advanced Performance Metrics</div>
     </header>
-    <section class="table-container">
-      <table id="stats-table">
-        <thead>
-          <tr>
-            <th data-field="id">#<span class="sort-arrow">↓</span></th>
-            <th data-field="mpg">MPG<span class="sort-arrow">↓</span></th>
-            <th data-field="ppg">PPG<span class="sort-arrow">↓</span></th>
-            <th data-field="apg">APG<span class="sort-arrow">↓</span></th>
-            <th data-field="rpg">RPG<span class="sort-arrow">↓</span></th>
-            <th data-field="spg">SPG<span class="sort-arrow">↓</span></th>
-            <th data-field="bpg">BPG<span class="sort-arrow">↓</span></th>
-            <th data-field="topg">TOPG<span class="sort-arrow">↓</span></th>
-            <th data-field="fgm">FGM<span class="sort-arrow">↓</span></th>
-            <th data-field="fga">FGA<span class="sort-arrow">↓</span></th>
-            <th data-field="fgPct">FG%<span class="sort-arrow">↓</span></th>
-            <th data-field="tpm">3PM<span class="sort-arrow">↓</span></th>
-            <th data-field="tpa">3PA<span class="sort-arrow">↓</span></th>
-            <th data-field="tpPct">3P%<span class="sort-arrow">↓</span></th>
-            <th data-field="ftm">FTM<span class="sort-arrow">↓</span></th>
-            <th data-field="fta">FTA<span class="sort-arrow">↓</span></th>
-            <th data-field="ftPct">FT%<span class="sort-arrow">↓</span></th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-        </tbody>
-        <tfoot>
-          <tr id="average-row" class="average-row">
-            <td id="avg-id">0 Games</td>
-            <td id="avg-mpg">0</td>
-            <td id="avg-ppg">0</td>
-            <td id="avg-apg">0</td>
-            <td id="avg-rpg">0</td>
-            <td id="avg-spg">0</td>
-            <td id="avg-bpg">0</td>
-            <td id="avg-topg">0</td>
-            <td id="avg-fgm">0</td>
-            <td id="avg-fga">0</td>
-            <td id="avg-fgPct">0</td>
-            <td id="avg-tpm">0</td>
-            <td id="avg-tpa">0</td>
-            <td id="avg-tpPct">0</td>
-            <td id="avg-ftm">0</td>
-            <td id="avg-fta">0</td>
-            <td id="avg-ftPct">0</td>
-          </tr>
-        </tfoot>
-      </table>
+
+    <section class="grid-wrapper">
+      <div class="empty-state" id="empty-state">
+        <p>No records found. Add a game to begin.</p>
+      </div>
+
+      <div class="table-scroll">
+        <table id="stats-table">
+          <thead>
+            <tr id="table-head-row">
+              <th data-field="id" scope="col" aria-sort="none">#<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="mpg" scope="col" aria-sort="none">MPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="ppg" scope="col" aria-sort="none">PPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="apg" scope="col" aria-sort="none">APG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="rpg" scope="col" aria-sort="none">RPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="spg" scope="col" aria-sort="none">SPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="bpg" scope="col" aria-sort="none">BPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="topg" scope="col" aria-sort="none">TOPG<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="fgm" scope="col" aria-sort="none">FGM<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="fga" scope="col" aria-sort="none">FGA<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="fgPct" scope="col" aria-sort="none">FG%<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="tpm" scope="col" aria-sort="none">3PM<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="tpa" scope="col" aria-sort="none">3PA<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="tpPct" scope="col" aria-sort="none">3P%<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="ftm" scope="col" aria-sort="none">FTM<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="fta" scope="col" aria-sort="none">FTA<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+              <th data-field="ftPct" scope="col" aria-sort="none">FT%<span class="sort-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg></span></th>
+            </tr>
+          </thead>
+          <tbody id="table-body" aria-live="polite">
+          </tbody>
+          <tfoot id="table-footer">
+            <tr class="row-average">
+              <td id="avg-id">0 Games</td>
+              <td id="avg-mpg">0</td>
+              <td id="avg-ppg">0</td>
+              <td id="avg-apg">0</td>
+              <td id="avg-rpg">0</td>
+              <td id="avg-spg">0</td>
+              <td id="avg-bpg">0</td>
+              <td id="avg-topg">0</td>
+              <td id="avg-fgm">0</td>
+              <td id="avg-fga">0</td>
+              <td id="avg-fgPct">0</td>
+              <td id="avg-tpm">0</td>
+              <td id="avg-tpa">0</td>
+              <td id="avg-tpPct">0</td>
+              <td id="avg-ftm">0</td>
+              <td id="avg-fta">0</td>
+              <td id="avg-ftPct">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </section>
 
-    <div class="fab-container">
-      <div class="fab-wrapper" id="fab-wrapper">
-        <button class="fab" id="add-game-fab" aria-label="Add Game">
-          <svg viewBox="0 0 24 24">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-        </button>
-      </div>
+    <div class="fab-area">
+      <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
     </div>
   </main>
 
   <script>
-    const FIELDS = ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'];
-    const COMPUTED = ['ppg', 'fgPct', 'tpPct', 'ftPct'];
+    const CONFIG = {
+      storageKey: 'bstats_games',
+      fields: ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'],
+      computed: ['ppg', 'fgPct', 'tpPct', 'ftPct']
+    };
 
     const defaultGames = [
       { id: 3, mpg: 36.0, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
       { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
       { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
     ];
-    let games = defaultGames;
-    try {
-      const stored = localStorage.getItem('bstats_games');
-      if (stored) games = JSON.parse(stored);
-    } catch (e) {
-      console.error('Failed to parse stats from local storage', e);
-    }
 
-    function saveGames() {
-      try {
-        localStorage.setItem('bstats_games', JSON.stringify(games));
-      } catch (e) {
-        console.error('Failed to save stats to local storage', e);
+    class StatsTracker {
+      constructor() {
+        this.games = this.loadGames();
+        this.sortState = { col: null, asc: true };
+        this.dom = {
+          tbody: document.getElementById('table-body'),
+          tfoot: document.getElementById('table-footer'),
+          emptyState: document.getElementById('empty-state'),
+          fab: document.getElementById('add-game-fab'),
+          headers: document.querySelectorAll('th[data-field]')
+        };
+
+        this.init();
       }
-    }
-    let sortCol = null;
-    let sortAsc = true;
 
-    games.forEach(g => recalcRowGame(g));
-
-    const tBody = document.getElementById('table-body');
-
-    function formatVal(val) {
-      let n = parseFloat(val);
-      if (isNaN(n)) return '0';
-      return Number.isInteger(n) ? n.toString() : n.toFixed(1);
-    }
-
-    function formatPercent(val) {
-      return Math.round(val || 0) + '%';
-    }
-
-    function recalcRowGame(g) {
-      g.fgPct = g.fga > 0 ? (g.fgm / g.fga) * 100 : 0;
-      g.tpPct = g.tpa > 0 ? (g.tpm / g.tpa) * 100 : 0;
-      g.ftPct = g.fta > 0 ? (g.ftm / g.fta) * 100 : 0;
-      let fgmMade = g.fgm || 0;
-      let tpmMade = g.tpm || 0;
-      let ftmMade = g.ftm || 0;
-      g.ppg = (Math.max(0, fgmMade - tpmMade) * 2) + (tpmMade * 3) + ftmMade;
-    }
-
-    function createRowDom(game) {
-      const tr = document.createElement('tr');
-      tr.className = 'game-row';
-      tr.dataset.id = game.id;
-
-      FIELDS.forEach(field => {
-        const td = document.createElement('td');
-        td.dataset.field = field;
-
-        if (field === 'id') {
-          td.innerHTML = `
-        <div class="row-highlight"></div>
-        <button class="delete-btn" aria-label="Delete">×</button>
-        <span class="value" style="display: none;">${game[field]}</span>
-      `;
-        } else if (COMPUTED.includes(field)) {
-          td.className = 'computed';
-          td.innerHTML = `<span class="value">${field === 'ppg' ? formatVal(game[field]) : formatPercent(game[field])}</span>`;
-        } else {
-          td.className = 'editable';
-          td.innerHTML = `<span class="value">${formatVal(game[field])}</span>`;
+      loadGames() {
+        try {
+          const stored = localStorage.getItem(CONFIG.storageKey);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {
+          console.warn('Storage read failed. Fallback to defaults.');
         }
-        tr.appendChild(td);
-      });
-
-      let hl = tr.querySelector('.row-highlight');
-      let btn = tr.querySelector('.delete-btn');
-      tr.addEventListener('mouseenter', () => {
-        anime({ targets: tr, backgroundColor: '#1a1a1a', duration: 150, easing: 'linear' });
-        anime({ targets: [hl, btn], opacity: 1, duration: 150, easing: 'linear' });
-      });
-      tr.addEventListener('mouseleave', () => {
-        anime({ targets: tr, backgroundColor: 'rgba(26,26,26,0)', duration: 150, easing: 'linear' });
-        anime({ targets: [hl, btn], opacity: 0, duration: 150, easing: 'linear' });
-      });
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        deleteRow(tr);
-      });
-
-      tr.querySelectorAll('.editable').forEach(td => {
-        td.addEventListener('click', (e) => editCell(e.currentTarget));
-      });
-
-      return tr;
-    }
-
-    function updateAverages(animate = true) {
-      let num = games.length;
-      let sum = { mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0, fgm: 0, fga: 0, tpm: 0, tpa: 0, ftm: 0, fta: 0 };
-
-      games.forEach(g => {
-        for (let k in sum) sum[k] += g[k] || 0;
-      });
-
-      let avg = {};
-      for (let k in sum) {
-        avg[k] = num > 0 ? sum[k] / num : 0;
+        return defaultGames;
       }
-      avg.fgPct = sum.fga > 0 ? (sum.fgm / sum.fga) * 100 : 0;
-      avg.tpPct = sum.tpa > 0 ? (sum.tpm / sum.tpa) * 100 : 0;
-      avg.ftPct = sum.fta > 0 ? (sum.ftm / sum.fta) * 100 : 0;
-      avg.id = num;
 
-      FIELDS.forEach(field => {
-        let td = document.getElementById(`avg-${field}`);
-        if (!td) return;
+      saveGames() {
+        try {
+          localStorage.setItem(CONFIG.storageKey, JSON.stringify(this.games));
+        } catch (e) {
+          console.warn('Storage write failed.');
+        }
+      }
 
-        let isComputed = COMPUTED.includes(field);
-        let newValue = (field === 'id') ? `${avg.id} Games` : (isComputed && field !== 'ppg' ? formatPercent(avg[field]) : formatVal(avg[field]));
+      init() {
+        this.games.forEach(g => this.calculateComputedValues(g));
+        this.renderTable();
+        this.updateAverages(false);
+        this.bindEvents();
+        this.playIntroSequence();
+      }
 
-        let existingText = td.textContent;
-        if (existingText !== newValue) {
-          td.textContent = newValue;
+      bindEvents() {
+        this.dom.fab.addEventListener('click', () => this.addGame());
+        this.dom.headers.forEach(th => {
+          th.addEventListener('click', () => this.handleSort(th.dataset.field));
+          th.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.handleSort(th.dataset.field);
+            }
+          });
+        });
+      }
 
-          if (animate && document.readyState === 'complete') {
-            anime({
-              targets: td,
-              backgroundColor: [
-                { value: '#333333', duration: 0 },
-                { value: '#ffffff', duration: 200 },
-                { value: '#333333', duration: 200 },
-                { value: '#1f1f1f', duration: 0, delay: 400 }
-              ],
-              color: [
-                { value: '#ffffff', duration: 0 },
-                { value: '#000000', duration: 200 },
-                { value: '#ffffff', duration: 200 }
-              ],
-              duration: 400,
-              easing: 'easeInOutSine'
+      formatVal(v) {
+        let n = parseFloat(v);
+        if (isNaN(n)) return '0';
+        return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+      }
+
+      formatPct(v) {
+        return Math.round(v || 0) + '%';
+      }
+
+      calculateComputedValues(g) {
+        g.fgPct = g.fga > 0 ? (g.fgm / g.fga) * 100 : 0;
+        g.tpPct = g.tpa > 0 ? (g.tpm / g.tpa) * 100 : 0;
+        g.ftPct = g.fta > 0 ? (g.ftm / g.fta) * 100 : 0;
+
+        let fgm = g.fgm || 0;
+        let tpm = g.tpm || 0;
+        let ftm = g.ftm || 0;
+        g.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
+      }
+
+      createRow(game) {
+        const tr = document.createElement('tr');
+        tr.className = 'data-row';
+        tr.dataset.id = game.id;
+
+        CONFIG.fields.forEach(field => {
+          const td = document.createElement('td');
+          td.dataset.field = field;
+
+          if (field === 'id') {
+            td.innerHTML = `
+              <div class="row-actions">
+                <button class="btn-delete" aria-label="Delete game ${game.id}" title="Delete record">
+                  <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                </button>
+              </div>
+              <span class="value">${game[field]}</span>
+            `;
+            const btn = td.querySelector('.btn-delete');
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.deleteRow(tr, game.id);
+            });
+          } else if (CONFIG.computed.includes(field)) {
+            td.className = 'cell-computed';
+            td.innerHTML = `<span class="value">${field === 'ppg' ? this.formatVal(game[field]) : this.formatPct(game[field])}</span>`;
+          } else {
+            td.className = 'cell-editable';
+            td.tabIndex = 0;
+            td.innerHTML = `<span class="value">${this.formatVal(game[field])}</span>`;
+            td.addEventListener('click', () => this.editCell(td, game));
+            td.addEventListener('focus', () => {
+              td.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && document.activeElement === td) {
+                  this.editCell(td, game);
+                }
+              }, { once: true });
             });
           }
-        }
-      });
-    }
+          tr.appendChild(td);
+        });
 
-    function editCell(td) {
-      if (td.querySelector('input')) return;
-      const span = td.querySelector('.value');
-      const val = span.textContent;
+        return tr;
+      }
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'edit-input';
-      input.value = val;
-
-      span.style.display = 'none';
-      td.appendChild(input);
-      input.focus();
-      input.select();
-
-      const save = () => {
-        let n = parseFloat(input.value);
-        if (isNaN(n) || n < 0) {
-          input.style.borderColor = '#ffffff';
-          input.style.borderBottomColor = '#ffffff';
-          anime({
-            targets: input,
-            translateX: [-5, 5, -3, 3, 0],
-            duration: 300,
-            easing: 'easeInOutSine'
+      renderTable() {
+        this.dom.tbody.innerHTML = '';
+        if (this.games.length === 0) {
+          this.dom.emptyState.classList.add('active');
+          this.dom.tfoot.style.display = 'none';
+        } else {
+          this.dom.emptyState.classList.remove('active');
+          this.dom.tfoot.style.display = '';
+          this.games.forEach(g => {
+            this.dom.tbody.appendChild(this.createRow(g));
           });
-          input.focus();
-          return;
         }
+      }
 
+      updateAverages(animate = true) {
+        let count = this.games.length;
+        if (count === 0) return;
+
+        let sums = { mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0, fgm: 0, fga: 0, tpm: 0, tpa: 0, ftm: 0, fta: 0 };
+        this.games.forEach(g => {
+          for (let k in sums) sums[k] += g[k] || 0;
+        });
+
+        let avg = {};
+        for (let k in sums) avg[k] = count > 0 ? sums[k] / count : 0;
+
+        avg.fgPct = sums.fga > 0 ? (sums.fgm / sums.fga) * 100 : 0;
+        avg.tpPct = sums.tpa > 0 ? (sums.tpm / sums.tpa) * 100 : 0;
+        avg.ftPct = sums.fta > 0 ? (sums.ftm / sums.fta) * 100 : 0;
+        avg.id = count;
+
+        let changedElements = [];
+
+        CONFIG.fields.forEach(f => {
+          let td = document.getElementById(`avg-${f}`);
+          if (!td) return;
+
+          let computed = CONFIG.computed.includes(f);
+          let rawValue = (f === 'id') ? `${avg.id} Games` : (computed && f !== 'ppg' ? this.formatPct(avg[f]) : this.formatVal(avg[f]));
+
+          if (td.textContent !== rawValue) {
+            td.textContent = rawValue;
+            changedElements.push(td);
+          }
+        });
+
+        if (animate && changedElements.length > 0) {
+          anime({
+            targets: changedElements,
+            color: ['#FFFFFF', '#888888', '#FFFFFF'],
+            textShadow: ['0 0 10px rgba(255,255,255,0.8)', 'none'],
+            duration: 600,
+            easing: 'easeOutExpo'
+          });
+        }
+      }
+
+      editCell(td, game) {
+        if (td.querySelector('input')) return;
+
+        const span = td.querySelector('.value');
+        const val = span.textContent;
         const field = td.dataset.field;
-        const row = td.closest('tr');
-        const id = parseInt(row.dataset.id);
-        let game = games.find(g => g.id === id);
 
-        game[field] = n;
-        recalcRowGame(game);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-input';
+        input.value = val;
 
-        span.textContent = formatVal(n);
-        row.querySelector('[data-field="fgPct"] .value').textContent = formatPercent(game.fgPct);
-        row.querySelector('[data-field="tpPct"] .value').textContent = formatPercent(game.tpPct);
-        row.querySelector('[data-field="ftPct"] .value').textContent = formatPercent(game.ftPct);
-        row.querySelector('[data-field="ppg"] .value').textContent = formatVal(game.ppg);
+        span.style.display = 'none';
+        td.appendChild(input);
+        input.focus();
+        input.select();
 
-        input.remove();
-        span.style.display = '';
+        const finishEdit = () => {
+          let n = parseFloat(input.value);
+          if (isNaN(n) || n < 0) {
+            anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
+            input.focus();
+            return;
+          }
 
-        saveGames();
-        updateAverages();
-      };
+          game[field] = n;
+          this.calculateComputedValues(game);
 
-      input.addEventListener('blur', save);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') input.blur();
-        if (e.key === 'Escape') {
-          input.value = val;
-          input.blur();
-        }
-      });
-    }
+          span.textContent = this.formatVal(n);
 
-    function deleteRow(tr) {
-      let id = parseInt(tr.dataset.id);
-      games = games.filter(g => g.id !== id);
-      saveGames();
-      tr.style.pointerEvents = 'none';
+          const row = td.closest('tr');
+          row.querySelector('[data-field="fgPct"] .value').textContent = this.formatPct(game.fgPct);
+          row.querySelector('[data-field="tpPct"] .value').textContent = this.formatPct(game.tpPct);
+          row.querySelector('[data-field="ftPct"] .value').textContent = this.formatPct(game.ftPct);
+          row.querySelector('[data-field="ppg"] .value').textContent = this.formatVal(game.ppg);
 
-      anime.timeline()
-        .add({
-          targets: tr,
-          translateX: 40,
-          opacity: [1, 0],
-          duration: 250,
-          easing: 'easeInExpo'
-        })
-        .add({
+          input.remove();
+          span.style.display = '';
+
+          anime({ targets: td, backgroundColor: ['rgba(255,255,255,0.1)', 'transparent'], duration: 400 });
+
+          this.saveGames();
+          this.updateAverages();
+        };
+
+        input.addEventListener('blur', finishEdit);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') input.blur();
+          if (e.key === 'Escape') {
+            input.value = val;
+            input.blur();
+          }
+        });
+      }
+
+      deleteRow(tr, id) {
+        this.games = this.games.filter(g => g.id !== id);
+        this.saveGames();
+
+        tr.style.pointerEvents = 'none';
+        anime({
           targets: tr.querySelectorAll('td'),
+          opacity: 0,
           paddingTop: 0,
           paddingBottom: 0,
           height: 0,
-          borderBottomWidth: 0,
-          fontSize: 0,
-          duration: 200,
-          easing: 'linear',
+          wrap: true,
+          duration: 300,
+          easing: 'cubicBezier(0.4, 0, 0.2, 1)',
           complete: () => {
             tr.remove();
-            updateAverages();
+            this.renderTable();
+            this.updateAverages();
           }
         });
-    }
+      }
 
-    function addGame() {
-      let maxId = games.length > 0 ? Math.max(...games.map(g => g.id)) : 0;
-      let newGame = {
-        id: maxId + 1, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
-        fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
-      };
-      games.unshift(newGame);
-      saveGames();
+      addGame() {
+        let nextId = this.games.length > 0 ? Math.max(...this.games.map(g => g.id)) + 1 : 1;
+        let newG = {
+          id: nextId, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
+          fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
+        };
 
-      let tr = createRowDom(newGame);
-      tBody.prepend(tr);
+        this.games.unshift(newG);
+        this.saveGames();
 
-      anime.set(tr, { translateY: 30, opacity: 0 });
-      anime({
-        targets: tr,
-        translateY: 0,
-        opacity: 1,
-        duration: 350,
-        easing: 'easeOutBack'
-      });
+        if (this.games.length === 1) this.renderTable();
+        else {
+          const tr = this.createRow(newG);
+          this.dom.tbody.prepend(tr);
 
-      updateAverages();
-    }
-
-    document.querySelectorAll('th').forEach(th => {
-      th.addEventListener('click', () => {
-        let field = th.dataset.field;
-        if (!field) return;
-
-        if (sortCol === field) {
-          sortAsc = !sortAsc;
-        } else {
-          sortCol = field;
-          sortAsc = true;
-        }
-
-        anime({ targets: '.sort-arrow', opacity: 0, duration: 150 });
-        let arrow = th.querySelector('.sort-arrow');
-        arrow.style.opacity = '1';
-        anime({
-          targets: arrow,
-          rotateZ: sortAsc ? 0 : 180,
-          duration: 200
-        });
-
-        doSort(field);
-      });
-    });
-
-    function doSort(field) {
-      const rows = Array.from(tBody.querySelectorAll('tr.game-row'));
-      const rectsBefore = new Map();
-      rows.forEach(r => rectsBefore.set(r.dataset.id, r.getBoundingClientRect().top));
-
-      games.sort((a, b) => {
-        let valA = a[field] || 0;
-        let valB = b[field] || 0;
-        return sortAsc ? valA - valB : valB - valA;
-      });
-      saveGames();
-
-      games.forEach(g => {
-        let r = rows.find(row => parseInt(row.dataset.id) === g.id);
-        if (r) tBody.appendChild(r);
-      });
-
-      rows.forEach((r, index) => {
-        let beforeY = rectsBefore.get(r.dataset.id);
-        let afterY = r.getBoundingClientRect().top;
-        let deltaY = beforeY - afterY;
-
-        if (deltaY !== 0) {
-          anime.set(r, { translateY: deltaY });
           anime({
-            targets: r,
-            translateY: 0,
-            duration: 320,
-            easing: 'easeInOutQuart',
-            delay: index * 30
+            targets: tr,
+            translateY: [-20, 0],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutBack'
           });
         }
-      });
+        this.updateAverages();
+      }
+
+      handleSort(field) {
+        if (this.sortState.col === field) {
+          this.sortState.asc = !this.sortState.asc;
+        } else {
+          this.sortState.col = field;
+          this.sortState.asc = true;
+        }
+
+        this.dom.headers.forEach(th => th.setAttribute('aria-sort', 'none'));
+        const activeHeader = document.querySelector(`th[data-field="${field}"]`);
+        activeHeader.setAttribute('aria-sort', this.sortState.asc ? 'ascending' : 'descending');
+
+        const rows = Array.from(this.dom.tbody.querySelectorAll('tr.data-row'));
+        const rects = new Map();
+        rows.forEach(r => rects.set(r.dataset.id, r.getBoundingClientRect().top));
+
+        this.games.sort((a, b) => {
+          let vA = a[field] || 0;
+          let vB = b[field] || 0;
+          return this.sortState.asc ? vA - vB : vB - vA;
+        });
+
+        this.saveGames();
+        this.renderTable();
+
+        const newRows = Array.from(this.dom.tbody.querySelectorAll('tr.data-row'));
+        newRows.forEach((r, i) => {
+          let before = rects.get(r.dataset.id);
+          if (before !== undefined) {
+            let after = r.getBoundingClientRect().top;
+            let delta = before - after;
+            if (delta !== 0) {
+              anime.set(r, { translateY: delta });
+              anime({
+                targets: r,
+                translateY: 0,
+                duration: 400,
+                easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+                delay: i * 20
+              });
+            }
+          }
+        });
+      }
+
+      playIntroSequence() {
+        anime.timeline({ easing: 'easeOutExpo' })
+          .add({
+            targets: '.app-header',
+            opacity: [0, 1],
+            translateY: [-20, 0],
+            duration: 800
+          })
+          .add({
+            targets: '.grid-wrapper',
+            opacity: [0, 1],
+            scale: [0.98, 1],
+            duration: 800
+          }, '-=600')
+          .add({
+            targets: 'tr.data-row',
+            opacity: [0, 1],
+            translateX: [-10, 0],
+            delay: anime.stagger(50),
+            duration: 600
+          }, '-=400')
+          .add({
+            targets: '#table-footer',
+            opacity: [0, 1],
+            translateY: [10, 0],
+            duration: 600
+          }, '-=400');
+
+        anime({
+          targets: '.btn-fab',
+          scale: [0, 1],
+          opacity: [0, 1],
+          delay: 800,
+          duration: 600,
+          easing: 'easeOutBack'
+        });
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      games.forEach(g => tBody.appendChild(createRowDom(g)));
-      updateAverages(false);
-
-      anime({
-        targets: '#header',
-        translateY: [-20, 0],
-        opacity: [0, 1],
-        duration: 300,
-        easing: 'easeOutExpo'
-      });
-
-      setTimeout(() => {
-        anime({
-          targets: '#average-row',
-          opacity: [0, 1],
-          duration: 300,
-          easing: 'easeOutExpo'
-        });
-      }, 100);
-
-      anime({
-        targets: '#fab-wrapper',
-        scale: [1, 1.04, 1],
-        duration: 2000,
-        easing: 'easeInOutSine',
-        loop: true
-      });
-
-      document.getElementById('add-game-fab').addEventListener('click', (e) => {
-        anime({
-          targets: e.currentTarget,
-          scale: [1, 1.12, 1],
-          duration: 200,
-          easing: 'easeInOutSine'
-        });
-        addGame();
-      });
+    document.addEventListener('DOMContentLoaded', () => {
+      window.tracker = new StatsTracker();
     });
   </script>
 </body>
