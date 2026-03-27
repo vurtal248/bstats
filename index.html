@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Premium, high-performance basketball statistics tracker.">
-  <title>Stats Tracker</title>
+  <meta name="description" content="Basketball Stats">
+  <title>B-Stats // Pro Analytics</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,22 +15,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
   <style>
-    /* CSS Variables & Foundation */
+    /* 
+      // MODERN CSS ARCHITECTURE
+      // Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
+    */
     :root {
-      --bg-color: #030303;
-      --surface-color: #0d0d0d;
-      --surface-hover: #141414;
-      --border-color: rgba(255, 255, 255, 0.06);
-      --border-active: rgba(255, 255, 255, 0.2);
+      --clr-bg: #030305;
+      --clr-surface: rgba(15, 15, 20, 0.65);
+      --clr-surface-hover: rgba(25, 25, 30, 0.85);
+      --clr-border: rgba(255, 255, 255, 0.04);
+      --clr-border-active: rgba(0, 240, 255, 0.3);
 
-      --text-main: #FAFAFA;
-      --text-muted: #888888;
-      --text-dim: #444444;
+      --clr-text-primary: #FFFFFF;
+      --clr-text-secondary: #8A8A93;
+      --clr-text-dim: #4B4B55;
 
-      --accent: #FFFFFF;
-      --danger: #FF3333;
-      --focus-ring: rgba(255, 255, 255, 0.4);
-      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+      --clr-accent: #00F0FF;
+      --clr-accent-glow: rgba(0, 240, 255, 0.4);
+      --clr-danger: #FF2A5F;
+
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     * {
@@ -40,22 +48,43 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'JetBrains Mono', monospace;
+      background-color: var(--clr-bg);
+      color: var(--clr-text-primary);
+      font-family: var(--font-mono);
       font-size: 14px;
       -webkit-font-smoothing: antialiased;
-      background-image:
-        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 100%;
+      grid-template-rows: auto 1fr;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* Accessibility */
+    /* Ambient Background System */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(0, 240, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 85% 100%, rgba(112, 0, 255, 0.03) 0%, transparent 50%);
+    }
+
+    .ambient-noise {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.25;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    /* Focus & Accessibility */
     :focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--clr-accent);
       outline-offset: 4px;
       border-radius: 2px;
     }
@@ -64,142 +93,181 @@
       position: absolute;
       width: 1px;
       height: 1px;
-      padding: 0;
       margin: -1px;
+      padding: 0;
       overflow: hidden;
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
 
-    /* Layout */
-    .app-container {
-      max-width: 1600px;
+    /* Layout Hierarchy */
+    .layout-main {
+      padding: clamp(24px, 5vw, 64px);
+      max-width: 1800px;
       margin: 0 auto;
-      padding: clamp(20px, 4vw, 60px);
       width: 100%;
-      flex: 1;
       display: flex;
       flex-direction: column;
+      gap: clamp(24px, 4vw, 48px);
+      flex: 1;
     }
 
-    header {
-      margin-bottom: clamp(30px, 5vw, 60px);
+    /* Header Composition */
+    .header-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       will-change: transform, opacity;
+      opacity: 0;
+      /* JS handles reveal */
     }
 
-    h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(2rem, 5vw, 4rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      margin: 0;
-      line-height: 1;
+    .header-title {
+      font-family: var(--font-display);
       text-transform: uppercase;
-      background: linear-gradient(135deg, #FFFFFF 0%, #777777 100%);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: 0.9;
+      margin: 0;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .header-sub {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 12px;
-      letter-spacing: 0.05em;
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--clr-text-secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
-    /* Table Container */
-    .grid-wrapper {
+    .header-meta::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: var(--clr-accent);
+    }
+
+    /* Data Visualization Grid */
+    .data-container {
       position: relative;
-      flex: 1;
-      border: 1px solid var(--border-color);
-      border-radius: 1px;
-      background: rgba(13, 13, 13, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 4px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       overflow: hidden;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      will-change: opacity, transform;
+      opacity: 0;
+      /* JS handles reveal */
     }
 
-    .table-scroll {
+    .data-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--clr-border-active), transparent);
+      opacity: 0.5;
+    }
+
+    .scroll-context {
       width: 100%;
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: auto;
       scrollbar-width: thin;
-      scrollbar-color: var(--text-dim) transparent;
+      scrollbar-color: var(--clr-text-dim) transparent;
+      flex: 1;
+      min-height: 300px;
     }
 
-    .table-scroll::-webkit-scrollbar {
-      height: 4px;
+    .scroll-context::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
     }
 
-    .table-scroll::-webkit-scrollbar-track {
+    .scroll-context::-webkit-scrollbar-track {
       background: transparent;
     }
 
-    .table-scroll::-webkit-scrollbar-thumb {
-      background: var(--text-dim);
-      border-radius: 2px;
+    .scroll-context::-webkit-scrollbar-thumb {
+      background: var(--clr-text-dim);
+      border-radius: 3px;
     }
 
-    table {
+    .stats-grid {
       width: 100%;
-      min-width: 1300px;
+      min-width: 1400px;
       border-collapse: separate;
       border-spacing: 0;
       font-variant-numeric: tabular-nums;
     }
 
-    th,
-    td {
-      padding: 16px;
+    .stats-grid th,
+    .stats-grid td {
+      padding: 16px 20px;
       text-align: right;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--clr-border);
       white-space: nowrap;
+      height: 54px;
     }
 
-    th:first-child,
-    td:first-child {
+    .stats-grid th:first-child,
+    .stats-grid td:first-child {
       text-align: center;
       width: 80px;
-      position: relative;
+      position: sticky;
+      left: 0;
+      z-index: 10;
     }
 
-    /* Headers */
-    th {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.8rem;
+    /* Table Headers */
+    .stats-grid th {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      color: var(--clr-text-secondary);
+      background: rgba(10, 10, 12, 0.95);
       position: sticky;
       top: 0;
       z-index: 20;
       cursor: pointer;
       user-select: none;
-      transition: color 0.3s var(--ease-fluid);
-      background: rgba(13, 13, 13, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: color 0.3s var(--ease-out-expo);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    th:hover,
-    th:focus-visible {
-      color: var(--text-main);
+    .stats-grid th:first-child {
+      z-index: 30;
     }
 
-    .sort-icon {
+    .stats-grid th:hover,
+    .stats-grid th:focus-visible {
+      color: var(--clr-text-primary);
+    }
+
+    .sort-indicator {
       display: inline-block;
-      width: 10px;
-      height: 10px;
-      margin-left: 6px;
+      width: 12px;
+      height: 12px;
+      margin-left: 8px;
       opacity: 0;
-      transition: transform 0.4s var(--ease-fluid), opacity 0.3s;
+      transition: transform 0.4s var(--ease-out-expo), opacity 0.3s;
+      vertical-align: middle;
     }
 
-    .sort-icon svg {
+    .sort-indicator svg {
       width: 100%;
       height: 100%;
       fill: none;
@@ -208,51 +276,61 @@
       stroke-linecap: round;
     }
 
-    th[aria-sort="ascending"] .sort-icon {
+    th[aria-sort="ascending"] .sort-indicator {
       opacity: 1;
       transform: rotate(180deg);
-      color: var(--text-main);
+      color: var(--clr-accent);
     }
 
-    th[aria-sort="descending"] .sort-icon {
+    th[aria-sort="descending"] .sort-indicator {
       opacity: 1;
       transform: rotate(0deg);
-      color: var(--text-main);
+      color: var(--clr-accent);
     }
 
-    /* Rows */
-    tbody tr {
-      transition: background-color 0.3s var(--ease-fluid);
+    /* Row Aesthetics */
+    .stats-grid tbody tr {
+      transition: background-color 0.3s var(--ease-out-expo);
     }
 
-    tbody tr:hover,
-    tbody tr:focus-within {
-      background-color: var(--surface-hover);
+    .stats-grid tbody tr:hover,
+    .stats-grid tbody tr:focus-within {
+      background-color: var(--clr-surface-hover);
     }
 
-    /* Cells */
-    .cell-editable {
+    .stats-grid td:first-child {
+      background: var(--clr-bg);
+      transition: background-color 0.3s var(--ease-out-expo);
+    }
+
+    .stats-grid tbody tr:hover td:first-child,
+    .stats-grid tbody tr:focus-within td:first-child {
+      background-color: var(--clr-surface-hover);
+    }
+
+    /* Cell Interactions */
+    .cell-interactive {
       cursor: pointer;
       position: relative;
-      transition: color 0.3s var(--ease-fluid), text-shadow 0.3s;
+      transition: color 0.3s var(--ease-out-expo), text-shadow 0.3s;
     }
 
-    .cell-editable:hover {
-      color: var(--accent);
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    .cell-interactive:hover {
+      color: var(--clr-accent);
+      text-shadow: 0 0 16px var(--clr-accent-glow);
     }
 
     .cell-computed {
-      color: var(--text-muted);
+      color: var(--clr-text-secondary);
     }
 
-    /* Inline Input */
-    .edit-input {
+    /* Edit State */
+    .input-edit {
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1px solid var(--accent);
-      color: var(--text-main);
+      border-bottom: 1px solid var(--clr-accent);
+      color: var(--clr-text-primary);
       font-family: inherit;
       font-size: inherit;
       text-align: right;
@@ -262,116 +340,138 @@
       z-index: 5;
     }
 
-    /* Row Actions */
-    .row-actions {
+    /* Actions Context */
+    .action-context {
       position: absolute;
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
       opacity: 0;
-      transition: opacity 0.3s var(--ease-fluid);
+      transition: opacity 0.3s var(--ease-out-expo);
       display: flex;
     }
 
-    tbody tr:hover .row-actions,
-    tbody tr:focus-within .row-actions {
+    .stats-grid tbody tr:hover .action-context,
+    .stats-grid tbody tr:focus-within .action-context {
       opacity: 1;
     }
 
-    .btn-delete {
+    .btn-icon {
       background: none;
       border: none;
-      color: var(--text-dim);
+      color: var(--clr-text-dim);
       cursor: pointer;
       padding: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.3s var(--ease-fluid), transform 0.3s var(--ease-fluid);
+      display: grid;
+      place-items: center;
+      transition: color 0.3s, transform 0.3s var(--ease-out-back);
     }
 
-    .btn-delete:hover {
-      color: var(--danger);
-      transform: scale(1.1);
+    .btn-icon:hover {
+      color: var(--clr-danger);
+      transform: scale(1.15);
     }
 
-    .btn-delete svg {
+    .btn-icon svg {
       width: 16px;
       height: 16px;
       stroke: currentColor;
       stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
       fill: none;
     }
 
-    /* Footer / Averages */
-    tfoot {
+    /* Averages Footer */
+    .stats-grid tfoot {
       position: relative;
       z-index: 15;
     }
 
-    .row-average td {
-      background: var(--surface-color);
+    .stats-grid tfoot td {
+      background: rgba(5, 5, 7, 0.95);
+      border-top: 1px solid var(--clr-border);
       border-bottom: none;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--clr-text-primary);
       padding-top: 24px;
       padding-bottom: 24px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: color 0.4s var(--ease-fluid), background 0.4s var(--ease-fluid);
+      transition: color 0.4s, text-shadow 0.4s;
     }
 
-    /* Empty State */
+    .stats-grid tfoot td:first-child {
+      background: rgba(5, 5, 7, 0.95);
+    }
+
+    /* Empty State Context */
     .empty-state {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
+      inset: 0;
+      top: 54px;
+      /* below header */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.4s;
+      transition: opacity 0.5s var(--ease-out-expo);
+      background: var(--clr-surface);
+      z-index: 5;
     }
 
-    .empty-state.active {
+    .empty-state.is-active {
       opacity: 1;
       pointer-events: auto;
     }
 
-    .empty-state p {
-      color: var(--text-muted);
-      font-size: 1.1rem;
-      margin: 0;
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      color: var(--clr-text-dim);
+      stroke-width: 1;
     }
 
-    /* FAB */
-    .fab-area {
+    .empty-message {
+      color: var(--clr-text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Floating Action Button */
+    .fab-container {
       position: fixed;
-      bottom: clamp(20px, 4vw, 40px);
-      right: clamp(20px, 4vw, 40px);
+      bottom: clamp(24px, 5vw, 48px);
+      right: clamp(24px, 5vw, 48px);
       z-index: 100;
-      will-change: transform;
     }
 
     .btn-fab {
       width: 64px;
       height: 64px;
       border-radius: 50%;
-      background: var(--text-main);
-      color: var(--bg-color);
+      background: var(--clr-text-primary);
+      color: var(--clr-bg);
       border: none;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.1);
+      transition: transform 0.4s var(--ease-out-back), box-shadow 0.4s;
+      overflow: hidden;
+      position: relative;
+      opacity: 0;
+      /* JS handles reveal */
+    }
+
+    .btn-fab::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(0, 0, 0, 0.2));
     }
 
     .btn-fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
+      transform: scale(1.05) translateY(-4px);
+      box-shadow: 0 20px 48px rgba(255, 255, 255, 0.2);
     }
 
     .btn-fab:active {
@@ -383,113 +483,129 @@
       height: 24px;
       stroke: currentColor;
       stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
       fill: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Skeleton Loading Pattern */
+    .skeleton-row td span {
+      display: block;
+      height: 16px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--clr-text-dim) 0%, var(--clr-text-secondary) 50%, var(--clr-text-dim) 100%);
+      background-size: 200% 100%;
+      border-radius: 2px;
+      opacity: 0.2;
+      animation: skeleton-shimmer 2s infinite linear;
+    }
+
+    @keyframes skeleton-shimmer {
+      to {
+        background-position: -200% 0;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <main class="app-container">
-    <header class="app-header">
-      <h1>Data Grid</h1>
-      <div class="header-sub">Advanced Performance Metrics</div>
+  <div class="ambient-bg"></div>
+  <div class="ambient-noise"></div>
+
+  <main class="layout-main">
+    <header class="header-block">
+      <h1 class="header-title">BMetrics</h1>
+      <div class="header-meta">Professional Performance Engine</div>
     </header>
 
-    <section class="grid-wrapper">
-      <div class="empty-state" id="empty-state">
-        <p>No records found. Add a game to begin.</p>
+    <section class="data-container" aria-label="Statistics Data Grid">
+      <div class="empty-state" id="empty-state" aria-hidden="true">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        <p class="empty-message">Dataset Empty. Initialize new record.</p>
       </div>
 
-      <div class="table-scroll">
-        <table id="stats-table">
-          <thead>
+      <div class="scroll-context" tabindex="0">
+        <table class="stats-grid" id="stats-table">
+          <thead id="table-head">
             <tr id="table-head-row">
-              <th data-field="id" scope="col" aria-sort="none">#<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="mpg" scope="col" aria-sort="none">MPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="ppg" scope="col" aria-sort="none">PPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="apg" scope="col" aria-sort="none">APG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="rpg" scope="col" aria-sort="none">RPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="spg" scope="col" aria-sort="none">SPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="bpg" scope="col" aria-sort="none">BPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="topg" scope="col" aria-sort="none">TOPG<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="fgm" scope="col" aria-sort="none">FGM<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="fga" scope="col" aria-sort="none">FGA<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="fgPct" scope="col" aria-sort="none">FG%<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="tpm" scope="col" aria-sort="none">3PM<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="tpa" scope="col" aria-sort="none">3PA<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="tpPct" scope="col" aria-sort="none">3P%<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="ftm" scope="col" aria-sort="none">FTM<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="fta" scope="col" aria-sort="none">FTA<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
-              <th data-field="ftPct" scope="col" aria-sort="none">FT%<span class="sort-icon"><svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12l7 7 7-7" />
-                  </svg></span></th>
+              <!-- Rendered via JS -->
             </tr>
           </thead>
           <tbody id="table-body" aria-live="polite">
+            <tr class="skeleton-row">
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+            </tr>
           </tbody>
           <tfoot id="table-footer">
-            <tr class="row-average">
-              <td id="avg-id">0 Games</td>
-              <td id="avg-mpg">0</td>
-              <td id="avg-ppg">0</td>
-              <td id="avg-apg">0</td>
-              <td id="avg-rpg">0</td>
-              <td id="avg-spg">0</td>
-              <td id="avg-bpg">0</td>
-              <td id="avg-topg">0</td>
-              <td id="avg-fgm">0</td>
-              <td id="avg-fga">0</td>
-              <td id="avg-fgPct">0</td>
-              <td id="avg-tpm">0</td>
-              <td id="avg-tpa">0</td>
-              <td id="avg-tpPct">0</td>
-              <td id="avg-ftm">0</td>
-              <td id="avg-fta">0</td>
-              <td id="avg-ftPct">0</td>
+            <tr class="row-average" id="footer-row">
+              <!-- Rendered via JS -->
             </tr>
           </tfoot>
         </table>
       </div>
     </section>
 
-    <div class="fab-area">
-      <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
-        <svg viewBox="0 0 24 24">
+    <div class="fab-container">
+      <button class="btn-fab" id="add-game-fab" aria-label="Append new session record">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
@@ -497,385 +613,367 @@
   </main>
 
   <script>
-    const CONFIG = {
-      storageKey: 'bstats_games',
-      fields: ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'],
-      computed: ['ppg', 'fgPct', 'tpPct', 'ftPct']
-    };
+    /**
+     * @file Interactive Logic & State Management
+     * @description Modern vanilla JS utilizing reactive state principles, Anime.js for complex choreography.
+     */
 
-    const defaultGames = [
-      { id: 3, mpg: 36.0, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
+    const METRICS_SCHEMA = [
+      { key: 'id', label: '#' },
+      { key: 'mpg', label: 'MPG' },
+      { key: 'ppg', label: 'PPG', computed: true },
+      { key: 'apg', label: 'APG' },
+      { key: 'rpg', label: 'RPG' },
+      { key: 'spg', label: 'SPG' },
+      { key: 'bpg', label: 'BPG' },
+      { key: 'topg', label: 'TOPG' },
+      { key: 'fgm', label: 'FGM' },
+      { key: 'fga', label: 'FGA' },
+      { key: 'fgPct', label: 'FG%', computed: true, isPct: true },
+      { key: 'tpm', label: '3PM' },
+      { key: 'tpa', label: '3PA' },
+      { key: 'tpPct', label: '3P%', computed: true, isPct: true },
+      { key: 'ftm', label: 'FTM' },
+      { key: 'fta', label: 'FTA' },
+      { key: 'ftPct', label: 'FT%', computed: true, isPct: true }
+    ];
+
+    const STORAGE_KEY = 'bstats_games';
+
+    const MOCK_DATA = [
+      { id: 3, mpg: 36.5, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
       { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
       { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
     ];
 
-    class StatsTracker {
+    class BMetricsApp {
       constructor() {
-        this.games = this.loadGames();
-        this.sortState = { col: null, asc: true };
-        this.dom = {
+        this.state = {
+          data: this.restoreState(),
+          sortRef: { key: null, asc: true }
+        };
+
+        this.refs = {
+          thead: document.getElementById('table-head-row'),
           tbody: document.getElementById('table-body'),
-          tfoot: document.getElementById('table-footer'),
-          emptyState: document.getElementById('empty-state'),
-          fab: document.getElementById('add-game-fab'),
-          headers: document.querySelectorAll('th[data-field]')
+          tfoot: document.getElementById('footer-row'),
+          empty: document.getElementById('empty-state'),
+          fab: document.getElementById('add-game-fab')
         };
 
         this.init();
       }
 
-      loadGames() {
-        try {
-          const stored = localStorage.getItem(CONFIG.storageKey);
-          if (stored) return JSON.parse(stored);
-        } catch (e) {
-          console.warn('Storage read failed. Fallback to defaults.');
-        }
-        return defaultGames;
-      }
-
-      saveGames() {
-        try {
-          localStorage.setItem(CONFIG.storageKey, JSON.stringify(this.games));
-        } catch (e) {
-          console.warn('Storage write failed.');
-        }
-      }
-
       init() {
-        this.games.forEach(g => this.calculateComputedValues(g));
-        this.renderTable();
-        this.updateAverages(false);
-        this.bindEvents();
-        this.playIntroSequence();
+        this.buildStructure();
+        this.hydrateState();
+        this.bindGlobalEvents();
+        // Give time for skeleton to show before revealing actual data
+        setTimeout(() => {
+          this.render();
+          this.choreographEntrance();
+        }, 150);
       }
 
-      bindEvents() {
-        this.dom.fab.addEventListener('click', () => this.addGame());
-        this.dom.headers.forEach(th => {
-          th.addEventListener('click', () => this.handleSort(th.dataset.field));
-          th.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              this.handleSort(th.dataset.field);
-            }
-          });
+      restoreState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : MOCK_DATA;
+        } catch (e) { return MOCK_DATA; }
+      }
+
+      persistState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state.data)); } catch (e) { }
+      }
+
+      hydrateState() {
+        this.state.data.forEach(row => this.computeRowDerived(row));
+      }
+
+      computeRowDerived(row) {
+        row.fgPct = row.fga > 0 ? (row.fgm / row.fga) * 100 : 0;
+        row.tpPct = row.tpa > 0 ? (row.tpm / row.tpa) * 100 : 0;
+        row.ftPct = row.fta > 0 ? (row.ftm / row.fta) * 100 : 0;
+        const fgm = row.fgm || 0, tpm = row.tpm || 0, ftm = row.ftm || 0;
+        row.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
+      }
+
+      formatValue(val, isPct = false) {
+        if (val === undefined || val === null) return '0';
+        if (isPct) return Math.round(val) + '%';
+        let n = parseFloat(val);
+        return isNaN(n) ? '0' : (Number.isInteger(n) ? n.toString() : n.toFixed(1));
+      }
+
+      buildStructure() {
+        this.refs.thead.innerHTML = METRICS_SCHEMA.map(col => `
+          <th data-key="${col.key}" scope="col" aria-sort="none" tabindex="0" role="columnheader">
+            ${col.label}
+            <span class="sort-indicator"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
+          </th>
+        `).join('');
+
+        this.refs.tfoot.innerHTML = METRICS_SCHEMA.map(col => `
+          <td id="avg-${col.key}" data-key="${col.key}">0</td>
+        `).join('');
+
+        this.refs.thead.querySelectorAll('th').forEach(th => {
+          const handler = () => this.handleSort(th.dataset.key);
+          th.addEventListener('click', handler);
+          th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
         });
       }
 
-      formatVal(v) {
-        let n = parseFloat(v);
-        if (isNaN(n)) return '0';
-        return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+      bindGlobalEvents() {
+        this.refs.fab.addEventListener('click', () => this.handleAppendRecord());
       }
 
-      formatPct(v) {
-        return Math.round(v || 0) + '%';
+      render() {
+        this.refs.tbody.innerHTML = '';
+
+        if (this.state.data.length === 0) {
+          this.refs.empty.classList.add('is-active');
+          this.refs.empty.setAttribute('aria-hidden', 'false');
+          this.refs.tfoot.parentElement.style.opacity = '0';
+          return;
+        }
+
+        this.refs.empty.classList.remove('is-active');
+        this.refs.empty.setAttribute('aria-hidden', 'true');
+        this.refs.tfoot.parentElement.style.opacity = '1';
+
+        const fragment = document.createDocumentFragment();
+        this.state.data.forEach(row => {
+          fragment.appendChild(this.buildRowDOM(row));
+        });
+        this.refs.tbody.appendChild(fragment);
+
+        this.updateAggregates(false);
       }
 
-      calculateComputedValues(g) {
-        g.fgPct = g.fga > 0 ? (g.fgm / g.fga) * 100 : 0;
-        g.tpPct = g.tpa > 0 ? (g.tpm / g.tpa) * 100 : 0;
-        g.ftPct = g.fta > 0 ? (g.ftm / g.fta) * 100 : 0;
-
-        let fgm = g.fgm || 0;
-        let tpm = g.tpm || 0;
-        let ftm = g.ftm || 0;
-        g.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
-      }
-
-      createRow(game) {
+      buildRowDOM(rowData) {
         const tr = document.createElement('tr');
         tr.className = 'data-row';
-        tr.dataset.id = game.id;
+        tr.dataset.id = rowData.id;
 
-        CONFIG.fields.forEach(field => {
+        METRICS_SCHEMA.forEach(col => {
           const td = document.createElement('td');
-          td.dataset.field = field;
+          td.dataset.key = col.key;
 
-          if (field === 'id') {
+          if (col.key === 'id') {
             td.innerHTML = `
-              <div class="row-actions">
-                <button class="btn-delete" aria-label="Delete game ${game.id}" title="Delete record">
-                  <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
-                </button>
+              <div class="action-context">
+                <button class="btn-icon" aria-label="Delete record ${rowData.id}"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg></button>
               </div>
-              <span class="value">${game[field]}</span>
+              <span class="cell-val">${rowData[col.key]}</span>
             `;
-            const btn = td.querySelector('.btn-delete');
-            btn.addEventListener('click', (e) => {
+            td.querySelector('.btn-icon').addEventListener('click', (e) => {
               e.stopPropagation();
-              this.deleteRow(tr, game.id);
+              this.handleDeleteRecord(tr, rowData.id);
             });
-          } else if (CONFIG.computed.includes(field)) {
+          } else if (col.computed) {
             td.className = 'cell-computed';
-            td.innerHTML = `<span class="value">${field === 'ppg' ? this.formatVal(game[field]) : this.formatPct(game[field])}</span>`;
+            td.innerHTML = `<span class="cell-val">${this.formatValue(rowData[col.key], col.isPct)}</span>`;
           } else {
-            td.className = 'cell-editable';
+            td.className = 'cell-interactive';
             td.tabIndex = 0;
-            td.innerHTML = `<span class="value">${this.formatVal(game[field])}</span>`;
-            td.addEventListener('click', () => this.editCell(td, game));
+            td.innerHTML = `<span class="cell-val">${this.formatValue(rowData[col.key])}</span>`;
+            td.addEventListener('click', () => this.initializeEdit(td, rowData, col));
             td.addEventListener('focus', () => {
               td.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && document.activeElement === td) {
-                  this.editCell(td, game);
-                }
+                if (e.key === 'Enter' && document.activeElement === td) this.initializeEdit(td, rowData, col);
               }, { once: true });
             });
           }
           tr.appendChild(td);
         });
-
         return tr;
       }
 
-      renderTable() {
-        this.dom.tbody.innerHTML = '';
-        if (this.games.length === 0) {
-          this.dom.emptyState.classList.add('active');
-          this.dom.tfoot.style.display = 'none';
-        } else {
-          this.dom.emptyState.classList.remove('active');
-          this.dom.tfoot.style.display = '';
-          this.games.forEach(g => {
-            this.dom.tbody.appendChild(this.createRow(g));
-          });
-        }
-      }
+      updateAggregates(animate = true) {
+        const len = this.state.data.length;
+        if (len === 0) return;
 
-      updateAverages(animate = true) {
-        let count = this.games.length;
-        if (count === 0) return;
+        let acc = {};
+        METRICS_SCHEMA.forEach(c => acc[c.key] = 0);
 
-        let sums = { mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0, fgm: 0, fga: 0, tpm: 0, tpa: 0, ftm: 0, fta: 0 };
-        this.games.forEach(g => {
-          for (let k in sums) sums[k] += g[k] || 0;
+        this.state.data.forEach(r => {
+          METRICS_SCHEMA.forEach(c => { if (r[c.key]) acc[c.key] += r[c.key]; });
         });
 
         let avg = {};
-        for (let k in sums) avg[k] = count > 0 ? sums[k] / count : 0;
+        METRICS_SCHEMA.forEach(c => avg[c.key] = acc[c.key] / len);
 
-        avg.fgPct = sums.fga > 0 ? (sums.fgm / sums.fga) * 100 : 0;
-        avg.tpPct = sums.tpa > 0 ? (sums.tpm / sums.tpa) * 100 : 0;
-        avg.ftPct = sums.fta > 0 ? (sums.ftm / sums.fta) * 100 : 0;
-        avg.id = count;
+        avg.id = len;
+        avg.fgPct = acc.fga > 0 ? (acc.fgm / acc.fga) * 100 : 0;
+        avg.tpPct = acc.tpa > 0 ? (acc.tpm / acc.tpa) * 100 : 0;
+        avg.ftPct = acc.fta > 0 ? (acc.ftm / acc.fta) * 100 : 0;
 
-        let changedElements = [];
+        const updatedNodes = [];
 
-        CONFIG.fields.forEach(f => {
-          let td = document.getElementById(`avg-${f}`);
-          if (!td) return;
-
-          let computed = CONFIG.computed.includes(f);
-          let rawValue = (f === 'id') ? `${avg.id} Games` : (computed && f !== 'ppg' ? this.formatPct(avg[f]) : this.formatVal(avg[f]));
-
-          if (td.textContent !== rawValue) {
-            td.textContent = rawValue;
-            changedElements.push(td);
+        METRICS_SCHEMA.forEach(col => {
+          const node = document.getElementById(`avg-${col.key}`);
+          if (!node) return;
+          const displayVal = col.key === 'id' ? `${len} GAMES` : (col.computed && col.key !== 'ppg' ? this.formatValue(avg[col.key], col.isPct) : this.formatValue(avg[col.key]));
+          if (node.textContent !== displayVal) {
+            node.textContent = displayVal;
+            updatedNodes.push(node);
           }
         });
 
-        if (animate && changedElements.length > 0) {
+        if (animate && updatedNodes.length) {
           anime({
-            targets: changedElements,
-            color: ['#FFFFFF', '#888888', '#FFFFFF'],
-            textShadow: ['0 0 10px rgba(255,255,255,0.8)', 'none'],
+            targets: updatedNodes,
+            color: ['#00F0FF', '#FFFFFF'],
+            textShadow: ['0 0 16px rgba(0,240,255,0.6)', 'none'],
             duration: 600,
             easing: 'easeOutExpo'
           });
         }
       }
 
-      editCell(td, game) {
-        if (td.querySelector('input')) return;
+      initializeEdit(tdNode, rowData, colMeta) {
+        if (tdNode.querySelector('input')) return;
 
-        const span = td.querySelector('.value');
-        const val = span.textContent;
-        const field = td.dataset.field;
+        const span = tdNode.querySelector('.cell-val');
+        const prevVal = span.textContent;
 
         const input = document.createElement('input');
         input.type = 'text';
-        input.className = 'edit-input';
-        input.value = val;
+        input.className = 'input-edit';
+        input.value = prevVal;
 
         span.style.display = 'none';
-        td.appendChild(input);
+        tdNode.appendChild(input);
         input.focus();
         input.select();
 
-        const finishEdit = () => {
-          let n = parseFloat(input.value);
-          if (isNaN(n) || n < 0) {
+        const commit = () => {
+          const parsed = parseFloat(input.value);
+          if (isNaN(parsed) || parsed < 0) {
             anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
             input.focus();
             return;
           }
 
-          game[field] = n;
-          this.calculateComputedValues(game);
+          rowData[colMeta.key] = parsed;
+          this.computeRowDerived(rowData);
+          this.persistState();
 
-          span.textContent = this.formatVal(n);
+          span.textContent = this.formatValue(parsed);
 
-          const row = td.closest('tr');
-          row.querySelector('[data-field="fgPct"] .value').textContent = this.formatPct(game.fgPct);
-          row.querySelector('[data-field="tpPct"] .value').textContent = this.formatPct(game.tpPct);
-          row.querySelector('[data-field="ftPct"] .value').textContent = this.formatPct(game.ftPct);
-          row.querySelector('[data-field="ppg"] .value').textContent = this.formatVal(game.ppg);
+          const tr = tdNode.closest('tr');
+          METRICS_SCHEMA.filter(c => c.computed).forEach(c => {
+            const tgtSpan = tr.querySelector(`td[data-key="${c.key}"] .cell-val`);
+            if (tgtSpan) tgtSpan.textContent = this.formatValue(rowData[c.key], c.isPct);
+          });
 
           input.remove();
           span.style.display = '';
 
-          anime({ targets: td, backgroundColor: ['rgba(255,255,255,0.1)', 'transparent'], duration: 400 });
-
-          this.saveGames();
-          this.updateAverages();
+          anime({ targets: tdNode, backgroundColor: ['rgba(0,240,255,0.15)', 'transparent'], duration: 500, easing: 'easeOutExpo' });
+          this.updateAggregates(true);
         };
 
-        input.addEventListener('blur', finishEdit);
-        input.addEventListener('keydown', (e) => {
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', e => {
           if (e.key === 'Enter') input.blur();
-          if (e.key === 'Escape') {
-            input.value = val;
-            input.blur();
-          }
+          if (e.key === 'Escape') { input.value = prevVal; input.blur(); }
         });
       }
 
-      deleteRow(tr, id) {
-        this.games = this.games.filter(g => g.id !== id);
-        this.saveGames();
+      handleDeleteRecord(trNode, id) {
+        this.state.data = this.state.data.filter(r => r.id !== id);
+        this.persistState();
+        trNode.style.pointerEvents = 'none';
 
-        tr.style.pointerEvents = 'none';
         anime({
-          targets: tr.querySelectorAll('td'),
-          opacity: 0,
-          paddingTop: 0,
-          paddingBottom: 0,
-          height: 0,
-          wrap: true,
-          duration: 300,
-          easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+          targets: trNode.querySelectorAll('td'),
+          opacity: 0, paddingTop: 0, paddingBottom: 0, height: 0,
+          duration: 350, easing: 'cubicBezier(0.4, 0, 0.2, 1)',
           complete: () => {
-            tr.remove();
-            this.renderTable();
-            this.updateAverages();
+            trNode.remove();
+            if (this.state.data.length === 0) this.render();
+            else this.updateAggregates(true);
           }
         });
       }
 
-      addGame() {
-        let nextId = this.games.length > 0 ? Math.max(...this.games.map(g => g.id)) + 1 : 1;
-        let newG = {
-          id: nextId, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
-          fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
-        };
+      handleAppendRecord() {
+        const nextId = this.state.data.length > 0 ? Math.max(...this.state.data.map(d => d.id)) + 1 : 1;
+        const newRecord = { id: nextId };
+        METRICS_SCHEMA.forEach(c => { if (c.key !== 'id') newRecord[c.key] = 0; });
 
-        this.games.unshift(newG);
-        this.saveGames();
+        this.state.data.unshift(newRecord);
+        this.persistState();
 
-        if (this.games.length === 1) this.renderTable();
-        else {
-          const tr = this.createRow(newG);
-          this.dom.tbody.prepend(tr);
-
+        if (this.state.data.length === 1) {
+          this.render();
+        } else {
+          const tr = this.buildRowDOM(newRecord);
+          this.refs.tbody.prepend(tr);
           anime({
             targets: tr,
-            translateY: [-20, 0],
+            translateY: [-30, 0],
             opacity: [0, 1],
-            duration: 500,
-            easing: 'easeOutBack'
+            backgroundColor: ['rgba(0,240,255,0.1)', 'transparent'],
+            duration: 600,
+            easing: 'easeOutExpo'
           });
         }
-        this.updateAverages();
+        this.updateAggregates(true);
       }
 
-      handleSort(field) {
-        if (this.sortState.col === field) {
-          this.sortState.asc = !this.sortState.asc;
+      handleSort(key) {
+        if (this.state.sortRef.key === key) {
+          this.state.sortRef.asc = !this.state.sortRef.asc;
         } else {
-          this.sortState.col = field;
-          this.sortState.asc = true;
+          this.state.sortRef.key = key;
+          this.state.sortRef.asc = true;
         }
 
-        this.dom.headers.forEach(th => th.setAttribute('aria-sort', 'none'));
-        const activeHeader = document.querySelector(`th[data-field="${field}"]`);
-        activeHeader.setAttribute('aria-sort', this.sortState.asc ? 'ascending' : 'descending');
+        this.refs.thead.querySelectorAll('th').forEach(th => th.setAttribute('aria-sort', 'none'));
+        const activeTh = this.refs.thead.querySelector(`th[data-key="${key}"]`);
+        activeTh.setAttribute('aria-sort', this.state.sortRef.asc ? 'ascending' : 'descending');
 
-        const rows = Array.from(this.dom.tbody.querySelectorAll('tr.data-row'));
-        const rects = new Map();
-        rows.forEach(r => rects.set(r.dataset.id, r.getBoundingClientRect().top));
+        const rows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        const rectMap = new Map();
+        rows.forEach(r => rectMap.set(r.dataset.id, r.getBoundingClientRect().top));
 
-        this.games.sort((a, b) => {
-          let vA = a[field] || 0;
-          let vB = b[field] || 0;
-          return this.sortState.asc ? vA - vB : vB - vA;
+        this.state.data.sort((a, b) => {
+          let vA = a[key] || 0; let vB = b[key] || 0;
+          return this.state.sortRef.asc ? vA - vB : vB - vA;
         });
 
-        this.saveGames();
-        this.renderTable();
+        this.persistState();
+        this.render();
 
-        const newRows = Array.from(this.dom.tbody.querySelectorAll('tr.data-row'));
-        newRows.forEach((r, i) => {
-          let before = rects.get(r.dataset.id);
-          if (before !== undefined) {
-            let after = r.getBoundingClientRect().top;
-            let delta = before - after;
+        const updatedRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        updatedRows.forEach((r, i) => {
+          const beforeY = rectMap.get(r.dataset.id);
+          if (beforeY !== undefined) {
+            const afterY = r.getBoundingClientRect().top;
+            const delta = beforeY - afterY;
             if (delta !== 0) {
               anime.set(r, { translateY: delta });
-              anime({
-                targets: r,
-                translateY: 0,
-                duration: 400,
-                easing: 'cubicBezier(0.4, 0, 0.2, 1)',
-                delay: i * 20
-              });
+              anime({ targets: r, translateY: 0, duration: 500, easing: 'easeOutExpo', delay: i * 15 });
             }
           }
         });
       }
 
-      playIntroSequence() {
+      choreographEntrance() {
         anime.timeline({ easing: 'easeOutExpo' })
-          .add({
-            targets: '.app-header',
-            opacity: [0, 1],
-            translateY: [-20, 0],
-            duration: 800
-          })
-          .add({
-            targets: '.grid-wrapper',
-            opacity: [0, 1],
-            scale: [0.98, 1],
-            duration: 800
-          }, '-=600')
-          .add({
-            targets: 'tr.data-row',
-            opacity: [0, 1],
-            translateX: [-10, 0],
-            delay: anime.stagger(50),
-            duration: 600
-          }, '-=400')
-          .add({
-            targets: '#table-footer',
-            opacity: [0, 1],
-            translateY: [10, 0],
-            duration: 600
-          }, '-=400');
+          .add({ targets: '.header-block', opacity: [0, 1], translateY: [-20, 0], duration: 800 })
+          .add({ targets: '.data-container', opacity: [0, 1], translateY: [40, 0], duration: 800 }, '-=600')
+          .add({ targets: 'tr.data-row', opacity: [0, 1], translateX: [-20, 0], delay: anime.stagger(40), duration: 600 }, '-=400')
+          .add({ targets: '#footer-row', opacity: [0, 1], duration: 600 }, '-=400');
 
-        anime({
-          targets: '.btn-fab',
-          scale: [0, 1],
-          opacity: [0, 1],
-          delay: 800,
-          duration: 600,
-          easing: 'easeOutBack'
-        });
+        anime({ targets: '.btn-fab', scale: [0, 1], rotate: [-45, 0], opacity: [0, 1], delay: 800, duration: 700, easing: 'easeOutBack' });
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      window.tracker = new StatsTracker();
-    });
+    document.addEventListener('DOMContentLoaded', () => { window.app = new BMetricsApp(); });
   </script>
 </body>
 
