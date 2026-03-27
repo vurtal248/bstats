@@ -182,7 +182,7 @@
     }
 
     .computed {
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
 
     input.edit-input {
@@ -347,7 +347,7 @@
           td.innerHTML = `
         <div class="row-highlight"></div>
         <button class="delete-btn" aria-label="Delete">×</button>
-        <span class="value">${game[field]}</span>
+        <span class="value" style="display: none;">${game[field]}</span>
       `;
         } else if (COMPUTED.includes(field)) {
           td.className = 'computed';
