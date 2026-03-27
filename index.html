@@ -182,7 +182,7 @@
     }
 
     .computed {
-      color: var(--text-secondary);
+      color: var(--text-primary);
     }
 
     input.edit-input {
@@ -244,7 +244,7 @@
       <table id="stats-table">
         <thead>
           <tr>
-            <th data-field="id">Games<span class="sort-arrow">↓</span></th>
+            <th data-field="id">#<span class="sort-arrow">↓</span></th>
             <th data-field="mpg">MPG<span class="sort-arrow">↓</span></th>
             <th data-field="ppg">PPG<span class="sort-arrow">↓</span></th>
             <th data-field="apg">APG<span class="sort-arrow">↓</span></th>
@@ -263,7 +263,7 @@
             <th data-field="ftPct">FT%<span class="sort-arrow">↓</span></th>
           </tr>
           <tr id="average-row" class="average-row">
-            <td id="avg-id">0</td>
+            <td id="avg-id">0 Games</td>
             <td id="avg-mpg">0</td>
             <td id="avg-ppg">0</td>
             <td id="avg-apg">0</td>
@@ -404,7 +404,7 @@
         if (!td) return;
 
         let isComputed = COMPUTED.includes(field);
-        let newValue = (field === 'id') ? avg.id.toString() : (isComputed && field !== 'ppg' ? formatPercent(avg[field]) : formatVal(avg[field]));
+        let newValue = (field === 'id') ? `${avg.id} Games` : (isComputed && field !== 'ppg' ? formatPercent(avg[field]) : formatVal(avg[field]));
 
         let existingText = td.textContent;
         if (existingText !== newValue) {
