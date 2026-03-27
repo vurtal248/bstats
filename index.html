@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basketball Stats Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #000000;
+      --surface: #0d0d0d;
+      --card: #141414;
+      --average-row: #1f1f1f;
+      --border: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #888888;
+      --text-muted: #444444;
+      --highlight: #ffffff;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app-container {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      opacity: 0;
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 2.25rem;
+      letter-spacing: -0.04em;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1300px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th,
+    td {
+      padding: 0 16px;
+      text-align: right;
+      vertical-align: middle;
+      height: 52px;
+      white-space: nowrap;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: center;
+      width: 90px;
+    }
+
+    th {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      background-color: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      user-select: none;
+    }
+
+    .sort-arrow {
+      display: inline-block;
+      opacity: 0;
+      margin-left: 4px;
+      font-size: 0.8rem;
+    }
+
+    .average-row {
+      opacity: 0;
+    }
+
+    .average-row td {
+      background-color: var(--average-row);
+      position: sticky;
+      top: 52px;
+      z-index: 9;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    tr.game-row {
+      position: relative;
+      border-bottom: 1px solid var(--border);
+      background-color: transparent;
+    }
+
+    tr.game-row:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      font-family: 'Inter', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.95rem;
+    }
+
+    td:first-child {
+      position: relative;
+    }
+
+    .row-highlight {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background-color: var(--highlight);
+      opacity: 0;
+      z-index: 2;
+    }
+
+    .delete-btn {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0;
+      line-height: 1;
+      padding: 4px;
+      z-index: 2;
+    }
+
+    .delete-btn:hover {
+      color: var(--highlight);
+    }
+
+    .editable {
+      cursor: pointer;
+    }
+
+    .computed {
+      color: var(--text-muted);
+    }
+
+    input.edit-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom-color: var(--highlight);
+      color: var(--text-primary);
+      text-align: right;
+      font-family: inherit;
+      font-size: inherit;
+      padding: 4px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fab-container {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      z-index: 100;
+    }
+
+    .fab-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fab {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--text-primary);
+      color: var(--bg);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fab svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app-container">
+    <header id="header">
+      <h1>Stats Tracker</h1>
+    </header>
+    <section class="table-container">
+      <table id="stats-table">
+        <thead>
+          <tr>
+            <th data-field="id">Games<span class="sort-arrow">↓</span></th>
+            <th data-field="mpg">MPG<span class="sort-arrow">↓</span></th>
+            <th data-field="ppg">PPG<span class="sort-arrow">↓</span></th>
+            <th data-field="apg">APG<span class="sort-arrow">↓</span></th>
+            <th data-field="rpg">RPG<span class="sort-arrow">↓</span></th>
+            <th data-field="spg">SPG<span class="sort-arrow">↓</span></th>
+            <th data-field="bpg">BPG<span class="sort-arrow">↓</span></th>
+            <th data-field="topg">TOPG<span class="sort-arrow">↓</span></th>
+            <th data-field="fgm">FGM<span class="sort-arrow">↓</span></th>
+            <th data-field="fga">FGA<span class="sort-arrow">↓</span></th>
+            <th data-field="fgPct">FG%<span class="sort-arrow">↓</span></th>
+            <th data-field="tpm">3PM<span class="sort-arrow">↓</span></th>
+            <th data-field="tpa">3PA<span class="sort-arrow">↓</span></th>
+            <th data-field="tpPct">3P%<span class="sort-arrow">↓</span></th>
+            <th data-field="ftm">FTM<span class="sort-arrow">↓</span></th>
+            <th data-field="fta">FTA<span class="sort-arrow">↓</span></th>
+            <th data-field="ftPct">FT%<span class="sort-arrow">↓</span></th>
+          </tr>
+          <tr id="average-row" class="average-row">
+            <td id="avg-id">0</td>
+            <td id="avg-mpg">0</td>
+            <td id="avg-ppg">0</td>
+            <td id="avg-apg">0</td>
+            <td id="avg-rpg">0</td>
+            <td id="avg-spg">0</td>
+            <td id="avg-bpg">0</td>
+            <td id="avg-topg">0</td>
+            <td id="avg-fgm">0</td>
+            <td id="avg-fga">0</td>
+            <td id="avg-fgPct">0</td>
+            <td id="avg-tpm">0</td>
+            <td id="avg-tpa">0</td>
+            <td id="avg-tpPct">0</td>
+            <td id="avg-ftm">0</td>
+            <td id="avg-fta">0</td>
+            <td id="avg-ftPct">0</td>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </section>
+
+    <div class="fab-container">
+      <div class="fab-wrapper" id="fab-wrapper">
+        <button class="fab" id="add-game-fab" aria-label="Add Game">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const FIELDS = ['id', 'mpg', 'ppg', 'apg', 'rpg', 'spg', 'bpg', 'topg', 'fgm', 'fga', 'fgPct', 'tpm', 'tpa', 'tpPct', 'ftm', 'fta', 'ftPct'];
+    const COMPUTED = ['fgPct', 'tpPct', 'ftPct'];
+
+    let games = [
+      { id: 3, mpg: 36.0, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
+      { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
+      { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
+    ];
+    let nextId = 4;
+    let sortCol = null;
+    let sortAsc = true;
+
+    games.forEach(g => recalcRowGame(g));
+
+    const tBody = document.getElementById('table-body');
+
+    function formatVal(val) {
+      let n = parseFloat(val);
+      if (isNaN(n)) return '0';
+      return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+    }
+
+    function formatPercent(val) {
+      return Math.round(val || 0) + '%';
+    }
+
+    function recalcRowGame(g) {
+      g.fgPct = g.fga > 0 ? (g.fgm / g.fga) * 100 : 0;
+      g.tpPct = g.tpa > 0 ? (g.tpm / g.tpa) * 100 : 0;
+      g.ftPct = g.fta > 0 ? (g.ftm / g.fta) * 100 : 0;
+    }
+
+    function createRowDom(game) {
+      const tr = document.createElement('tr');
+      tr.className = 'game-row';
+      tr.dataset.id = game.id;
+
+      FIELDS.forEach(field => {
+        const td = document.createElement('td');
+        td.dataset.field = field;
+
+        if (field === 'id') {
+          td.innerHTML = `
+        <div class="row-highlight"></div>
+        <button class="delete-btn" aria-label="Delete">×</button>
+        <span class="value">${game[field]}</span>
+      `;
+        } else if (COMPUTED.includes(field)) {
+          td.className = 'computed';
+          td.innerHTML = `<span class="value">${formatPercent(game[field])}</span>`;
+        } else {
+          td.className = 'editable';
+          td.innerHTML = `<span class="value">${formatVal(game[field])}</span>`;
+        }
+        tr.appendChild(td);
+      });
+
+      let hl = tr.querySelector('.row-highlight');
+      let btn = tr.querySelector('.delete-btn');
+      tr.addEventListener('mouseenter', () => {
+        anime({ targets: tr, backgroundColor: '#1a1a1a', duration: 150, easing: 'linear' });
+        anime({ targets: [hl, btn], opacity: 1, duration: 150, easing: 'linear' });
+      });
+      tr.addEventListener('mouseleave', () => {
+        anime({ targets: tr, backgroundColor: 'rgba(26,26,26,0)', duration: 150, easing: 'linear' });
+        anime({ targets: [hl, btn], opacity: 0, duration: 150, easing: 'linear' });
+      });
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteRow(tr);
+      });
+
+      tr.querySelectorAll('.editable').forEach(td => {
+        td.addEventListener('click', (e) => editCell(e.currentTarget));
+      });
+
+      return tr;
+    }
+
+    function updateAverages(animate = true) {
+      let num = games.length;
+      let sum = { mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0, fgm: 0, fga: 0, tpm: 0, tpa: 0, ftm: 0, fta: 0 };
+
+      games.forEach(g => {
+        for (let k in sum) sum[k] += g[k] || 0;
+      });
+
+      let avg = {};
+      for (let k in sum) {
+        avg[k] = num > 0 ? sum[k] / num : 0;
+      }
+      avg.fgPct = sum.fga > 0 ? (sum.fgm / sum.fga) * 100 : 0;
+      avg.tpPct = sum.tpa > 0 ? (sum.tpm / sum.tpa) * 100 : 0;
+      avg.ftPct = sum.fta > 0 ? (sum.ftm / sum.fta) * 100 : 0;
+      avg.id = num;
+
+      FIELDS.forEach(field => {
+        let td = document.getElementById(`avg-${field}`);
+        if (!td) return;
+
+        let isComputed = COMPUTED.includes(field);
+        let newValue = (field === 'id') ? avg.id.toString() : (isComputed ? formatPercent(avg[field]) : formatVal(avg[field]));
+
+        let existingText = td.textContent;
+        if (existingText !== newValue) {
+          td.textContent = newValue;
+
+          if (animate && document.readyState === 'complete') {
+            anime({
+              targets: td,
+              backgroundColor: [
+                { value: '#333333', duration: 0 },
+                { value: '#ffffff', duration: 200 },
+                { value: '#333333', duration: 200 },
+                { value: '#1f1f1f', duration: 0, delay: 400 }
+              ],
+              color: [
+                { value: '#ffffff', duration: 0 },
+                { value: '#000000', duration: 200 },
+                { value: '#ffffff', duration: 200 }
+              ],
+              duration: 400,
+              easing: 'easeInOutSine'
+            });
+          }
+        }
+      });
+    }
+
+    function editCell(td) {
+      if (td.querySelector('input')) return;
+      const span = td.querySelector('.value');
+      const val = span.textContent;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'edit-input';
+      input.value = val;
+
+      span.style.display = 'none';
+      td.appendChild(input);
+      input.focus();
+      input.select();
+
+      const save = () => {
+        let n = parseFloat(input.value);
+        if (isNaN(n) || n < 0) {
+          input.style.borderColor = '#ffffff';
+          input.style.borderBottomColor = '#ffffff';
+          anime({
+            targets: input,
+            translateX: [-5, 5, -3, 3, 0],
+            duration: 300,
+            easing: 'easeInOutSine'
+          });
+          input.focus();
+          return;
+        }
+
+        const field = td.dataset.field;
+        const row = td.closest('tr');
+        const id = parseInt(row.dataset.id);
+        let game = games.find(g => g.id === id);
+
+        game[field] = n;
+        recalcRowGame(game);
+
+        span.textContent = formatVal(n);
+        row.querySelector('[data-field="fgPct"] .value').textContent = formatPercent(game.fgPct);
+        row.querySelector('[data-field="tpPct"] .value').textContent = formatPercent(game.tpPct);
+        row.querySelector('[data-field="ftPct"] .value').textContent = formatPercent(game.ftPct);
+
+        input.remove();
+        span.style.display = '';
+
+        updateAverages();
+      };
+
+      input.addEventListener('blur', save);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+        if (e.key === 'Escape') {
+          input.value = val;
+          input.blur();
+        }
+      });
+    }
+
+    function deleteRow(tr) {
+      let id = parseInt(tr.dataset.id);
+      games = games.filter(g => g.id !== id);
+      tr.style.pointerEvents = 'none';
+
+      anime.timeline()
+        .add({
+          targets: tr,
+          translateX: 40,
+          opacity: [1, 0],
+          duration: 250,
+          easing: 'easeInExpo'
+        })
+        .add({
+          targets: tr.querySelectorAll('td'),
+          paddingTop: 0,
+          paddingBottom: 0,
+          height: 0,
+          borderBottomWidth: 0,
+          fontSize: 0,
+          duration: 200,
+          easing: 'linear',
+          complete: () => {
+            tr.remove();
+            updateAverages();
+          }
+        });
+    }
+
+    function addGame() {
+      let newGame = {
+        id: nextId++, mpg: 0, ppg: 0, apg: 0, rpg: 0, spg: 0, bpg: 0, topg: 0,
+        fgm: 0, fga: 0, fgPct: 0, tpm: 0, tpa: 0, tpPct: 0, ftm: 0, fta: 0, ftPct: 0
+      };
+      games.unshift(newGame);
+
+      let tr = createRowDom(newGame);
+      tBody.prepend(tr);
+
+      anime.set(tr, { translateY: 30, opacity: 0 });
+      anime({
+        targets: tr,
+        translateY: 0,
+        opacity: 1,
+        duration: 350,
+        easing: 'easeOutBack'
+      });
+
+      updateAverages();
+    }
+
+    document.querySelectorAll('th').forEach(th => {
+      th.addEventListener('click', () => {
+        let field = th.dataset.field;
+        if (!field) return;
+
+        if (sortCol === field) {
+          sortAsc = !sortAsc;
+        } else {
+          sortCol = field;
+          sortAsc = true;
+        }
+
+        anime({ targets: '.sort-arrow', opacity: 0, duration: 150 });
+        let arrow = th.querySelector('.sort-arrow');
+        arrow.style.opacity = '1';
+        anime({
+          targets: arrow,
+          rotateZ: sortAsc ? 0 : 180,
+          duration: 200
+        });
+
+        doSort(field);
+      });
+    });
+
+    function doSort(field) {
+      const rows = Array.from(tBody.querySelectorAll('tr.game-row'));
+      const rectsBefore = new Map();
+      rows.forEach(r => rectsBefore.set(r.dataset.id, r.getBoundingClientRect().top));
+
+      games.sort((a, b) => {
+        let valA = a[field] || 0;
+        let valB = b[field] || 0;
+        return sortAsc ? valA - valB : valB - valA;
+      });
+
+      games.forEach(g => {
+        let r = rows.find(row => parseInt(row.dataset.id) === g.id);
+        if (r) tBody.appendChild(r);
+      });
+
+      rows.forEach((r, index) => {
+        let beforeY = rectsBefore.get(r.dataset.id);
+        let afterY = r.getBoundingClientRect().top;
+        let deltaY = beforeY - afterY;
+
+        if (deltaY !== 0) {
+          anime.set(r, { translateY: deltaY });
+          anime({
+            targets: r,
+            translateY: 0,
+            duration: 320,
+            easing: 'easeInOutQuart',
+            delay: index * 30
+          });
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      games.forEach(g => tBody.appendChild(createRowDom(g)));
+      updateAverages(false);
+
+      anime({
+        targets: '#header',
+        translateY: [-20, 0],
+        opacity: [0, 1],
+        duration: 300,
+        easing: 'easeOutExpo'
+      });
+
+      setTimeout(() => {
+        anime({
+          targets: '#average-row',
+          opacity: [0, 1],
+          duration: 300,
+          easing: 'easeOutExpo'
+        });
+      }, 100);
+
+      anime({
+        targets: '#fab-wrapper',
+        scale: [1, 1.04, 1],
+        duration: 2000,
+        easing: 'easeInOutSine',
+        loop: true
+      });
+
+      document.getElementById('add-game-fab').addEventListener('click', (e) => {
+        anime({
+          targets: e.currentTarget,
+          scale: [1, 1.12, 1],
+          duration: 200,
+          easing: 'easeInOutSine'
+        });
+        addGame();
+      });
+    });
+  </script>
+</body>
+
+</html>
