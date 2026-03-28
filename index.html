@@ -650,6 +650,9 @@
       bottom: clamp(24px, 5vw, 48px);
       right: clamp(24px, 5vw, 48px);
       z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .btn-fab {
@@ -1312,6 +1315,12 @@
     </section>
 
     <div class="fab-container">
+      <button class="btn-fab" id="predict-games-fab" aria-label="Predict future games">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+          <polyline points="17 6 23 6 23 12" />
+        </svg>
+      </button>
       <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14" />
@@ -1351,6 +1360,22 @@
       <div class="modal-footer">
         <button class="btn-ghost" id="btn-cancel-profile">Cancel</button>
         <button class="btn-primary" id="btn-confirm-profile">Initialize</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal dialog for predict games -->
+  <dialog class="modal-dialog" id="modal-predict">
+    <div class="modal-content">
+      <h2 class="modal-title">Predict Future Potential</h2>
+      <p class="modal-desc">Generate upcoming game statistics based on recent averages and performance variance.</p>
+      <div class="modal-body">
+        <input type="number" id="input-predict-count" class="input-modern" placeholder="Number of games (e.g. 5)"
+          min="1" max="82" autocomplete="off" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="btn-cancel-predict">Cancel</button>
+        <button class="btn-primary" id="btn-confirm-predict">Simulate</button>
       </div>
     </div>
   </dialog>
@@ -1425,6 +1450,7 @@
           tfoot: document.getElementById('footer-row'),
           empty: document.getElementById('empty-state'),
           fab: document.getElementById('add-game-fab'),
+          predictFab: document.getElementById('predict-games-fab'),
 
           profileToggle: document.getElementById('profile-toggle'),
           profileMenu: document.getElementById('profile-menu'),
@@ -1435,7 +1461,12 @@
           inputProfileName: document.getElementById('input-profile-name'),
           btnCancelProfile: document.getElementById('btn-cancel-profile'),
           btnConfirmProfile: document.getElementById('btn-confirm-profile'),
-          playerBio: document.getElementById('player-bio')
+          playerBio: document.getElementById('player-bio'),
+
+          modalPredict: document.getElementById('modal-predict'),
+          inputPredictCount: document.getElementById('input-predict-count'),
+          btnCancelPredict: document.getElementById('btn-cancel-predict'),
+          btnConfirmPredict: document.getElementById('btn-confirm-predict')
         };
 
         this.#init();
@@ -1677,6 +1708,28 @@
         });
       }
 
+      #openPredictModal() {
+        this.refs.inputPredictCount.value = '';
+        this.refs.modalPredict.showModal();
+        this.refs.btnConfirmPredict.disabled = true;
+      }
+
+      #closePredictModal() {
+        this.refs.modalPredict.setAttribute('closing', '');
+        anime({
+          targets: this.refs.modalPredict,
+          opacity: 0,
+          translateY: 20,
+          duration: 300,
+          easing: 'easeInExpo',
+          complete: () => {
+            this.refs.modalPredict.close();
+            this.refs.modalPredict.removeAttribute('closing');
+            anime.set(this.refs.modalPredict, { opacity: '', translateY: '' });
+          }
+        });
+      }
+
       /* ——— Biodata Management —————————————————— */
 
       #renderProfileBio() {
@@ -1834,6 +1887,19 @@
 
       #bindGlobalEvents() {
         this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
+        this.refs.predictFab.addEventListener('click', () => this.#openPredictModal());
+
+        this.refs.btnCancelPredict.addEventListener('click', () => this.#closePredictModal());
+        this.refs.btnConfirmPredict.addEventListener('click', () => this.#handlePredictGames());
+        this.refs.inputPredictCount.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          this.refs.btnConfirmPredict.disabled = isNaN(val) || val <= 0 || val > 1000;
+        });
+        this.refs.inputPredictCount.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !this.refs.btnConfirmPredict.disabled) {
+            this.#handlePredictGames();
+          }
+        });
 
         // Profile events
         this.refs.profileToggle.addEventListener('click', () => this.#toggleProfileMenu());
@@ -2162,6 +2228,98 @@
         this.#updateAggregates(true);
 
         // Scroll to top so the new row is visible
+        const scrollCtx = this.refs.tbody.closest('.scroll-context');
+        if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      #handlePredictGames() {
+        const count = parseInt(this.refs.inputPredictCount.value, 10);
+        if (isNaN(count) || count <= 0) return;
+
+        const data = this.#state.data;
+        const len = data.length || 1;
+
+        const acc = {};
+        METRICS_SCHEMA.forEach(c => { if (!c.computed && c.key !== 'id') acc[c.key] = 0; });
+        data.forEach(r => {
+          METRICS_SCHEMA.forEach(c => {
+            if (!c.computed && c.key !== 'id') acc[c.key] += Number(r[c.key]) || 0;
+          });
+        });
+
+        const avg = {};
+        const variance = {};
+        METRICS_SCHEMA.forEach(c => {
+          if (!c.computed && c.key !== 'id') {
+            avg[c.key] = data.length > 0 ? (acc[c.key] / len) : 0;
+
+            let sumSquares = 0;
+            data.forEach(r => {
+              sumSquares += Math.pow((Number(r[c.key]) || 0) - avg[c.key], 2);
+            });
+            const stdDev = data.length > 1 ? Math.sqrt(sumSquares / (len - 1)) : (Math.max(avg[c.key] * 0.2, 1));
+            variance[c.key] = stdDev;
+          }
+        });
+
+        const newRecords = [];
+        const ids = data.map(d => d.id);
+        let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+
+        for (let i = 0; i < count; i++) {
+          const rec = { id: nextId++ };
+          METRICS_SCHEMA.forEach(c => {
+            if (!c.computed && c.key !== 'id') {
+              // Box-Muller transform
+              let u = 0, v = 0;
+              while (u === 0) u = Math.random();
+              while (v === 0) v = Math.random();
+              let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+              let val = avg[c.key] + z * variance[c.key];
+              if (val < 0) val = 0;
+              if (c.key === 'mpg' && val > 48) val = 48 + Math.floor(Math.random() * 10); // arbitrary max
+
+              if (c.key !== 'mpg') val = Math.round(val);
+              else val = Number(val.toFixed(1)); // mpg gets 1 decimal
+
+              rec[c.key] = val;
+            }
+          });
+
+          // Ensure logic invariants
+          if (rec.fga < rec.fgm) rec.fga = rec.fgm;
+          if (rec.fta < rec.ftm) rec.fta = rec.ftm;
+          if (rec.tpa < rec.tpm) rec.tpa = rec.tpm;
+          if (rec.fga < rec.tpa) rec.fga = rec.tpa;
+          if (rec.fgm < rec.tpm) rec.fgm = rec.tpm;
+
+          this.#computeDerived(rec);
+          newRecords.unshift(rec);
+        }
+
+        // Append new items at top, respect sort if necessary
+        this.#state.sortRef = { key: null, asc: true }; // Reset sort to view newly prepended records simply
+        this.#state.data = [...newRecords, ...this.#state.data];
+        this.#persistState();
+
+        this.#closePredictModal();
+        this.#render();
+
+        // Entrance animation for new rows
+        const rows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row')).slice(0, count);
+        if (rows.length > 0) {
+          anime({
+            targets: rows,
+            translateY: [-30, 0],
+            opacity: [0, 1],
+            backgroundColor: [this.#getThemeColors().bgFlash, 'transparent'],
+            delay: anime.stagger(20),
+            duration: 600,
+            easing: 'easeOutExpo'
+          });
+        }
+
         const scrollCtx = this.refs.tbody.closest('.scroll-context');
         if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: 'smooth' });
       }
