@@ -50,6 +50,85 @@
       --row-h: 50px;
     }
 
+    :root[data-theme="light"] {
+      --clr-bg: #FAFAFA;
+      --clr-surface: rgba(0, 0, 0, 0.03);
+      --clr-surface-hover: rgba(0, 0, 0, 0.06);
+      --clr-border: rgba(0, 0, 0, 0.08);
+      --clr-border-active: rgba(0, 0, 0, 0.3);
+      --clr-text-primary: #050505;
+      --clr-text-secondary: #666666;
+      --clr-text-dim: #999999;
+      --clr-accent: #050505;
+      --clr-accent-glow: rgba(0, 0, 0, 0.15);
+      --clr-danger: #050505;
+    }
+
+    :root[data-theme="light"] .ambient-bg {
+      background: radial-gradient(circle at 15% 0%, rgba(0, 0, 0, 0.03) 0%, transparent 50%), radial-gradient(circle at 85% 100%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
+    }
+
+    :root[data-theme="light"] .ambient-noise {
+      opacity: 0.15;
+    }
+
+    :root[data-theme="light"] .header-title {
+      background: linear-gradient(180deg, #050505 0%, rgba(5, 5, 5, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    :root[data-theme="light"] .stats-grid th {
+      background: rgba(245, 245, 245, 0.95);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    :root[data-theme="light"] .stats-grid tfoot td {
+      background: rgba(245, 245, 245, 0.95);
+    }
+
+    :root[data-theme="light"] .stats-grid tfoot td::before {
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+    }
+
+    :root[data-theme="light"] .profile-menu {
+      background: rgba(250, 250, 250, 0.95);
+    }
+
+    :root[data-theme="light"] .profile-menu-actions {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    :root[data-theme="light"] .btn-delete-profile:hover,
+    :root[data-theme="light"] .btn-new-profile:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    :root[data-theme="light"] .modal-dialog::backdrop {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    :root[data-theme="light"] .input-modern:focus {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    :root[data-theme="light"] .input-edit::selection {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    :root[data-theme="light"] .btn-fab {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    :root[data-theme="light"] .btn-fab:hover {
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    :root[data-theme="light"] .btn-fab::after {
+      background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.2));
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -623,6 +702,71 @@
       z-index: 2;
     }
 
+    /* — Theme Toggle Button ————————————————————— */
+    .theme-toggle-container {
+      position: fixed;
+      bottom: clamp(24px, 5vw, 48px);
+      left: clamp(24px, 5vw, 48px);
+      z-index: 100;
+    }
+
+    .btn-theme {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      color: var(--clr-text-primary);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.4s var(--ease-out-back);
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0;
+    }
+
+    .btn-theme:hover {
+      background: var(--clr-surface-hover);
+      transform: scale(1.1);
+      border-color: var(--clr-border-active);
+    }
+
+    .btn-theme:active {
+      transform: scale(0.95);
+    }
+
+    .btn-theme svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      transition: transform 0.5s var(--ease-out-expo);
+      position: absolute;
+    }
+
+    .btn-theme .icon-sun {
+      opacity: 0;
+      transform: rotate(-90deg) scale(0.5);
+    }
+
+    .btn-theme .icon-moon {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+
+    :root[data-theme="light"] .btn-theme .icon-sun {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+
+    :root[data-theme="light"] .btn-theme .icon-moon {
+      opacity: 0;
+      transform: rotate(90deg) scale(0.5);
+    }
+
     /* — Skeleton Loading Pattern ———————————————— */
     .skeleton-row td span {
       display: block;
@@ -985,12 +1129,14 @@
         min-width: 60px;
       }
 
-      .btn-fab {
+      .btn-fab,
+      .btn-theme {
         width: 52px;
         height: 52px;
       }
 
-      .btn-fab svg {
+      .btn-fab svg,
+      .btn-theme svg {
         width: 20px;
         height: 20px;
       }
@@ -1172,6 +1318,25 @@
         </svg>
       </button>
     </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-container">
+      <button class="btn-theme" id="theme-toggle-btn" aria-label="Toggle light/dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
   </main>
 
   <!-- Modal dialog for new profile -->
@@ -1246,6 +1411,7 @@
       #activeProfileId;
 
       constructor() {
+        this.#initTheme();
         this.#initProfiles();
 
         this.#state = {
@@ -1273,6 +1439,28 @@
         };
 
         this.#init();
+      }
+
+      /* ——— Theme Setup ————————————————————————— */
+
+      #initTheme() {
+        const storedTheme = localStorage.getItem('bstats_theme');
+        if (storedTheme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        } else if (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      }
+
+      #getThemeColors() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        return {
+          bgFlash: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
+          bgFlashStrong: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)',
+          textPrimary: isLight ? '#050505' : '#FFFFFF',
+          textSecondary: isLight ? '#666666' : '#888888',
+          accent: isLight ? '#050505' : '#FFFFFF'
+        };
       }
 
       /* ——— Lifecycle ——————————————————————————— */
@@ -1540,9 +1728,10 @@
           spanNode.style.display = '';
 
           // Flash confirmation
+          const tc = this.#getThemeColors();
           anime({
             targets: spanNode,
-            color: ['#FFFFFF', '#888888', '#FFFFFF'],
+            color: [tc.accent, tc.textSecondary, tc.textPrimary],
             duration: 600,
             easing: 'easeOutExpo'
           });
@@ -1674,6 +1863,20 @@
 
         // initial render profile menu
         this.#renderProfileMenu();
+
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        if (themeBtn) {
+          themeBtn.addEventListener('click', () => {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+              document.documentElement.removeAttribute('data-theme');
+              localStorage.setItem('bstats_theme', 'dark');
+            } else {
+              document.documentElement.setAttribute('data-theme', 'light');
+              localStorage.setItem('bstats_theme', 'light');
+            }
+          });
+        }
 
         // bind bio click-to-edit interactions
         this.refs.playerBio.querySelectorAll('.bio-value').forEach(node => {
@@ -1808,10 +2011,12 @@
         });
 
         if (animate && updatedNodes.length) {
+          const tc = this.#getThemeColors();
+          const shadowColor = tc.accent === '#050505' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)';
           anime({
             targets: updatedNodes,
-            color: ['#888888', '#FFFFFF'],
-            textShadow: ['0 0 16px rgba(255,255,255,0.5)', 'none'],
+            color: [tc.textSecondary, tc.textPrimary],
+            textShadow: [`0 0 16px ${shadowColor}`, 'none'],
             duration: 600,
             easing: 'easeOutExpo'
           });
@@ -1883,7 +2088,7 @@
           // Subtle flash confirmation
           anime({
             targets: tdNode,
-            backgroundColor: ['rgba(255,255,255,0.12)', 'transparent'],
+            backgroundColor: [this.#getThemeColors().bgFlashStrong, 'transparent'],
             duration: 500,
             easing: 'easeOutExpo'
           });
@@ -1948,7 +2153,7 @@
             targets: tr,
             translateY: [-30, 0],
             opacity: [0, 1],
-            backgroundColor: ['rgba(255,255,255,0.08)', 'transparent'],
+            backgroundColor: [this.#getThemeColors().bgFlash, 'transparent'],
             duration: 600,
             easing: 'easeOutExpo'
           });
@@ -2047,11 +2252,11 @@
           }, '-=400');
 
         anime({
-          targets: '.btn-fab',
+          targets: ['.btn-fab', '.btn-theme'],
           scale: [0, 1],
           rotate: [-45, 0],
           opacity: [0, 1],
-          delay: 800,
+          delay: anime.stagger(150, { start: 800 }),
           duration: 700,
           easing: 'easeOutBack'
         });
