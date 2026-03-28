@@ -581,6 +581,312 @@
       }
     }
 
+    /* — Profile Selector ——————————————————————— */
+    .profile-container {
+      position: relative;
+      margin-top: 16px;
+      width: fit-content;
+      z-index: 50;
+    }
+
+    .profile-trigger {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 4px;
+      padding: 10px 16px;
+      color: var(--clr-text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out-expo);
+      width: 280px;
+    }
+
+    .profile-trigger:hover,
+    .profile-trigger:focus-visible {
+      background: var(--clr-surface-hover);
+      border-color: var(--clr-border-active);
+    }
+
+    .profile-label {
+      color: var(--clr-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.7rem;
+    }
+
+    .profile-active-name {
+      flex: 1;
+      text-align: left;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chevron-icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    .profile-trigger[aria-expanded="true"] .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    .profile-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 100%;
+      background: rgba(10, 10, 10, 0.95);
+      border: 1px solid var(--clr-border);
+      border-radius: 4px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .profile-menu:not([hidden]) {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .profile-menu-scroll {
+      max-height: 240px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--clr-text-dim) transparent;
+    }
+
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      color: var(--clr-text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .profile-item:hover,
+    .profile-item:focus-within {
+      background: var(--clr-surface-hover);
+      color: var(--clr-text-primary);
+    }
+
+    .profile-item.is-active {
+      color: var(--clr-accent);
+      font-weight: 700;
+    }
+
+    .profile-item-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-delete-profile {
+      background: none;
+      border: none;
+      color: var(--clr-text-dim);
+      cursor: pointer;
+      padding: 4px;
+      display: grid;
+      place-items: center;
+      border-radius: 2px;
+      transition: all 0.2s;
+      opacity: 0;
+    }
+
+    .profile-item:hover .btn-delete-profile,
+    .profile-item:focus-within .btn-delete-profile {
+      opacity: 1;
+    }
+
+    .btn-delete-profile:hover {
+      color: var(--clr-danger);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-delete-profile svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .profile-menu-actions {
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-new-profile {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px dashed var(--clr-text-dim);
+      color: var(--clr-text-secondary);
+      padding: 10px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-new-profile:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--clr-text-primary);
+      border-color: var(--clr-text-secondary);
+    }
+
+    .btn-new-profile svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* — Modal Dialog ———————————————————————————— */
+    .modal-dialog {
+      padding: 0;
+      border: 1px solid var(--clr-border);
+      background: var(--clr-bg);
+      border-radius: 6px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+      color: var(--clr-text-primary);
+      max-width: 400px;
+      width: 90vw;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+      margin: auto;
+    }
+
+    .modal-dialog[open] {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modal-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      opacity: 0;
+      transition: opacity 0.4s var(--ease-out-expo);
+    }
+
+    .modal-dialog[open]::backdrop {
+      opacity: 1;
+    }
+
+    .modal-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .modal-desc {
+      color: var(--clr-text-secondary);
+      font-size: 0.85rem;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .input-modern {
+      width: 100%;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      color: var(--clr-text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .input-modern:focus {
+      border-color: var(--clr-border-active);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn-ghost,
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--clr-text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--clr-surface);
+      color: var(--clr-text-primary);
+    }
+
+    .btn-primary {
+      background: var(--clr-text-primary);
+      color: var(--clr-bg);
+      font-weight: 700;
+    }
+
+    .btn-primary:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     /* — Responsive: Compact ————————————————————— */
     @media (max-width: 768px) {
       :root {
@@ -641,6 +947,30 @@
     <header class="header-block">
       <h1 class="header-title">BMetrics</h1>
       <p class="header-meta">Professional Performance Engine</p>
+
+      <div class="profile-container" id="profile-selector">
+        <button class="profile-trigger" id="profile-toggle" aria-expanded="false" aria-controls="profile-menu">
+          <span class="profile-label">Database</span>
+          <span class="profile-active-name" id="active-profile-name">Player 1</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <div class="profile-menu" id="profile-menu" role="menu" hidden>
+          <div class="profile-menu-scroll" id="profile-list">
+            <!-- items generated by JS -->
+          </div>
+          <div class="profile-menu-actions">
+            <button class="btn-new-profile" id="btn-new-profile">
+              <svg viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+              </svg>
+              New Database
+            </button>
+          </div>
+        </div>
+      </div>
     </header>
 
     <section class="data-container" aria-label="Statistics Data Grid">
@@ -737,6 +1067,23 @@
     </div>
   </main>
 
+  <!-- Modal dialog for new profile -->
+  <dialog class="modal-dialog" id="modal-new-profile">
+    <div class="modal-content">
+      <h2 class="modal-title">Initialize Database</h2>
+      <p class="modal-desc">Create a new metrics instance for a player or season.</p>
+      <div class="modal-body">
+        <input type="text" id="input-profile-name" class="input-modern" placeholder="E.g., Season 24/25, Player Name"
+          autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="btn-cancel-profile">Cancel</button>
+        <button class="btn-primary" id="btn-confirm-profile">Initialize</button>
+      </div>
+    </div>
+  </dialog>
+
+
   <script>
     /**
      * @file BMetrics — Interactive Logic & State Management
@@ -774,7 +1121,10 @@
     /** Computed column refs for quick lookup */
     const COMPUTED_COLS = METRICS_SCHEMA.filter(c => c.computed);
 
-    const STORAGE_KEY = 'bstats_games';
+    const STORAGE_KEY_PROFILES = 'bstats_profiles';
+    const STORAGE_KEY_ACTIVE = 'bstats_active_profile';
+    const STORAGE_KEY_PREFIX = 'bstats_games_';
+    const LEGACY_STORAGE_KEY = 'bstats_games';
 
     const SEED_DATA = [
       { id: 3, mpg: 36.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, tpm: 4, tpa: 9, ftm: 6.5, fta: 7 },
@@ -785,8 +1135,11 @@
     class BMetricsApp {
       /** @type {{ data: object[], sortRef: { key: string|null, asc: boolean } }} */
       #state;
+      #profiles;
+      #activeProfileId;
 
       constructor() {
+        this.#initProfiles();
 
         this.#state = {
           data: this.#restoreState(),
@@ -798,7 +1151,17 @@
           tbody: document.getElementById('table-body'),
           tfoot: document.getElementById('footer-row'),
           empty: document.getElementById('empty-state'),
-          fab: document.getElementById('add-game-fab')
+          fab: document.getElementById('add-game-fab'),
+
+          profileToggle: document.getElementById('profile-toggle'),
+          profileMenu: document.getElementById('profile-menu'),
+          profileList: document.getElementById('profile-list'),
+          activeProfileName: document.getElementById('active-profile-name'),
+          btnNewProfile: document.getElementById('btn-new-profile'),
+          modalNewProfile: document.getElementById('modal-new-profile'),
+          inputProfileName: document.getElementById('input-profile-name'),
+          btnCancelProfile: document.getElementById('btn-cancel-profile'),
+          btnConfirmProfile: document.getElementById('btn-confirm-profile')
         };
 
         this.#init();
@@ -820,11 +1183,203 @@
         });
       }
 
+      /* ——— Profile Management —————————————————— */
+
+      #initProfiles() {
+        try {
+          const rawProfiles = localStorage.getItem(STORAGE_KEY_PROFILES);
+          if (rawProfiles) {
+            this.#profiles = JSON.parse(rawProfiles);
+            this.#activeProfileId = localStorage.getItem(STORAGE_KEY_ACTIVE) || this.#profiles[0].id;
+
+            // Validate active profile exists
+            if (!this.#profiles.find(p => p.id === this.#activeProfileId)) {
+              this.#activeProfileId = this.#profiles[0].id;
+              localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
+            }
+          } else {
+            // First time or legacy migration
+            this.#profiles = [{ id: 'default', name: 'Player 1' }];
+            this.#activeProfileId = 'default';
+            localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(this.#profiles));
+            localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
+
+            // Migrate legacy data
+            const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+            if (legacyData) {
+              localStorage.setItem(STORAGE_KEY_PREFIX + 'default', legacyData);
+            }
+          }
+        } catch {
+          this.#profiles = [{ id: 'default', name: 'Player 1' }];
+          this.#activeProfileId = 'default';
+        }
+      }
+
+      #saveProfiles() {
+        try {
+          localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(this.#profiles));
+          localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
+        } catch { }
+      }
+
+      #renderProfileMenu() {
+        const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+        this.refs.activeProfileName.textContent = activeProfile ? activeProfile.name : 'Unknown';
+
+        this.refs.profileList.innerHTML = this.#profiles.map(p => `
+          <div class="profile-item ${p.id === this.#activeProfileId ? 'is-active' : ''}" data-id="${p.id}" tabindex="0" role="menuitem">
+            <span class="profile-item-name">${p.name}</span>
+            ${this.#profiles.length > 1 ? `
+            <button class="btn-delete-profile" aria-label="Delete ${p.name}" data-action="delete" data-id="${p.id}">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+            </button>
+            ` : ''}
+          </div>
+        `).join('');
+
+        // Attach events to list items
+        this.refs.profileList.querySelectorAll('.profile-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.btn-delete-profile');
+            if (deleteBtn) {
+              e.stopPropagation();
+              this.#handleDeleteProfile(item.dataset.id);
+            } else {
+              this.#handleSwitchProfile(item.dataset.id);
+            }
+          });
+          item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.#handleSwitchProfile(item.dataset.id);
+            }
+          });
+        });
+      }
+
+      #handleSwitchProfile(id) {
+        if (this.#activeProfileId === id) {
+          this.#closeProfileMenu();
+          return;
+        }
+
+        this.#activeProfileId = id;
+        this.#saveProfiles();
+
+        // Load new data
+        this.#state.data = this.#restoreState();
+        this.#state.sortRef = { key: null, asc: true };
+        this.#hydrateComputed();
+
+        this.#renderProfileMenu();
+        this.#render();
+        this.#closeProfileMenu();
+
+        // FLIP or simple entrance anim
+        const rows = this.refs.tbody.querySelectorAll('tr.data-row');
+        if (rows.length > 0) {
+          anime({
+            targets: rows,
+            opacity: [0, 1],
+            translateX: [-10, 0],
+            delay: anime.stagger(20),
+            duration: 400,
+            easing: 'easeOutExpo'
+          });
+        }
+      }
+
+      #handleCreateProfile() {
+        const name = this.refs.inputProfileName.value.trim();
+        if (!name) return;
+
+        const id = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        this.#profiles.push({ id, name });
+        this.#activeProfileId = id;
+        this.#saveProfiles();
+
+        // Init empty data
+        this.#state.data = [];
+        this.#state.sortRef = { key: null, asc: true };
+        this.#persistState(); // write empty array to new key
+
+        this.#closeProfileModal();
+        this.#closeProfileMenu();
+
+        this.#renderProfileMenu();
+        this.#render();
+      }
+
+      #handleDeleteProfile(id) {
+        if (this.#profiles.length <= 1) return; // Cannot delete last profile
+        const profileToDelete = this.#profiles.find(p => p.id === id);
+
+        if (!confirm(`Are you sure you want to delete the database "${profileToDelete.name}" and all its records? This cannot be undone.`)) {
+          return;
+        }
+
+        // Remove data from localstorage
+        localStorage.removeItem(STORAGE_KEY_PREFIX + id);
+
+        this.#profiles = this.#profiles.filter(p => p.id !== id);
+
+        // If deleted profile was active, switch to the first available
+        if (this.#activeProfileId === id) {
+          this.#activeProfileId = this.#profiles[0].id;
+          this.#state.data = this.#restoreState();
+          this.#state.sortRef = { key: null, asc: true };
+          this.#hydrateComputed();
+          this.#render();
+        }
+
+        this.#saveProfiles();
+        this.#renderProfileMenu();
+      }
+
+      #toggleProfileMenu() {
+        const isExpanded = this.refs.profileToggle.getAttribute('aria-expanded') === 'true';
+        if (isExpanded) {
+          this.#closeProfileMenu();
+        } else {
+          this.refs.profileMenu.hidden = false;
+          this.refs.profileToggle.setAttribute('aria-expanded', 'true');
+        }
+      }
+
+      #closeProfileMenu() {
+        this.refs.profileMenu.hidden = true;
+        this.refs.profileToggle.setAttribute('aria-expanded', 'false');
+      }
+
+      #openProfileModal() {
+        this.#closeProfileMenu();
+        this.refs.inputProfileName.value = '';
+        this.refs.modalNewProfile.showModal();
+        this.refs.btnConfirmProfile.disabled = true;
+      }
+
+      #closeProfileModal() {
+        this.refs.modalNewProfile.setAttribute('closing', '');
+        anime({
+          targets: this.refs.modalNewProfile,
+          opacity: 0,
+          translateY: 20,
+          duration: 300,
+          easing: 'easeInExpo',
+          complete: () => {
+            this.refs.modalNewProfile.close();
+            this.refs.modalNewProfile.removeAttribute('closing');
+            anime.set(this.refs.modalNewProfile, { opacity: '', translateY: '' });
+          }
+        });
+      }
+
       /* ——— Persistence ————————————————————————— */
 
       #restoreState() {
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + this.#activeProfileId);
           if (!raw) return structuredClone(SEED_DATA);
           const parsed = JSON.parse(raw);
           return Array.isArray(parsed) ? parsed : structuredClone(SEED_DATA);
@@ -835,7 +1390,7 @@
 
       #persistState() {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.#state.data));
+          localStorage.setItem(STORAGE_KEY_PREFIX + this.#activeProfileId, JSON.stringify(this.#state.data));
         } catch { /* quota exceeded or private mode — silently degrade */ }
       }
 
@@ -906,6 +1461,36 @@
 
       #bindGlobalEvents() {
         this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
+
+        // Profile events
+        this.refs.profileToggle.addEventListener('click', () => this.#toggleProfileMenu());
+
+        // Close menu on outside click
+        document.addEventListener('click', (e) => {
+          if (!this.refs.profileToggle.contains(e.target) && !this.refs.profileMenu.contains(e.target)) {
+            this.#closeProfileMenu();
+          }
+        });
+
+        this.refs.btnNewProfile.addEventListener('click', () => this.#openProfileModal());
+
+        this.refs.btnCancelProfile.addEventListener('click', () => this.#closeProfileModal());
+
+        this.refs.btnConfirmProfile.addEventListener('click', () => this.#handleCreateProfile());
+
+        this.refs.inputProfileName.addEventListener('input', (e) => {
+          this.refs.btnConfirmProfile.disabled = e.target.value.trim().length === 0;
+        });
+
+        this.refs.inputProfileName.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !this.refs.btnConfirmProfile.disabled) {
+            this.#handleCreateProfile();
+          }
+        });
+
+        // initial render profile menu
+        this.#renderProfileMenu();
+
       }
 
       /* ——— Rendering ——————————————————————————— */
