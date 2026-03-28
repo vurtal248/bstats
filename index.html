@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Basketball Stats">
+  <meta name="description" content="Basketball Stats — Professional Performance Engine">
+  <meta name="theme-color" content="#050505">
   <title>B-Stats</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,9 +16,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
   <style>
-    /* 
-      // MODERN CSS ARCHITECTURE
-      // Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
+    /*
+      MODERN CSS ARCHITECTURE
+      Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
+      Palette: Strict Monochrome
     */
     :root {
       --clr-bg: #050505;
@@ -39,10 +41,29 @@
 
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      /* Spatial tokens */
+      --space-edge: clamp(16px, 5vw, 64px);
+      --space-gap: clamp(20px, 4vw, 48px);
+      --cell-pad-y: 14px;
+      --cell-pad-x: 12px;
+      --row-h: 50px;
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    /* — Reduced Motion ——————————————————————— */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     body {
@@ -53,7 +74,9 @@
       font-family: var(--font-mono);
       font-size: 14px;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
+      min-height: 100dvh;
       display: grid;
       grid-template-columns: 100%;
       grid-template-rows: auto 1fr;
@@ -61,7 +84,7 @@
       overflow-x: hidden;
     }
 
-    /* Ambient Background System */
+    /* — Ambient Background System ——————————————— */
     .ambient-bg {
       position: fixed;
       inset: 0;
@@ -82,7 +105,7 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
     }
 
-    /* Focus & Accessibility */
+    /* — Focus & Accessibility ——————————————————— */
     :focus-visible {
       outline: 2px solid var(--clr-accent);
       outline-offset: 4px;
@@ -100,24 +123,25 @@
       border: 0;
     }
 
-    /* Layout Hierarchy */
+    /* — Layout Hierarchy ——————————————————————— */
     .layout-main {
-      padding: clamp(24px, 5vw, 64px);
+      padding: var(--space-edge);
       max-width: 1800px;
       margin: 0 auto;
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: clamp(24px, 4vw, 48px);
+      gap: var(--space-gap);
       flex: 1;
+      min-height: 0;
+      /* flex child scroll fix */
     }
 
-    /* Header Composition */
+    /* — Header Composition ————————————————————— */
     .header-block {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      will-change: transform, opacity;
       opacity: 0;
       /* JS handles reveal */
     }
@@ -133,6 +157,7 @@
       background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .header-meta {
@@ -151,9 +176,10 @@
       width: 32px;
       height: 1px;
       background: var(--clr-accent);
+      flex-shrink: 0;
     }
 
-    /* Data Visualization Grid */
+    /* — Data Visualization Grid ————————————————— */
     .data-container {
       position: relative;
       background: var(--clr-surface);
@@ -168,6 +194,7 @@
       flex-direction: column;
       opacity: 0;
       /* JS handles reveal */
+      min-height: 280px;
     }
 
     .data-container::before {
@@ -179,6 +206,7 @@
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--clr-border-active), transparent);
       opacity: 0.5;
+      z-index: 40;
     }
 
     .scroll-context {
@@ -188,7 +216,8 @@
       scrollbar-width: thin;
       scrollbar-color: var(--clr-text-dim) transparent;
       flex: 1;
-      min-height: 300px;
+      min-height: 0;
+      /* flex child scroll fix */
     }
 
     .scroll-context::-webkit-scrollbar {
@@ -205,6 +234,10 @@
       border-radius: 3px;
     }
 
+    .scroll-context::-webkit-scrollbar-thumb:hover {
+      background: var(--clr-text-secondary);
+    }
+
     .stats-grid {
       width: 100%;
       border-collapse: separate;
@@ -214,23 +247,24 @@
 
     .stats-grid th,
     .stats-grid td {
-      padding: 16px 10px;
+      padding: var(--cell-pad-y) var(--cell-pad-x);
       text-align: right;
       border-bottom: 1px solid var(--clr-border);
       white-space: nowrap;
-      height: 54px;
+      height: var(--row-h);
     }
 
     .stats-grid th:first-child,
     .stats-grid td:first-child {
       text-align: center;
       width: 80px;
+      min-width: 80px;
       position: sticky;
       left: 0;
       z-index: 10;
     }
 
-    /* Table Headers */
+    /* — Table Headers ——————————————————————————— */
     .stats-grid th {
       font-family: var(--font-display);
       font-size: 0.75rem;
@@ -249,11 +283,18 @@
 
     .stats-grid th:first-child {
       z-index: 30;
+      cursor: default;
+      /* # column is not sortable */
     }
 
     .stats-grid th:hover,
     .stats-grid th:focus-visible {
       color: var(--clr-text-primary);
+    }
+
+    .stats-grid th:first-child:hover {
+      color: var(--clr-text-secondary);
+      /* no hover effect for non-sortable */
     }
 
     .sort-indicator {
@@ -287,7 +328,7 @@
       color: var(--clr-accent);
     }
 
-    /* Row Aesthetics */
+    /* — Row Aesthetics —————————————————————————— */
     .stats-grid tbody tr {
       transition: background-color 0.3s var(--ease-out-expo);
     }
@@ -307,7 +348,7 @@
       background-color: var(--clr-surface-hover);
     }
 
-    /* Cell Interactions */
+    /* — Cell Interactions —————————————————————— */
     .cell-interactive {
       cursor: pointer;
       position: relative;
@@ -323,7 +364,7 @@
       color: var(--clr-text-secondary);
     }
 
-    /* Edit State */
+    /* — Edit State —————————————————————————————— */
     .input-edit {
       width: 100%;
       background: transparent;
@@ -333,13 +374,18 @@
       font-family: inherit;
       font-size: inherit;
       text-align: right;
-      padding: 0;
+      padding: 0 0 2px;
       outline: none;
       position: relative;
       z-index: 5;
+      caret-color: var(--clr-accent);
     }
 
-    /* Actions Context */
+    .input-edit::selection {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* — Actions Context ————————————————————————— */
     .action-context {
       position: absolute;
       left: 12px;
@@ -364,6 +410,7 @@
       display: grid;
       place-items: center;
       transition: color 0.3s, transform 0.3s var(--ease-out-back);
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-icon:hover {
@@ -379,7 +426,7 @@
       fill: none;
     }
 
-    /* Averages Footer */
+    /* — Averages Footer (sticky) ———————————————— */
     .stats-grid tfoot {
       position: relative;
       z-index: 15;
@@ -391,20 +438,33 @@
       border-bottom: none;
       font-weight: 700;
       color: var(--clr-text-primary);
-      padding-top: 24px;
-      padding-bottom: 24px;
+      padding-top: 20px;
+      padding-bottom: 20px;
       transition: color 0.4s, text-shadow 0.4s;
+      position: sticky;
+      bottom: 0;
     }
 
     .stats-grid tfoot td:first-child {
       background: rgba(5, 5, 5, 0.95);
+      z-index: 30;
     }
 
-    /* Empty State Context */
+    .stats-grid tfoot td::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+    }
+
+    /* — Empty State Context ————————————————————— */
     .empty-state {
       position: absolute;
       inset: 0;
-      top: 54px;
+      top: var(--row-h);
       /* below header */
       display: flex;
       flex-direction: column;
@@ -428,14 +488,24 @@
       height: 48px;
       color: var(--clr-text-dim);
       stroke-width: 1;
+      opacity: 0.6;
     }
 
     .empty-message {
       color: var(--clr-text-secondary);
-      font-size: 1.1rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
     }
 
-    /* Floating Action Button */
+    .empty-hint {
+      color: var(--clr-text-dim);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: -4px;
+    }
+
+    /* — Floating Action Button ————————————————— */
     .fab-container {
       position: fixed;
       bottom: clamp(24px, 5vw, 48px);
@@ -444,8 +514,8 @@
     }
 
     .btn-fab {
-      width: 64px;
-      height: 64px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: var(--clr-text-primary);
       color: var(--clr-bg);
@@ -453,49 +523,55 @@
       cursor: pointer;
       display: grid;
       place-items: center;
-      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 8px 24px rgba(255, 255, 255, 0.08),
+        0 2px 8px rgba(255, 255, 255, 0.06);
       transition: transform 0.4s var(--ease-out-back), box-shadow 0.4s;
       overflow: hidden;
       position: relative;
       opacity: 0;
       /* JS handles reveal */
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-fab::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(0, 0, 0, 0.2));
+      background: linear-gradient(135deg, transparent 40%, rgba(0, 0, 0, 0.15));
+      border-radius: inherit;
     }
 
     .btn-fab:hover {
-      transform: scale(1.05) translateY(-4px);
-      box-shadow: 0 20px 48px rgba(255, 255, 255, 0.2);
+      transform: scale(1.06) translateY(-3px);
+      box-shadow:
+        0 16px 40px rgba(255, 255, 255, 0.15),
+        0 4px 12px rgba(255, 255, 255, 0.1);
     }
 
     .btn-fab:active {
-      transform: scale(0.95);
+      transform: scale(0.94);
     }
 
     .btn-fab svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       stroke: currentColor;
-      stroke-width: 2;
+      stroke-width: 2.5;
       fill: none;
       position: relative;
       z-index: 2;
     }
 
-    /* Skeleton Loading Pattern */
+    /* — Skeleton Loading Pattern ———————————————— */
     .skeleton-row td span {
       display: block;
-      height: 16px;
+      height: 14px;
       width: 100%;
       background: linear-gradient(90deg, var(--clr-text-dim) 0%, var(--clr-text-secondary) 50%, var(--clr-text-dim) 100%);
       background-size: 200% 100%;
       border-radius: 2px;
-      opacity: 0.2;
+      opacity: 0.15;
       animation: skeleton-shimmer 2s infinite linear;
     }
 
@@ -504,37 +580,87 @@
         background-position: -200% 0;
       }
     }
+
+    /* — Responsive: Compact ————————————————————— */
+    @media (max-width: 768px) {
+      :root {
+        --cell-pad-y: 12px;
+        --cell-pad-x: 8px;
+        --row-h: 44px;
+      }
+
+      .stats-grid {
+        font-size: 12px;
+      }
+
+      .stats-grid th:first-child,
+      .stats-grid td:first-child {
+        width: 60px;
+        min-width: 60px;
+      }
+
+      .btn-fab {
+        width: 52px;
+        height: 52px;
+      }
+
+      .btn-fab svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .header-meta {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* — Responsive: Ultra-narrow ———————————————— */
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 2rem;
+      }
+
+      .header-meta::before {
+        width: 20px;
+      }
+
+      .btn-icon svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="ambient-bg"></div>
-  <div class="ambient-noise"></div>
+  <div class="ambient-bg" aria-hidden="true"></div>
+  <div class="ambient-noise" aria-hidden="true"></div>
 
   <main class="layout-main">
     <header class="header-block">
       <h1 class="header-title">BMetrics</h1>
-      <div class="header-meta">Professional Performance Engine</div>
+      <p class="header-meta">Professional Performance Engine</p>
     </header>
 
     <section class="data-container" aria-label="Statistics Data Grid">
-      <div class="empty-state" id="empty-state" aria-hidden="true">
+      <div class="empty-state" id="empty-state" role="status" aria-hidden="true">
         <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
-        <p class="empty-message">Dataset Empty. Initialize new record.</p>
+        <p class="empty-message">Dataset Empty</p>
+        <p class="empty-hint">Tap + to initialize a new record</p>
       </div>
 
-      <div class="scroll-context" tabindex="0">
+      <div class="scroll-context" tabindex="0" role="region" aria-label="Scrollable statistics table">
         <table class="stats-grid" id="stats-table">
           <thead id="table-head">
             <tr id="table-head-row">
               <!-- Rendered via JS -->
             </tr>
           </thead>
-          <tbody id="table-body" aria-live="polite">
+          <tbody id="table-body" aria-live="polite" aria-relevant="additions removals">
             <tr class="skeleton-row">
               <td><span></span></td>
               <td><span></span></td>
@@ -603,7 +729,7 @@
     </section>
 
     <div class="fab-container">
-      <button class="btn-fab" id="add-game-fab" aria-label="Append new session record">
+      <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
@@ -613,11 +739,14 @@
 
   <script>
     /**
-     * @file Interactive Logic & State Management
-     * @description Modern vanilla JS utilizing reactive state principles, Anime.js for complex choreography.
+     * @file BMetrics — Interactive Logic & State Management
+     * @description Vanilla JS with reactive state, Anime.js choreography, localStorage persistence.
      */
 
-    const METRICS_SCHEMA = [
+    /** Schema: each column definition
+     * @typedef {{ key: string, label: string, computed?: boolean, isPct?: boolean }} MetricColumn */
+
+    const METRICS_SCHEMA = Object.freeze([
       { key: 'id', label: '#' },
       { key: 'mpg', label: 'MPG' },
       { key: 'ppg', label: 'PPG', computed: true },
@@ -635,20 +764,35 @@
       { key: 'ftm', label: 'FTM' },
       { key: 'fta', label: 'FTA' },
       { key: 'ftPct', label: 'FT%', computed: true, isPct: true }
-    ];
+    ]);
+
+    /** Column keys that are editable (not computed, not id) */
+    const EDITABLE_KEYS = new Set(
+      METRICS_SCHEMA.filter(c => !c.computed && c.key !== 'id').map(c => c.key)
+    );
+
+    /** Computed column refs for quick lookup */
+    const COMPUTED_COLS = METRICS_SCHEMA.filter(c => c.computed);
 
     const STORAGE_KEY = 'bstats_games';
 
-    const MOCK_DATA = [
-      { id: 3, mpg: 36.5, ppg: 32.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, fgPct: 0, tpm: 4, tpa: 9, tpPct: 0, ftm: 6.5, fta: 7, ftPct: 0 },
-      { id: 2, mpg: 34.0, ppg: 28.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, fgPct: 0, tpm: 3, tpa: 8, tpPct: 0, ftm: 7, fta: 8, ftPct: 0 },
-      { id: 1, mpg: 30.0, ppg: 22.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, fgPct: 0, tpm: 2, tpa: 6, tpPct: 0, ftm: 4, fta: 5, ftPct: 0 }
+    const SEED_DATA = [
+      { id: 3, mpg: 36.5, apg: 8.2, rpg: 5.4, spg: 1.2, bpg: 0.8, topg: 2.1, fgm: 11, fga: 22, tpm: 4, tpa: 9, ftm: 6.5, fta: 7 },
+      { id: 2, mpg: 34.0, apg: 9.0, rpg: 6.0, spg: 2.0, bpg: 1.0, topg: 1.8, fgm: 9, fga: 18, tpm: 3, tpa: 8, ftm: 7, fta: 8 },
+      { id: 1, mpg: 30.0, apg: 10.5, rpg: 4.2, spg: 0.8, bpg: 0.2, topg: 3.5, fgm: 8, fga: 15, tpm: 2, tpa: 6, ftm: 4, fta: 5 }
     ];
 
     class BMetricsApp {
+      /** @type {{ data: object[], sortRef: { key: string|null, asc: boolean } }} */
+      #state;
+      /** @type {boolean} */
+      #prefersReducedMotion;
+
       constructor() {
-        this.state = {
-          data: this.restoreState(),
+        this.#prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        this.#state = {
+          data: this.#restoreState(),
           sortRef: { key: null, asc: true }
         };
 
@@ -660,77 +804,123 @@
           fab: document.getElementById('add-game-fab')
         };
 
-        this.init();
+        this.#init();
       }
 
-      init() {
-        this.buildStructure();
-        this.hydrateState();
-        this.bindGlobalEvents();
-        // Give time for skeleton to show before revealing actual data
-        setTimeout(() => {
-          this.render();
-          this.choreographEntrance();
-        }, 150);
-      }
+      /* ——— Lifecycle ——————————————————————————— */
 
-      restoreState() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : MOCK_DATA;
-        } catch (e) { return MOCK_DATA; }
-      }
+      #init() {
+        this.#buildStructure();
+        this.#hydrateComputed();
+        this.#bindGlobalEvents();
 
-      persistState() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state.data)); } catch (e) { }
-      }
-
-      hydrateState() {
-        this.state.data.forEach(row => this.computeRowDerived(row));
-      }
-
-      computeRowDerived(row) {
-        row.fgPct = row.fga > 0 ? (row.fgm / row.fga) * 100 : 0;
-        row.tpPct = row.tpa > 0 ? (row.tpm / row.tpa) * 100 : 0;
-        row.ftPct = row.fta > 0 ? (row.ftm / row.fta) * 100 : 0;
-        const fgm = row.fgm || 0, tpm = row.tpm || 0, ftm = row.ftm || 0;
-        row.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
-      }
-
-      formatValue(val, isPct = false) {
-        if (val === undefined || val === null) return '0';
-        if (isPct) return Math.round(val) + '%';
-        let n = parseFloat(val);
-        return isNaN(n) ? '0' : (Number.isInteger(n) ? n.toString() : n.toFixed(1));
-      }
-
-      buildStructure() {
-        this.refs.thead.innerHTML = METRICS_SCHEMA.map(col => `
-          <th data-key="${col.key}" scope="col" aria-sort="none" tabindex="0" role="columnheader">
-            ${col.label}
-            <span class="sort-indicator"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
-          </th>
-        `).join('');
-
-        this.refs.tfoot.innerHTML = METRICS_SCHEMA.map(col => `
-          <td id="avg-${col.key}" data-key="${col.key}">0</td>
-        `).join('');
-
-        this.refs.thead.querySelectorAll('th').forEach(th => {
-          const handler = () => this.handleSort(th.dataset.key);
-          th.addEventListener('click', handler);
-          th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
+        // Brief delay lets skeleton show before data replaces it
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            this.#render();
+            this.#choreographEntrance();
+          }, 120);
         });
       }
 
-      bindGlobalEvents() {
-        this.refs.fab.addEventListener('click', () => this.handleAppendRecord());
+      /* ——— Persistence ————————————————————————— */
+
+      #restoreState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return structuredClone(SEED_DATA);
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : structuredClone(SEED_DATA);
+        } catch {
+          return structuredClone(SEED_DATA);
+        }
       }
 
-      render() {
+      #persistState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.#state.data));
+        } catch { /* quota exceeded or private mode — silently degrade */ }
+      }
+
+      /* ——— Computation ————————————————————————— */
+
+      #hydrateComputed() {
+        this.#state.data.forEach(row => this.#computeDerived(row));
+      }
+
+      /** Recompute all derived fields for a single row */
+      #computeDerived(row) {
+        const fga = row.fga || 0;
+        const fgm = row.fgm || 0;
+        const tpa = row.tpa || 0;
+        const tpm = row.tpm || 0;
+        const fta = row.fta || 0;
+        const ftm = row.ftm || 0;
+
+        row.fgPct = fga > 0 ? (fgm / fga) * 100 : 0;
+        row.tpPct = tpa > 0 ? (tpm / tpa) * 100 : 0;
+        row.ftPct = fta > 0 ? (ftm / fta) * 100 : 0;
+
+        // PPG = 2pt FG * 2 + 3PM * 3 + FTM
+        row.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
+      }
+
+      /** Format a numeric value for display */
+      #formatValue(val, isPct = false) {
+        if (val == null) return '0';
+        if (isPct) return Math.round(val) + '%';
+        const n = parseFloat(val);
+        if (isNaN(n)) return '0';
+        return Number.isInteger(n) ? n.toString() : n.toFixed(1);
+      }
+
+      /* ——— DOM Construction ———————————————————— */
+
+      #buildStructure() {
+        // --- Table header ---
+        this.refs.thead.innerHTML = METRICS_SCHEMA.map(col => {
+          const isSortable = col.key !== 'id';
+          return `
+            <th data-key="${col.key}" scope="col" aria-sort="none"
+                ${isSortable ? 'tabindex="0" role="columnheader"' : 'role="columnheader"'}>
+              ${col.label}
+              ${isSortable ? '<span class="sort-indicator"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>' : ''}
+            </th>`;
+        }).join('');
+
+        // --- Table footer ---
+        this.refs.tfoot.innerHTML = METRICS_SCHEMA.map(col =>
+          `<td id="avg-${col.key}" data-key="${col.key}">0</td>`
+        ).join('');
+
+        // --- Header sort handlers ---
+        this.refs.thead.querySelectorAll('th').forEach(th => {
+          if (th.dataset.key === 'id') return; // # column is not sortable
+          const handler = () => this.#handleSort(th.dataset.key);
+          th.addEventListener('click', handler);
+          th.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handler();
+            }
+          });
+        });
+      }
+
+      #bindGlobalEvents() {
+        this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
+
+        // Listen for reduced-motion preference changes
+        window.matchMedia('(prefers-reduced-motion: reduce)')
+          .addEventListener('change', e => { this.#prefersReducedMotion = e.matches; });
+      }
+
+      /* ——— Rendering ——————————————————————————— */
+
+      #render() {
         this.refs.tbody.innerHTML = '';
 
-        if (this.state.data.length === 0) {
+        if (this.#state.data.length === 0) {
           this.refs.empty.classList.add('is-active');
           this.refs.empty.setAttribute('aria-hidden', 'false');
           this.refs.tfoot.parentElement.style.opacity = '0';
@@ -742,15 +932,14 @@
         this.refs.tfoot.parentElement.style.opacity = '1';
 
         const fragment = document.createDocumentFragment();
-        this.state.data.forEach(row => {
-          fragment.appendChild(this.buildRowDOM(row));
-        });
+        this.#state.data.forEach(row => fragment.appendChild(this.#buildRowDOM(row)));
         this.refs.tbody.appendChild(fragment);
 
-        this.updateAggregates(false);
+        this.#updateAggregates(false);
       }
 
-      buildRowDOM(rowData) {
+      /** Build a single <tr> element from row data */
+      #buildRowDOM(rowData) {
         const tr = document.createElement('tr');
         tr.className = 'data-row';
         tr.dataset.id = rowData.id;
@@ -762,48 +951,65 @@
           if (col.key === 'id') {
             td.innerHTML = `
               <div class="action-context">
-                <button class="btn-icon" aria-label="Delete record ${rowData.id}"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg></button>
+                <button class="btn-icon" aria-label="Delete game ${rowData.id}">
+                  <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                </button>
               </div>
-              <span class="cell-val">${rowData[col.key]}</span>
-            `;
-            td.querySelector('.btn-icon').addEventListener('click', (e) => {
+              <span class="cell-val">${rowData.id}</span>`;
+            td.querySelector('.btn-icon').addEventListener('click', e => {
               e.stopPropagation();
-              this.handleDeleteRecord(tr, rowData.id);
+              this.#handleDeleteRecord(tr, rowData.id);
             });
           } else if (col.computed) {
             td.className = 'cell-computed';
-            td.innerHTML = `<span class="cell-val">${this.formatValue(rowData[col.key], col.isPct)}</span>`;
+            td.innerHTML = `<span class="cell-val">${this.#formatValue(rowData[col.key], col.isPct)}</span>`;
           } else {
             td.className = 'cell-interactive';
             td.tabIndex = 0;
-            td.innerHTML = `<span class="cell-val">${this.formatValue(rowData[col.key])}</span>`;
-            td.addEventListener('click', () => this.initializeEdit(td, rowData, col));
-            td.addEventListener('focus', () => {
-              td.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && document.activeElement === td) this.initializeEdit(td, rowData, col);
-              }, { once: true });
+            td.innerHTML = `<span class="cell-val">${this.#formatValue(rowData[col.key])}</span>`;
+
+            // Click to edit
+            td.addEventListener('click', () => this.#initializeEdit(td, rowData, col));
+
+            // Keyboard: Enter to edit (single bound handler, no leak)
+            td.addEventListener('keydown', e => {
+              if (e.key === 'Enter' && document.activeElement === td) {
+                this.#initializeEdit(td, rowData, col);
+              }
             });
           }
+
           tr.appendChild(td);
         });
+
         return tr;
       }
 
-      updateAggregates(animate = true) {
-        const len = this.state.data.length;
+      /* ——— Aggregates ————————————————————————— */
+
+      /** Recalculate footer averages; optionally animate changed cells */
+      #updateAggregates(animate = true) {
+        const data = this.#state.data;
+        const len = data.length;
         if (len === 0) return;
 
-        let acc = {};
-        METRICS_SCHEMA.forEach(c => acc[c.key] = 0);
-
-        this.state.data.forEach(r => {
-          METRICS_SCHEMA.forEach(c => { if (r[c.key]) acc[c.key] += r[c.key]; });
+        // Accumulate totals (use Number() to include 0 values correctly)
+        const acc = {};
+        METRICS_SCHEMA.forEach(c => { acc[c.key] = 0; });
+        data.forEach(r => {
+          METRICS_SCHEMA.forEach(c => {
+            acc[c.key] += Number(r[c.key]) || 0;
+          });
         });
 
-        let avg = {};
-        METRICS_SCHEMA.forEach(c => avg[c.key] = acc[c.key] / len);
+        // Averages
+        const avg = {};
+        METRICS_SCHEMA.forEach(c => { avg[c.key] = acc[c.key] / len; });
 
+        // Game count label
         avg.id = len;
+
+        // Weighted percentage averages (true shooting %, not averaged %)
         avg.fgPct = acc.fga > 0 ? (acc.fgm / acc.fga) * 100 : 0;
         avg.tpPct = acc.tpa > 0 ? (acc.tpm / acc.tpa) * 100 : 0;
         avg.ftPct = acc.fta > 0 ? (acc.ftm / acc.fta) * 100 : 0;
@@ -813,166 +1019,300 @@
         METRICS_SCHEMA.forEach(col => {
           const node = document.getElementById(`avg-${col.key}`);
           if (!node) return;
-          const displayVal = col.key === 'id' ? `${len} GAMES` : (col.computed && col.key !== 'ppg' ? this.formatValue(avg[col.key], col.isPct) : this.formatValue(avg[col.key]));
+
+          let displayVal;
+          if (col.key === 'id') {
+            displayVal = `${len} GAME${len !== 1 ? 'S' : ''}`;
+          } else if (col.computed && col.key !== 'ppg') {
+            displayVal = this.#formatValue(avg[col.key], col.isPct);
+          } else {
+            displayVal = this.#formatValue(avg[col.key]);
+          }
+
           if (node.textContent !== displayVal) {
             node.textContent = displayVal;
             updatedNodes.push(node);
           }
         });
 
-        if (animate && updatedNodes.length) {
+        if (animate && updatedNodes.length && !this.#prefersReducedMotion) {
           anime({
             targets: updatedNodes,
             color: ['#888888', '#FFFFFF'],
-            textShadow: ['0 0 16px rgba(255,255,255,0.6)', 'none'],
+            textShadow: ['0 0 16px rgba(255,255,255,0.5)', 'none'],
             duration: 600,
             easing: 'easeOutExpo'
           });
         }
       }
 
-      initializeEdit(tdNode, rowData, colMeta) {
+      /* ——— Inline Edit ————————————————————————— */
+
+      #initializeEdit(tdNode, rowData, colMeta) {
+        // Guard: already in edit mode
         if (tdNode.querySelector('input')) return;
 
         const span = tdNode.querySelector('.cell-val');
         const prevVal = span.textContent;
 
         const input = document.createElement('input');
-        input.type = 'text';
+        input.type = 'number';
+        input.inputMode = 'decimal';
         input.className = 'input-edit';
         input.value = prevVal;
+        input.min = '0';
+        input.step = 'any';
+        input.setAttribute('aria-label', `Edit ${colMeta.label}`);
 
         span.style.display = 'none';
         tdNode.appendChild(input);
         input.focus();
         input.select();
 
+        let committed = false;
+
         const commit = () => {
-          const parsed = parseFloat(input.value);
+          if (committed) return; // prevent double-fire from blur + Enter
+          committed = true;
+
+          const trimmed = input.value.trim();
+
+          // Empty input → revert
+          if (trimmed === '') {
+            input.remove();
+            span.style.display = '';
+            return;
+          }
+
+          const parsed = parseFloat(trimmed);
           if (isNaN(parsed) || parsed < 0) {
-            anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
+            committed = false; // allow retry
+            if (!this.#prefersReducedMotion) {
+              anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
+            }
             input.focus();
             return;
           }
 
           rowData[colMeta.key] = parsed;
-          this.computeRowDerived(rowData);
-          this.persistState();
+          this.#computeDerived(rowData);
+          this.#persistState();
 
-          span.textContent = this.formatValue(parsed);
+          span.textContent = this.#formatValue(parsed);
 
+          // Update computed cells in this row
           const tr = tdNode.closest('tr');
-          METRICS_SCHEMA.filter(c => c.computed).forEach(c => {
+          COMPUTED_COLS.forEach(c => {
             const tgtSpan = tr.querySelector(`td[data-key="${c.key}"] .cell-val`);
-            if (tgtSpan) tgtSpan.textContent = this.formatValue(rowData[c.key], c.isPct);
+            if (tgtSpan) tgtSpan.textContent = this.#formatValue(rowData[c.key], c.isPct);
           });
 
           input.remove();
           span.style.display = '';
 
-          anime({ targets: tdNode, backgroundColor: ['rgba(255,255,255,0.15)', 'transparent'], duration: 500, easing: 'easeOutExpo' });
-          this.updateAggregates(true);
+          // Subtle flash confirmation
+          if (!this.#prefersReducedMotion) {
+            anime({
+              targets: tdNode,
+              backgroundColor: ['rgba(255,255,255,0.12)', 'transparent'],
+              duration: 500,
+              easing: 'easeOutExpo'
+            });
+          }
+
+          this.#updateAggregates(true);
         };
 
         input.addEventListener('blur', commit);
         input.addEventListener('keydown', e => {
-          if (e.key === 'Enter') input.blur();
-          if (e.key === 'Escape') { input.value = prevVal; input.blur(); }
-        });
-      }
-
-      handleDeleteRecord(trNode, id) {
-        this.state.data = this.state.data.filter(r => r.id !== id);
-        this.persistState();
-        trNode.style.pointerEvents = 'none';
-
-        anime({
-          targets: trNode.querySelectorAll('td'),
-          opacity: 0, paddingTop: 0, paddingBottom: 0, height: 0,
-          duration: 350, easing: 'cubicBezier(0.4, 0, 0.2, 1)',
-          complete: () => {
-            trNode.remove();
-            if (this.state.data.length === 0) this.render();
-            else this.updateAggregates(true);
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+          if (e.key === 'Escape') {
+            committed = true; // skip commit logic
+            input.remove();
+            span.style.display = '';
           }
         });
       }
 
-      handleAppendRecord() {
-        const nextId = this.state.data.length > 0 ? Math.max(...this.state.data.map(d => d.id)) + 1 : 1;
-        const newRecord = { id: nextId };
-        METRICS_SCHEMA.forEach(c => { if (c.key !== 'id') newRecord[c.key] = 0; });
+      /* ——— Record Management ——————————————————— */
 
-        this.state.data.unshift(newRecord);
-        this.persistState();
+      #handleDeleteRecord(trNode, id) {
+        this.#state.data = this.#state.data.filter(r => r.id !== id);
+        this.#persistState();
+        trNode.style.pointerEvents = 'none';
 
-        if (this.state.data.length === 1) {
-          this.render();
-        } else {
-          const tr = this.buildRowDOM(newRecord);
-          this.refs.tbody.prepend(tr);
-          anime({
-            targets: tr,
-            translateY: [-30, 0],
-            opacity: [0, 1],
-            backgroundColor: ['rgba(255,255,255,0.1)', 'transparent'],
-            duration: 600,
-            easing: 'easeOutExpo'
-          });
+        if (this.#prefersReducedMotion) {
+          trNode.remove();
+          if (this.#state.data.length === 0) this.#render();
+          else this.#updateAggregates(true);
+          return;
         }
-        this.updateAggregates(true);
+
+        anime({
+          targets: trNode.querySelectorAll('td'),
+          opacity: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          height: 0,
+          duration: 350,
+          easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+          complete: () => {
+            trNode.remove();
+            if (this.#state.data.length === 0) this.#render();
+            else this.#updateAggregates(true);
+          }
+        });
       }
 
-      handleSort(key) {
-        if (this.state.sortRef.key === key) {
-          this.state.sortRef.asc = !this.state.sortRef.asc;
+      #handleAppendRecord() {
+        const ids = this.#state.data.map(d => d.id);
+        const nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+
+        const newRecord = { id: nextId };
+        METRICS_SCHEMA.forEach(c => {
+          if (c.key !== 'id') newRecord[c.key] = 0;
+        });
+
+        this.#state.data.unshift(newRecord);
+        this.#computeDerived(newRecord);
+        this.#persistState();
+
+        if (this.#state.data.length === 1) {
+          this.#render();
         } else {
-          this.state.sortRef.key = key;
-          this.state.sortRef.asc = true;
+          const tr = this.#buildRowDOM(newRecord);
+          this.refs.tbody.prepend(tr);
+
+          if (!this.#prefersReducedMotion) {
+            anime({
+              targets: tr,
+              translateY: [-30, 0],
+              opacity: [0, 1],
+              backgroundColor: ['rgba(255,255,255,0.08)', 'transparent'],
+              duration: 600,
+              easing: 'easeOutExpo'
+            });
+          }
         }
 
+        this.#updateAggregates(true);
+
+        // Scroll to top so the new row is visible
+        const scrollCtx = this.refs.tbody.closest('.scroll-context');
+        if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: this.#prefersReducedMotion ? 'auto' : 'smooth' });
+      }
+
+      /* ——— Sorting ————————————————————————————— */
+
+      #handleSort(key) {
+        const sortRef = this.#state.sortRef;
+
+        if (sortRef.key === key) {
+          sortRef.asc = !sortRef.asc;
+        } else {
+          sortRef.key = key;
+          sortRef.asc = true;
+        }
+
+        // Update ARIA
         this.refs.thead.querySelectorAll('th').forEach(th => th.setAttribute('aria-sort', 'none'));
         const activeTh = this.refs.thead.querySelector(`th[data-key="${key}"]`);
-        activeTh.setAttribute('aria-sort', this.state.sortRef.asc ? 'ascending' : 'descending');
+        if (activeTh) {
+          activeTh.setAttribute('aria-sort', sortRef.asc ? 'ascending' : 'descending');
+        }
 
+        // Capture pre-sort positions for FLIP animation
         const rows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
         const rectMap = new Map();
         rows.forEach(r => rectMap.set(r.dataset.id, r.getBoundingClientRect().top));
 
-        this.state.data.sort((a, b) => {
-          let vA = a[key] || 0; let vB = b[key] || 0;
-          return this.state.sortRef.asc ? vA - vB : vB - vA;
+        // Sort data
+        this.#state.data.sort((a, b) => {
+          const vA = Number(a[key]) || 0;
+          const vB = Number(b[key]) || 0;
+          return sortRef.asc ? vA - vB : vB - vA;
         });
 
-        this.persistState();
-        this.render();
+        this.#persistState();
+        this.#render();
 
-        const updatedRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
-        updatedRows.forEach((r, i) => {
-          const beforeY = rectMap.get(r.dataset.id);
-          if (beforeY !== undefined) {
-            const afterY = r.getBoundingClientRect().top;
-            const delta = beforeY - afterY;
-            if (delta !== 0) {
-              anime.set(r, { translateY: delta });
-              anime({ targets: r, translateY: 0, duration: 500, easing: 'easeOutExpo', delay: i * 15 });
+        // FLIP: animate rows to new positions
+        if (!this.#prefersReducedMotion) {
+          const updatedRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+          updatedRows.forEach((r, i) => {
+            const beforeY = rectMap.get(r.dataset.id);
+            if (beforeY !== undefined) {
+              const afterY = r.getBoundingClientRect().top;
+              const delta = beforeY - afterY;
+              if (Math.abs(delta) > 1) {
+                anime.set(r, { translateY: delta });
+                anime({
+                  targets: r,
+                  translateY: 0,
+                  duration: 500,
+                  easing: 'easeOutExpo',
+                  delay: i * 20
+                });
+              }
             }
-          }
-        });
+          });
+        }
       }
 
-      choreographEntrance() {
-        anime.timeline({ easing: 'easeOutExpo' })
-          .add({ targets: '.header-block', opacity: [0, 1], translateY: [-20, 0], duration: 800 })
-          .add({ targets: '.data-container', opacity: [0, 1], translateY: [40, 0], duration: 800 }, '-=600')
-          .add({ targets: 'tr.data-row', opacity: [0, 1], translateX: [-20, 0], delay: anime.stagger(40), duration: 600 }, '-=400')
-          .add({ targets: '#footer-row', opacity: [0, 1], duration: 600 }, '-=400');
+      /* ——— Entrance Choreography ——————————————— */
 
-        anime({ targets: '.btn-fab', scale: [0, 1], rotate: [-45, 0], opacity: [0, 1], delay: 800, duration: 700, easing: 'easeOutBack' });
+      #choreographEntrance() {
+        if (this.#prefersReducedMotion) {
+          // Instant reveal, no animation
+          document.querySelector('.header-block').style.opacity = '1';
+          document.querySelector('.data-container').style.opacity = '1';
+          document.querySelector('.btn-fab').style.opacity = '1';
+          this.refs.tbody.querySelectorAll('tr.data-row').forEach(r => r.style.opacity = '1');
+          this.refs.tfoot.style.opacity = '1';
+          return;
+        }
+
+        anime.timeline({ easing: 'easeOutExpo' })
+          .add({
+            targets: '.header-block',
+            opacity: [0, 1],
+            translateY: [-20, 0],
+            duration: 800
+          })
+          .add({
+            targets: '.data-container',
+            opacity: [0, 1],
+            translateY: [40, 0],
+            duration: 800
+          }, '-=600')
+          .add({
+            targets: 'tr.data-row',
+            opacity: [0, 1],
+            translateX: [-20, 0],
+            delay: anime.stagger(40),
+            duration: 600
+          }, '-=400')
+          .add({
+            targets: '#footer-row',
+            opacity: [0, 1],
+            duration: 600
+          }, '-=400');
+
+        anime({
+          targets: '.btn-fab',
+          scale: [0, 1],
+          rotate: [-45, 0],
+          opacity: [0, 1],
+          delay: 800,
+          duration: 700,
+          easing: 'easeOutBack'
+        });
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => { window.app = new BMetricsApp(); });
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new BMetricsApp();
+    });
   </script>
 </body>
 
