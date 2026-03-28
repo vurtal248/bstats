@@ -2280,8 +2280,7 @@
               if (val < 0) val = 0;
               if (c.key === 'mpg' && val > 48) val = 48 + Math.floor(Math.random() * 10); // arbitrary max
 
-              if (c.key !== 'mpg') val = Math.round(val);
-              else val = Number(val.toFixed(1)); // mpg gets 1 decimal
+              val = Math.round(val);
 
               rec[c.key] = val;
             }
