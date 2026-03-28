@@ -785,11 +785,8 @@
     class BMetricsApp {
       /** @type {{ data: object[], sortRef: { key: string|null, asc: boolean } }} */
       #state;
-      /** @type {boolean} */
-      #prefersReducedMotion;
 
       constructor() {
-        this.#prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         this.#state = {
           data: this.#restoreState(),
@@ -909,10 +906,6 @@
 
       #bindGlobalEvents() {
         this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
-
-        // Listen for reduced-motion preference changes
-        window.matchMedia('(prefers-reduced-motion: reduce)')
-          .addEventListener('change', e => { this.#prefersReducedMotion = e.matches; });
       }
 
       /* ——— Rendering ——————————————————————————— */
@@ -1035,7 +1028,7 @@
           }
         });
 
-        if (animate && updatedNodes.length && !this.#prefersReducedMotion) {
+        if (animate && updatedNodes.length) {
           anime({
             targets: updatedNodes,
             color: ['#888888', '#FFFFFF'],
@@ -1087,9 +1080,7 @@
           const parsed = parseFloat(trimmed);
           if (isNaN(parsed) || parsed < 0) {
             committed = false; // allow retry
-            if (!this.#prefersReducedMotion) {
-              anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
-            }
+            anime({ targets: input, translateX: [0, -4, 4, -2, 2, 0], duration: 400 });
             input.focus();
             return;
           }
@@ -1111,14 +1102,12 @@
           span.style.display = '';
 
           // Subtle flash confirmation
-          if (!this.#prefersReducedMotion) {
-            anime({
-              targets: tdNode,
-              backgroundColor: ['rgba(255,255,255,0.12)', 'transparent'],
-              duration: 500,
-              easing: 'easeOutExpo'
-            });
-          }
+          anime({
+            targets: tdNode,
+            backgroundColor: ['rgba(255,255,255,0.12)', 'transparent'],
+            duration: 500,
+            easing: 'easeOutExpo'
+          });
 
           this.#updateAggregates(true);
         };
@@ -1140,13 +1129,6 @@
         this.#state.data = this.#state.data.filter(r => r.id !== id);
         this.#persistState();
         trNode.style.pointerEvents = 'none';
-
-        if (this.#prefersReducedMotion) {
-          trNode.remove();
-          if (this.#state.data.length === 0) this.#render();
-          else this.#updateAggregates(true);
-          return;
-        }
 
         anime({
           targets: trNode.querySelectorAll('td'),
@@ -1183,23 +1165,21 @@
           const tr = this.#buildRowDOM(newRecord);
           this.refs.tbody.prepend(tr);
 
-          if (!this.#prefersReducedMotion) {
-            anime({
-              targets: tr,
-              translateY: [-30, 0],
-              opacity: [0, 1],
-              backgroundColor: ['rgba(255,255,255,0.08)', 'transparent'],
-              duration: 600,
-              easing: 'easeOutExpo'
-            });
-          }
+          anime({
+            targets: tr,
+            translateY: [-30, 0],
+            opacity: [0, 1],
+            backgroundColor: ['rgba(255,255,255,0.08)', 'transparent'],
+            duration: 600,
+            easing: 'easeOutExpo'
+          });
         }
 
         this.#updateAggregates(true);
 
         // Scroll to top so the new row is visible
         const scrollCtx = this.refs.tbody.closest('.scroll-context');
-        if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: this.#prefersReducedMotion ? 'auto' : 'smooth' });
+        if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       /* ——— Sorting ————————————————————————————— */
@@ -1237,40 +1217,29 @@
         this.#render();
 
         // FLIP: animate rows to new positions
-        if (!this.#prefersReducedMotion) {
-          const updatedRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
-          updatedRows.forEach((r, i) => {
-            const beforeY = rectMap.get(r.dataset.id);
-            if (beforeY !== undefined) {
-              const afterY = r.getBoundingClientRect().top;
-              const delta = beforeY - afterY;
-              if (Math.abs(delta) > 1) {
-                anime.set(r, { translateY: delta });
-                anime({
-                  targets: r,
-                  translateY: 0,
-                  duration: 500,
-                  easing: 'easeOutExpo',
-                  delay: i * 20
-                });
-              }
+        const updatedRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        updatedRows.forEach((r, i) => {
+          const beforeY = rectMap.get(r.dataset.id);
+          if (beforeY !== undefined) {
+            const afterY = r.getBoundingClientRect().top;
+            const delta = beforeY - afterY;
+            if (Math.abs(delta) > 1) {
+              anime.set(r, { translateY: delta });
+              anime({
+                targets: r,
+                translateY: 0,
+                duration: 500,
+                easing: 'easeOutExpo',
+                delay: i * 20
+              });
             }
-          });
-        }
+          }
+        });
       }
 
       /* ——— Entrance Choreography ——————————————— */
 
       #choreographEntrance() {
-        if (this.#prefersReducedMotion) {
-          // Instant reveal, no animation
-          document.querySelector('.header-block').style.opacity = '1';
-          document.querySelector('.data-container').style.opacity = '1';
-          document.querySelector('.btn-fab').style.opacity = '1';
-          this.refs.tbody.querySelectorAll('tr.data-row').forEach(r => r.style.opacity = '1');
-          this.refs.tfoot.style.opacity = '1';
-          return;
-        }
 
         anime.timeline({ easing: 'easeOutExpo' })
           .add({
