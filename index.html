@@ -1050,6 +1050,23 @@
       background: rgba(255, 255, 255, 0.06);
     }
 
+    select.input-modern {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px top 50%;
+      background-size: 10px auto;
+    }
+
+    :root[data-theme="light"] select.input-modern {
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23050505%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    }
+
+    select.input-modern option {
+      background: var(--clr-bg);
+      color: var(--clr-text-primary);
+    }
+
     .modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -1372,6 +1389,14 @@
       <div class="modal-body">
         <input type="number" id="input-predict-count" class="input-modern" placeholder="Number of games (e.g. 5)"
           min="1" max="82" autocomplete="off" />
+        <select id="select-predict-archetype" class="input-modern" style="margin-top: 12px; cursor: pointer;">
+          <option value="balanced">Balanced (Current Trends)</option>
+          <option value="scorer">Scoring Machine</option>
+          <option value="playmaker">Floor General</option>
+          <option value="sharp">Sharpshooter</option>
+          <option value="defender">Lockdown Defender</option>
+          <option value="glass">Paint Beast</option>
+        </select>
       </div>
       <div class="modal-footer">
         <button class="btn-ghost" id="btn-cancel-predict">Cancel</button>
@@ -1465,6 +1490,7 @@
 
           modalPredict: document.getElementById('modal-predict'),
           inputPredictCount: document.getElementById('input-predict-count'),
+          selectPredictArchetype: document.getElementById('select-predict-archetype'),
           btnCancelPredict: document.getElementById('btn-cancel-predict'),
           btnConfirmPredict: document.getElementById('btn-confirm-predict')
         };
@@ -1710,6 +1736,7 @@
 
       #openPredictModal() {
         this.refs.inputPredictCount.value = '';
+        this.refs.selectPredictArchetype.value = 'balanced';
         this.refs.modalPredict.showModal();
         this.refs.btnConfirmPredict.disabled = true;
       }
@@ -2236,6 +2263,8 @@
         const count = parseInt(this.refs.inputPredictCount.value, 10);
         if (isNaN(count) || count <= 0) return;
 
+        const archetype = this.refs.selectPredictArchetype.value || 'balanced';
+
         const data = this.#state.data;
         const len = data.length || 1;
 
@@ -2276,7 +2305,25 @@
               while (v === 0) v = Math.random();
               let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
-              let val = avg[c.key] + z * variance[c.key];
+              let modAvg = avg[c.key];
+              let modVar = variance[c.key];
+
+              if (archetype === 'scorer') {
+                if (['fgm', 'fga', 'ftm', 'fta', 'tpm', 'tpa', 'pts'].includes(c.key)) { modAvg *= 1.35; modVar *= 1.15; }
+              } else if (archetype === 'playmaker') {
+                if (c.key === 'apg') { modAvg *= 1.4; modVar *= 1.2; }
+                if (c.key === 'topg') { modAvg *= 0.8; }
+              } else if (archetype === 'sharp') {
+                if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 1.5; modVar *= 1.25; }
+              } else if (archetype === 'defender') {
+                if (['spg', 'bpg'].includes(c.key)) { modAvg *= 1.6; modVar *= 1.25; }
+                if (c.key === 'rpg') { modAvg *= 1.15; }
+              } else if (archetype === 'glass') {
+                if (c.key === 'rpg') { modAvg *= 1.5; modVar *= 1.25; }
+                if (c.key === 'bpg') { modAvg *= 1.2; }
+              }
+
+              let val = modAvg + z * modVar;
               if (val < 0) val = 0;
               if (c.key === 'mpg' && val > 48) val = 48 + Math.floor(Math.random() * 10); // arbitrary max
 
