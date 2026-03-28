@@ -2505,8 +2505,38 @@
 
         for (let i = 0; i < count; i++) {
           const rec = { id: nextId++ };
+
+          // 1. Generate MPG first based on averages and archetype
+          let baseMpgAvg = avg['mpg'] || 0;
+          let baseMpgVar = variance['mpg'] || 0;
+
+          for (const archetype of archetypes) {
+            if (archetype === 'facilitator') {
+              baseMpgAvg = Math.min(baseMpgAvg * 1.1, 42);
+            } else if (archetype === 'workhorse') {
+              baseMpgAvg = Math.min(baseMpgAvg * 1.15, 44);
+            } else if (archetype === 'fringe') {
+              baseMpgAvg *= 0.7;
+              baseMpgVar *= 1.2;
+            }
+          }
+
+          let uM = 0, vM = 0;
+          while (uM === 0) uM = Math.random();
+          while (vM === 0) vM = Math.random();
+          let zM = Math.sqrt(-2.0 * Math.log(uM)) * Math.cos(2.0 * Math.PI * vM);
+
+          let genMpg = baseMpgAvg + zM * baseMpgVar;
+          if (genMpg < 0) genMpg = 0;
+          if (genMpg > 48) genMpg = 48 + Math.floor(Math.random() * 10);
+          genMpg = Math.round(genMpg);
+          rec['mpg'] = genMpg;
+
+          // Compute minute ratio to scale other stats
+          const minRatio = baseMpgAvg > 0 ? (genMpg / baseMpgAvg) : (genMpg > 0 ? 1 : 0);
+
           METRICS_SCHEMA.forEach(c => {
-            if (!c.computed && c.key !== 'id') {
+            if (!c.computed && c.key !== 'id' && c.key !== 'mpg') {
               // Box-Muller transform
               let u = 0, v = 0;
               while (u === 0) u = Math.random();
@@ -2544,7 +2574,6 @@
                 } else if (archetype === 'facilitator') {
                   // High-usage playmaker: elite assists, heavy minutes
                   if (c.key === 'apg') { modAvg *= 1.6; modVar *= 1.3; }
-                  if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.1, 42); }
                   if (c.key === 'topg') { modAvg *= 0.9; }
                 } else if (archetype === 'slasher') {
                   // Drive-and-kick: gets to the line, attacks the rim
@@ -2552,13 +2581,7 @@
                   if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.2; modVar *= 1.1; }
                   if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.6; } // doesn't stretch floor
                 } else if (archetype === 'workhorse') {
-                  // High-minutes grinder: everything bumps modestly
-                  if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.15, 44); }
-                  Object.keys(modAvg !== undefined ? { [c.key]: 1 } : {}).forEach(() => {
-                    if (!['mpg', 'id'].includes(c.key)) modAvg *= 1.1;
-                  });
-                  // simpler inline boost for all non-id non-mpg stats
-                  if (!['mpg'].includes(c.key)) { modAvg *= 1.08; }
+                  modAvg *= 1.08;
                 } else if (archetype === 'erratic') {
                   // Wild card: massive variance, anything goes
                   modVar *= 2.5;
@@ -2574,12 +2597,14 @@
                 }
               }
 
+              // Apply minute scaling to tie output to playtime
+              modAvg *= minRatio;
+              modVar *= Math.sqrt(minRatio); // Scale variance slightly less aggressively than avg
+
               let val = modAvg + z * modVar;
               if (val < 0) val = 0;
-              if (c.key === 'mpg' && val > 48) val = 48 + Math.floor(Math.random() * 10); // arbitrary max
 
               val = Math.round(val);
-
               rec[c.key] = val;
             }
           });
