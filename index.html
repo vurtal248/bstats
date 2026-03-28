@@ -1325,7 +1325,14 @@
           </div>
           <div class="bio-item">
             <span class="bio-label">HGT</span>
-            <span class="bio-value" data-bio-key="height" tabindex="0" role="textbox" aria-label="Edit Height">-</span>
+            <div style="display: flex; gap: 4px; align-items: baseline;">
+              <span class="bio-value" data-bio-key="heightFt" tabindex="0" role="textbox"
+                aria-label="Edit Feet">-</span>
+              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">'</span>
+              <span class="bio-value" data-bio-key="heightIn" tabindex="0" role="textbox"
+                aria-label="Edit Inches">-</span>
+              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">"</span>
+            </div>
           </div>
           <div class="bio-item">
             <span class="bio-label">WGT</span>
@@ -1957,7 +1964,7 @@
       #renderProfileBio() {
         const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
         if (!activeProfile) return;
-        ['position', 'height', 'weight', 'wingspan', 'age'].forEach(key => {
+        ['position', 'heightFt', 'heightIn', 'weight', 'wingspan', 'age'].forEach(key => {
           const el = this.refs.playerBio.querySelector(`[data-bio-key="${key}"]`);
           if (el) {
             el.textContent = activeProfile[key] || '-';
@@ -2473,6 +2480,12 @@
         const archetypeInputs = Array.from(this.refs.archetypeGrid.querySelectorAll('input[name="archetype"]:checked'));
         const archetypes = archetypeInputs.length > 0 ? archetypeInputs.map(inp => inp.value) : ['balanced'];
 
+        const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId) || {};
+        const ageNum = parseInt(activeProfile.age, 10) || 26;
+        const ft = parseInt(activeProfile.heightFt, 10) || 6;
+        const inc = parseInt(activeProfile.heightIn, 10) || 6;
+        const heightInches = (ft * 12) + inc; // default to 6'6" (78")
+
         const data = this.#state.data;
         const len = data.length || 1;
 
@@ -2597,12 +2610,42 @@
                 }
               }
 
+              // Age Multipliers
+              if (ageNum < 23) {
+                modVar *= 1.15; // Erratic youth variance
+              } else if (ageNum >= 30) {
+                // Veteran athletic decline
+                const athleticDecline = ageNum >= 35 ? 0.9 : 0.95;
+                if (['rpg', 'spg', 'bpg'].includes(c.key)) modAvg *= athleticDecline;
+              }
+
+              // Height Multipliers (relative to baseline 6'6" / 78")
+              const heightDiff = heightInches - 78;
+              if (['rpg', 'bpg'].includes(c.key)) {
+                // +5% bonus per inch taller, penalty if shorter
+                modAvg *= Math.max(0.5, 1 + (heightDiff * 0.05));
+              }
+              if (['apg', 'spg'].includes(c.key)) {
+                // Tall players lose slightly on steals/assists (handling), short players gain
+                modAvg *= Math.max(0.5, 1 - (heightDiff * 0.03));
+              }
+
               // Apply minute scaling to tie output to playtime
               modAvg *= minRatio;
               modVar *= Math.sqrt(minRatio); // Scale variance slightly less aggressively than avg
 
               let val = modAvg + z * modVar;
               if (val < 0) val = 0;
+
+              // Absolute Physical Ceilings (prevent impossible anomalies)
+              if (c.key === 'rpg' && val > 0.8 * genMpg) val = 0.8 * genMpg;  // Huge cap
+              if (c.key === 'apg' && val > 0.5 * genMpg) val = 0.5 * genMpg;
+              if (c.key === 'spg' && val > 0.25 * genMpg) val = 0.25 * genMpg;
+              if (c.key === 'bpg' && val > 0.3 * genMpg) val = 0.3 * genMpg;
+              if (['fgm', 'fga', 'tpm', 'tpa', 'ftm', 'fta'].includes(c.key)) {
+                // Cap shot attempts heavily per minute played
+                if (val > 1.35 * genMpg) val = 1.35 * genMpg;
+              }
 
               val = Math.round(val);
               rec[c.key] = val;
