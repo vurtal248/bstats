@@ -1081,7 +1081,7 @@
 
     .archetype-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 8px;
     }
 
@@ -1089,7 +1089,7 @@
       position: relative;
     }
 
-    .archetype-card input[type="radio"] {
+    .archetype-card input[type="checkbox"] {
       position: absolute;
       opacity: 0;
       width: 0;
@@ -1117,17 +1117,17 @@
       transform: translateY(-2px);
     }
 
-    .archetype-card input[type="radio"]:checked+label {
+    .archetype-card input[type="checkbox"]:checked+label {
       border-color: var(--clr-border-active);
       background: rgba(255, 255, 255, 0.08);
       box-shadow: 0 0 0 1px var(--clr-border-active);
     }
 
-    :root[data-theme="light"] .archetype-card input[type="radio"]:checked+label {
+    :root[data-theme="light"] .archetype-card input[type="checkbox"]:checked+label {
       background: rgba(0, 0, 0, 0.06);
     }
 
-    .archetype-card input[type="radio"]:focus-visible+label {
+    .archetype-card input[type="checkbox"]:focus-visible+label {
       outline: 2px solid var(--clr-accent);
       outline-offset: 2px;
     }
@@ -1214,6 +1214,15 @@
         /* IE and Edge */
         scrollbar-width: none;
         /* Firefox */
+      }
+
+      .header-right {
+        width: 100%;
+        align-items: flex-start !important;
+      }
+
+      .archetype-grid {
+        grid-template-columns: repeat(4, 1fr);
       }
 
       .player-bio-container::-webkit-scrollbar {
@@ -1307,28 +1316,133 @@
         </div>
       </div>
 
-      <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
-        <div class="bio-item">
-          <span class="bio-label">POS</span>
-          <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
-            aria-label="Edit Position">-</span>
+      <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
+        <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
+          <div class="bio-item">
+            <span class="bio-label">POS</span>
+            <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
+              aria-label="Edit Position">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">HGT</span>
+            <span class="bio-value" data-bio-key="height" tabindex="0" role="textbox" aria-label="Edit Height">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WGT</span>
+            <span class="bio-value" data-bio-key="weight" tabindex="0" role="textbox" aria-label="Edit Weight">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WING</span>
+            <span class="bio-value" data-bio-key="wingspan" tabindex="0" role="textbox"
+              aria-label="Edit Wingspan">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">AGE</span>
+            <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
+          </div>
         </div>
-        <div class="bio-item">
-          <span class="bio-label">HGT</span>
-          <span class="bio-value" data-bio-key="height" tabindex="0" role="textbox" aria-label="Edit Height">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">WGT</span>
-          <span class="bio-value" data-bio-key="weight" tabindex="0" role="textbox" aria-label="Edit Weight">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">WING</span>
-          <span class="bio-value" data-bio-key="wingspan" tabindex="0" role="textbox"
-            aria-label="Edit Wingspan">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">AGE</span>
-          <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
+
+        <div class="archetype-container" style="width: 100%; max-width: 500px; padding-bottom: 8px;">
+          <span class="archetype-label" style="text-align: right; margin-top: 0; margin-bottom: 12px;">Archetypes (Max
+            2)</span>
+          <div class="archetype-grid" id="archetype-grid" role="group" aria-label="Player archetypes">
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-balanced" value="balanced" checked>
+              <label for="arch-balanced">
+                <span class="archetype-icon">⚖️</span>
+                <span class="archetype-name">Balanced</span>
+                <span class="archetype-tag">Trends</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-scorer" value="scorer">
+              <label for="arch-scorer">
+                <span class="archetype-icon">🔥</span>
+                <span class="archetype-name">Scorer</span>
+                <span class="archetype-tag">FG/FT+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-playmaker" value="playmaker">
+              <label for="arch-playmaker">
+                <span class="archetype-icon">🎯</span>
+                <span class="archetype-name">Playmkr</span>
+                <span class="archetype-tag">AST/TO-</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-sharp" value="sharp">
+              <label for="arch-sharp">
+                <span class="archetype-icon">🎳</span>
+                <span class="archetype-name">Shooter</span>
+                <span class="archetype-tag">3PM/A+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-defender" value="defender">
+              <label for="arch-defender">
+                <span class="archetype-icon">🛡️</span>
+                <span class="archetype-name">Defender</span>
+                <span class="archetype-tag">STL/BLK+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-glass" value="glass">
+              <label for="arch-glass">
+                <span class="archetype-icon">💪</span>
+                <span class="archetype-name">Big</span>
+                <span class="archetype-tag">REB/BLK+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-facilitator" value="facilitator">
+              <label for="arch-facilitator">
+                <span class="archetype-icon">🤝</span>
+                <span class="archetype-name">Facilitate</span>
+                <span class="archetype-tag">AST+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-slasher" value="slasher">
+              <label for="arch-slasher">
+                <span class="archetype-icon">⚡</span>
+                <span class="archetype-name">Slasher</span>
+                <span class="archetype-tag">FTM+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-workhorse" value="workhorse">
+              <label for="arch-workhorse">
+                <span class="archetype-icon">⏱️</span>
+                <span class="archetype-name">Workhorse</span>
+                <span class="archetype-tag">MIN+</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-erratic" value="erratic">
+              <label for="arch-erratic">
+                <span class="archetype-icon">🎲</span>
+                <span class="archetype-name">Erratic</span>
+                <span class="archetype-tag">Variance</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-clutch" value="clutch">
+              <label for="arch-clutch">
+                <span class="archetype-icon">💎</span>
+                <span class="archetype-name">Clutch</span>
+                <span class="archetype-tag">FT/LowTO</span>
+              </label>
+            </div>
+            <div class="archetype-card">
+              <input type="checkbox" name="archetype" id="arch-fringe" value="fringe">
+              <label for="arch-fringe">
+                <span class="archetype-icon">📉</span>
+                <span class="archetype-name">Slump</span>
+                <span class="archetype-tag">Below Avg</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -1476,118 +1590,7 @@
       <div class="modal-body">
         <input type="number" id="input-predict-count" class="input-modern" placeholder="Number of games (e.g. 5)"
           min="1" max="82" autocomplete="off" />
-        <span class="archetype-label">Archetype</span>
-        <div class="archetype-grid" id="archetype-grid" role="radiogroup" aria-label="Player archetype">
 
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-balanced" value="balanced" checked>
-            <label for="arch-balanced">
-              <span class="archetype-icon">⚖️</span>
-              <span class="archetype-name">Balanced</span>
-              <span class="archetype-tag">Current Trends</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-scorer" value="scorer">
-            <label for="arch-scorer">
-              <span class="archetype-icon">🔥</span>
-              <span class="archetype-name">Scorer</span>
-              <span class="archetype-tag">FG / FT+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-playmaker" value="playmaker">
-            <label for="arch-playmaker">
-              <span class="archetype-icon">🎯</span>
-              <span class="archetype-name">Playmaker</span>
-              <span class="archetype-tag">AST+ / TOV−</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-sharp" value="sharp">
-            <label for="arch-sharp">
-              <span class="archetype-icon">🎳</span>
-              <span class="archetype-name">Sharpshooter</span>
-              <span class="archetype-tag">3PM / 3PA+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-defender" value="defender">
-            <label for="arch-defender">
-              <span class="archetype-icon">🛡️</span>
-              <span class="archetype-name">Defender</span>
-              <span class="archetype-tag">STL / BLK+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-glass" value="glass">
-            <label for="arch-glass">
-              <span class="archetype-icon">💪</span>
-              <span class="archetype-name">Paint Beast</span>
-              <span class="archetype-tag">REB / BLK+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-facilitator" value="facilitator">
-            <label for="arch-facilitator">
-              <span class="archetype-icon">🤝</span>
-              <span class="archetype-name">Facilitator</span>
-              <span class="archetype-tag">AST / MIN+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-slasher" value="slasher">
-            <label for="arch-slasher">
-              <span class="archetype-icon">⚡</span>
-              <span class="archetype-name">Slasher</span>
-              <span class="archetype-tag">FTM / FGA+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-workhorse" value="workhorse">
-            <label for="arch-workhorse">
-              <span class="archetype-icon">⏱️</span>
-              <span class="archetype-name">Workhorse</span>
-              <span class="archetype-tag">MIN / All+</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-erratic" value="erratic">
-            <label for="arch-erratic">
-              <span class="archetype-icon">🎲</span>
-              <span class="archetype-name">Erratic</span>
-              <span class="archetype-tag">High Variance</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-clutch" value="clutch">
-            <label for="arch-clutch">
-              <span class="archetype-icon">💎</span>
-              <span class="archetype-name">Clutch</span>
-              <span class="archetype-tag">FT / Low TOV</span>
-            </label>
-          </div>
-
-          <div class="archetype-card">
-            <input type="radio" name="archetype" id="arch-fringe" value="fringe">
-            <label for="arch-fringe">
-              <span class="archetype-icon">📉</span>
-              <span class="archetype-name">Slump</span>
-              <span class="archetype-tag">Below Avg</span>
-            </label>
-          </div>
-
-        </div>
       </div>
       <div class="modal-footer">
         <button class="btn-ghost" id="btn-cancel-predict">Cancel</button>
@@ -1927,9 +1930,8 @@
 
       #openPredictModal() {
         this.refs.inputPredictCount.value = '';
-        // Reset archetype selection to 'balanced'
-        const defaultRadio = this.refs.archetypeGrid.querySelector('input[value="balanced"]');
-        if (defaultRadio) defaultRadio.checked = true;
+        // Archetypes persist in header, no need to reset unless we really want to
+
         this.refs.modalPredict.showModal();
         this.refs.btnConfirmPredict.disabled = true;
       }
@@ -2174,6 +2176,18 @@
             }
           });
         });
+
+        // Archetype Max 2 logic
+        if (this.refs.archetypeGrid) {
+          this.refs.archetypeGrid.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+              const checked = this.refs.archetypeGrid.querySelectorAll('input[name="archetype"]:checked');
+              if (checked.length > 2) {
+                e.target.checked = false;
+              }
+            }
+          });
+        }
       }
 
       /* ——— Rendering ——————————————————————————— */
@@ -2456,8 +2470,8 @@
         const count = parseInt(this.refs.inputPredictCount.value, 10);
         if (isNaN(count) || count <= 0) return;
 
-        const archetypeInput = this.refs.archetypeGrid.querySelector('input[name="archetype"]:checked');
-        const archetype = archetypeInput ? archetypeInput.value : 'balanced';
+        const archetypeInputs = Array.from(this.refs.archetypeGrid.querySelectorAll('input[name="archetype"]:checked'));
+        const archetypes = archetypeInputs.length > 0 ? archetypeInputs.map(inp => inp.value) : ['balanced'];
 
         const data = this.#state.data;
         const len = data.length || 1;
@@ -2502,60 +2516,62 @@
               let modAvg = avg[c.key];
               let modVar = variance[c.key];
 
-              if (archetype === 'scorer') {
-                // Pure bucket-getter: boosted shooting volume & FT
-                if (['fgm', 'fga', 'ftm', 'fta'].includes(c.key)) { modAvg *= 1.35; modVar *= 1.15; }
-                if (c.key === 'topg') { modAvg *= 1.1; } // scorers can be ball-dominant
-              } else if (archetype === 'playmaker') {
-                // Pass-first: high assists, low turnovers, moderate scoring
-                if (c.key === 'apg') { modAvg *= 1.5; modVar *= 1.2; }
-                if (c.key === 'topg') { modAvg *= 0.75; }
-                if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.85; }
-              } else if (archetype === 'sharp') {
-                // Elite 3-point specialist
-                if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 1.6; modVar *= 1.25; }
-                if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.15; }
-              } else if (archetype === 'defender') {
-                // Perimeter stopper: high steals/blocks, fewer shot attempts
-                if (['spg', 'bpg'].includes(c.key)) { modAvg *= 1.7; modVar *= 1.3; }
-                if (c.key === 'rpg') { modAvg *= 1.15; }
-                if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.8; }
-              } else if (archetype === 'glass') {
-                // Interior force: dominant rebounding & paint blocking
-                if (c.key === 'rpg') { modAvg *= 1.6; modVar *= 1.2; }
-                if (c.key === 'bpg') { modAvg *= 1.35; modVar *= 1.1; }
-                if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.2; }
-                if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.4; } // rarely shoots 3s
-              } else if (archetype === 'facilitator') {
-                // High-usage playmaker: elite assists, heavy minutes
-                if (c.key === 'apg') { modAvg *= 1.6; modVar *= 1.3; }
-                if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.1, 42); }
-                if (c.key === 'topg') { modAvg *= 0.9; }
-              } else if (archetype === 'slasher') {
-                // Drive-and-kick: gets to the line, attacks the rim
-                if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.5; modVar *= 1.2; }
-                if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.2; modVar *= 1.1; }
-                if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.6; } // doesn't stretch floor
-              } else if (archetype === 'workhorse') {
-                // High-minutes grinder: everything bumps modestly
-                if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.15, 44); }
-                Object.keys(modAvg !== undefined ? { [c.key]: 1 } : {}).forEach(() => {
-                  if (!['mpg', 'id'].includes(c.key)) modAvg *= 1.1;
-                });
-                // simpler inline boost for all non-id non-mpg stats
-                if (!['mpg'].includes(c.key)) { modAvg *= 1.08; }
-              } else if (archetype === 'erratic') {
-                // Wild card: massive variance, anything goes
-                modVar *= 2.5;
-              } else if (archetype === 'clutch') {
-                // Calm under pressure: exceptional FT, low turnovers, tight variance
-                if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.3; modVar *= 0.7; }
-                if (c.key === 'topg') { modAvg *= 0.65; }
-                modVar *= 0.75; // generally consistent
-              } else if (archetype === 'fringe') {
-                // Off night / slump: across-the-board below average
-                modAvg *= 0.7;
-                modVar *= 1.2; // more unpredictable in slumps
+              for (const archetype of archetypes) {
+                if (archetype === 'scorer') {
+                  // Pure bucket-getter: boosted shooting volume & FT
+                  if (['fgm', 'fga', 'ftm', 'fta'].includes(c.key)) { modAvg *= 1.35; modVar *= 1.15; }
+                  if (c.key === 'topg') { modAvg *= 1.1; } // scorers can be ball-dominant
+                } else if (archetype === 'playmaker') {
+                  // Pass-first: high assists, low turnovers, moderate scoring
+                  if (c.key === 'apg') { modAvg *= 1.5; modVar *= 1.2; }
+                  if (c.key === 'topg') { modAvg *= 0.75; }
+                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.85; }
+                } else if (archetype === 'sharp') {
+                  // Elite 3-point specialist
+                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 1.6; modVar *= 1.25; }
+                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.15; }
+                } else if (archetype === 'defender') {
+                  // Perimeter stopper: high steals/blocks, fewer shot attempts
+                  if (['spg', 'bpg'].includes(c.key)) { modAvg *= 1.7; modVar *= 1.3; }
+                  if (c.key === 'rpg') { modAvg *= 1.15; }
+                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.8; }
+                } else if (archetype === 'glass') {
+                  // Interior force: dominant rebounding & paint blocking
+                  if (c.key === 'rpg') { modAvg *= 1.6; modVar *= 1.2; }
+                  if (c.key === 'bpg') { modAvg *= 1.35; modVar *= 1.1; }
+                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.2; }
+                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.4; } // rarely shoots 3s
+                } else if (archetype === 'facilitator') {
+                  // High-usage playmaker: elite assists, heavy minutes
+                  if (c.key === 'apg') { modAvg *= 1.6; modVar *= 1.3; }
+                  if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.1, 42); }
+                  if (c.key === 'topg') { modAvg *= 0.9; }
+                } else if (archetype === 'slasher') {
+                  // Drive-and-kick: gets to the line, attacks the rim
+                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.5; modVar *= 1.2; }
+                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.2; modVar *= 1.1; }
+                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.6; } // doesn't stretch floor
+                } else if (archetype === 'workhorse') {
+                  // High-minutes grinder: everything bumps modestly
+                  if (c.key === 'mpg') { modAvg = Math.min(modAvg * 1.15, 44); }
+                  Object.keys(modAvg !== undefined ? { [c.key]: 1 } : {}).forEach(() => {
+                    if (!['mpg', 'id'].includes(c.key)) modAvg *= 1.1;
+                  });
+                  // simpler inline boost for all non-id non-mpg stats
+                  if (!['mpg'].includes(c.key)) { modAvg *= 1.08; }
+                } else if (archetype === 'erratic') {
+                  // Wild card: massive variance, anything goes
+                  modVar *= 2.5;
+                } else if (archetype === 'clutch') {
+                  // Calm under pressure: exceptional FT, low turnovers, tight variance
+                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.3; modVar *= 0.7; }
+                  if (c.key === 'topg') { modAvg *= 0.65; }
+                  modVar *= 0.75; // generally consistent
+                } else if (archetype === 'fringe') {
+                  // Off night / slump: across-the-board below average
+                  modAvg *= 0.7;
+                  modVar *= 1.2; // more unpredictable in slumps
+                }
               }
 
               let val = modAvg + z * modVar;
