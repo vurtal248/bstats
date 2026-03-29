@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
@@ -40,7 +40,7 @@
       --clr-scan: rgba(240, 237, 232, 0.04);
       --clr-scan-line: rgba(240, 237, 232, 0.08);
 
-      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
 
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -403,14 +403,14 @@
 
     .header-title {
       font-family: var(--font-display);
-      text-transform: none;
-      font-weight: 400;
-      font-style: italic;
-      letter-spacing: -0.03em;
-      font-size: clamp(3rem, 7vw, 6rem);
+      text-transform: uppercase;
+      font-weight: 800;
+      font-style: normal;
+      letter-spacing: -0.04em;
+      font-size: clamp(2.8rem, 7vw, 6rem);
       line-height: 0.85;
       margin: 0;
-      background: linear-gradient(180deg, var(--clr-text-primary) 0%, var(--clr-text-secondary) 100%);
+      background: linear-gradient(180deg, var(--clr-text-primary) 0%, rgba(240, 237, 232, 0.4) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -729,7 +729,7 @@
 
     .cell-computed {
       color: var(--clr-text-dim);
-      font-style: italic;
+      font-style: normal;
     }
 
     /* — Edit State —————————————————————————————— */
@@ -818,9 +818,11 @@
       background: rgba(6, 6, 6, 0.97);
       z-index: 30;
       font-family: var(--font-display);
-      font-style: italic;
-      font-size: 0.9rem;
-      letter-spacing: 0.04em;
+      font-style: normal;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     /* Animated breathing glow border */
@@ -1331,11 +1333,12 @@
 
     .modal-title {
       font-family: var(--font-display);
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      font-weight: 400;
-      font-style: italic;
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 700;
+      font-style: normal;
       margin: 0;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
     }
 
     .modal-desc {
@@ -1382,10 +1385,11 @@
 
     /* — Archetype Card Picker ——————————————————— */
     .archetype-label {
-      font-family: var(--font-display);
-      font-size: 0.75rem;
-      font-style: italic;
-      letter-spacing: 0.04em;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-style: normal;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
       color: var(--clr-text-dim);
       margin-top: 16px;
       margin-bottom: 8px;
@@ -1479,10 +1483,11 @@
 
     .archetype-name {
       font-family: var(--font-display);
-      font-size: 0.65rem;
-      font-weight: 400;
-      font-style: italic;
-      letter-spacing: 0.02em;
+      font-size: 0.6rem;
+      font-weight: 700;
+      font-style: normal;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: var(--clr-text-primary);
       line-height: 1.2;
     }
