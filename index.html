@@ -151,7 +151,7 @@
       background-color: var(--clr-bg);
       color: var(--clr-text-primary);
       font-family: var(--font-mono);
-      font-size: 14px;
+      font-size: clamp(12px, 1vw + 4px, 14px);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
@@ -166,12 +166,18 @@
     /* — Ambient Background System ——————————————— */
     .ambient-bg {
       position: fixed;
-      inset: 0;
+      inset: -50%;
       z-index: -1;
       pointer-events: none;
       background:
         radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
         radial-gradient(circle at 85% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+      animation: ambient-drift 40s ease-in-out infinite alternate;
+    }
+    
+    @keyframes ambient-drift {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-5%) scale(1.05) rotate(2deg); }
     }
 
     .ambient-noise {
@@ -268,7 +274,7 @@
 
     .bio-value {
       font-family: var(--font-mono);
-      font-size: 0.95rem;
+      font-size: clamp(0.85rem, 1.5vw, 1rem);
       color: var(--clr-text-primary);
       min-width: 32px;
       text-align: right;
@@ -469,12 +475,15 @@
 
     /* — Row Aesthetics —————————————————————————— */
     .stats-grid tbody tr {
-      transition: background-color 0.3s var(--ease-out-expo);
+      transition: background-color 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+      position: relative;
     }
 
     .stats-grid tbody tr:hover,
     .stats-grid tbody tr:focus-within {
       background-color: var(--clr-surface-hover);
+      transform: scale(1.002);
+      z-index: 10;
     }
 
     .stats-grid td:first-child {
@@ -1060,11 +1069,11 @@
     }
 
     .modal-dialog::backdrop {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: all 0.5s var(--ease-out-expo);
       opacity: 0;
-      transition: opacity 0.4s var(--ease-out-expo);
     }
 
     .modal-dialog[open]::backdrop {
@@ -1080,7 +1089,7 @@
 
     .modal-title {
       font-family: var(--font-display);
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
       font-weight: 700;
       margin: 0;
     }
@@ -2645,15 +2654,37 @@
         this.#computeDerived(newRecord);
         this.#persistState();
 
+        const existingRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        const rectMap = new Map();
+        existingRows.forEach(r => rectMap.set(r.dataset.id, r.getBoundingClientRect().top));
+
         if (this.#state.data.length === 1) {
           this.#render();
         } else {
           const tr = this.#buildRowDOM(newRecord);
           this.refs.tbody.prepend(tr);
 
+          // FLIP for existing rows
+          existingRows.forEach((r) => {
+            const beforeY = rectMap.get(r.dataset.id);
+            if (beforeY !== undefined) {
+              const afterY = r.getBoundingClientRect().top;
+              const delta = beforeY - afterY;
+              if (Math.abs(delta) > 1) {
+                anime.set(r, { translateY: delta });
+                anime({
+                  targets: r,
+                  translateY: 0,
+                  duration: 600,
+                  easing: 'easeOutExpo'
+                });
+              }
+            }
+          });
+
           anime({
             targets: tr,
-            translateY: [-30, 0],
+            translateY: [-40, 0],
             opacity: [0, 1],
             backgroundColor: [this.#getThemeColors().bgFlash, 'transparent'],
             duration: 600,
@@ -2929,6 +2960,11 @@
           newRecords.unshift(rec);
         }
 
+        // FLIP setup
+        const existingRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        const rectMap = new Map();
+        existingRows.forEach(r => rectMap.set(r.dataset.id, r.getBoundingClientRect().top));
+
         // Append new items at top, respect sort if necessary
         this.#state.sortRef = { key: null, asc: true }; // Reset sort to view newly prepended records simply
         this.#state.data = [...newRecords, ...this.#state.data];
@@ -2937,15 +2973,34 @@
         this.#closePredictModal();
         this.#render();
 
+        // FLIP for existing rows sliding down
+        const currentRows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row'));
+        currentRows.forEach((r) => {
+          const beforeY = rectMap.get(r.dataset.id);
+          if (beforeY !== undefined) {
+            const afterY = r.getBoundingClientRect().top;
+            const delta = beforeY - afterY;
+            if (Math.abs(delta) > 1) {
+              anime.set(r, { translateY: delta });
+              anime({
+                targets: r,
+                translateY: 0,
+                duration: 600,
+                easing: 'easeOutExpo'
+              });
+            }
+          }
+        });
+
         // Entrance animation for new rows
-        const rows = Array.from(this.refs.tbody.querySelectorAll('tr.data-row')).slice(0, count);
-        if (rows.length > 0) {
+        const newDoms = currentRows.slice(0, count);
+        if (newDoms.length > 0) {
           anime({
-            targets: rows,
-            translateY: [-30, 0],
+            targets: newDoms,
+            translateY: [-40, 0],
             opacity: [0, 1],
             backgroundColor: [this.#getThemeColors().bgFlash, 'transparent'],
-            delay: anime.stagger(20),
+            delay: anime.stagger(30),
             duration: 600,
             easing: 'easeOutExpo'
           });
@@ -3029,36 +3084,39 @@
           .add({
             targets: '.header-block',
             opacity: [0, 1],
-            translateY: [-20, 0],
-            duration: 800
+            translateY: [-30, 0],
+            duration: 1200
           })
           .add({
             targets: '.data-container',
             opacity: [0, 1],
             translateY: [40, 0],
-            duration: 800
-          }, '-=600')
+            scale: [0.98, 1],
+            duration: 1000
+          }, '-=800')
           .add({
             targets: 'tr.data-row',
             opacity: [0, 1],
-            translateX: [-20, 0],
-            delay: anime.stagger(40),
-            duration: 600
-          }, '-=400')
+            translateX: [-30, 0],
+            delay: anime.stagger(30),
+            duration: 800,
+            easing: 'easeOutBack'
+          }, '-=800')
           .add({
             targets: '#footer-row',
             opacity: [0, 1],
-            duration: 600
-          }, '-=400');
+            translateY: [20, 0],
+            duration: 800
+          }, '-=600');
 
         anime({
           targets: ['.btn-fab', '.btn-theme', '.btn-fab-mini'],
           scale: [0, 1],
-          rotate: [-45, 0],
+          rotate: [-90, 0],
           opacity: [0, 1],
-          delay: anime.stagger(150, { start: 800 }),
-          duration: 700,
-          easing: 'easeOutBack'
+          delay: anime.stagger(150, { start: 900 }),
+          duration: 900,
+          easing: 'easeOutElastic(1, .6)'
         });
       }
     }
