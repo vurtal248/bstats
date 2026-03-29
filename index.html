@@ -652,7 +652,67 @@
       z-index: 100;
       display: flex;
       flex-direction: column;
+      align-items: flex-end;
       gap: 16px;
+    }
+
+    .fab-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-back);
+      transform-origin: bottom center;
+    }
+
+    .fab-container.is-collapsed .fab-actions {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px) scale(0.9);
+      position: absolute;
+      bottom: 60px;
+      visibility: hidden;
+    }
+
+    .btn-fab-mini {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      color: var(--clr-text-dim);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.4s var(--ease-out-back);
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0;
+      z-index: 2;
+    }
+
+    .btn-fab-mini:hover {
+      background: var(--clr-surface-hover);
+      transform: scale(1.1);
+      border-color: var(--clr-border-active);
+      color: var(--clr-text-primary);
+    }
+
+    .btn-fab-mini:active {
+      transform: scale(0.95);
+    }
+
+    .btn-fab-mini svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      transition: transform 0.5s var(--ease-out-expo);
+    }
+
+    .fab-container.is-collapsed .btn-fab-mini svg.icon-collapse {
+      transform: rotate(180deg);
     }
 
     .btn-fab {
@@ -1633,16 +1693,23 @@
       </div>
     </section>
 
-    <div class="fab-container">
-      <button class="btn-fab" id="predict-games-fab" aria-label="Predict future games">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-          <polyline points="17 6 23 6 23 12" />
-        </svg>
-      </button>
-      <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14M5 12h14" />
+    <div class="fab-container" id="main-fab-container">
+      <div class="fab-actions" id="fab-actions">
+        <button class="btn-fab" id="predict-games-fab" aria-label="Predict future games">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+        </button>
+        <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      </div>
+      <button class="btn-fab-mini" id="toggle-fabs-btn" aria-label="Toggle actions visibility">
+        <svg class="icon-collapse" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
     </div>
@@ -1771,6 +1838,8 @@
           empty: document.getElementById('empty-state'),
           fab: document.getElementById('add-game-fab'),
           predictFab: document.getElementById('predict-games-fab'),
+          fabContainer: document.getElementById('main-fab-container'),
+          toggleFabsBtn: document.getElementById('toggle-fabs-btn'),
 
           profileToggle: document.getElementById('profile-toggle'),
           profileMenu: document.getElementById('profile-menu'),
@@ -2211,6 +2280,10 @@
       #bindGlobalEvents() {
         this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
         this.refs.predictFab.addEventListener('click', () => this.#openPredictModal());
+
+        this.refs.toggleFabsBtn.addEventListener('click', () => {
+          this.refs.fabContainer.classList.toggle('is-collapsed');
+        });
 
         this.refs.btnCancelPredict.addEventListener('click', () => this.#closePredictModal());
         this.refs.btnConfirmPredict.addEventListener('click', () => this.#handlePredictGames());
@@ -2893,7 +2966,7 @@
           }, '-=400');
 
         anime({
-          targets: ['.btn-fab', '.btn-theme'],
+          targets: ['.btn-fab', '.btn-theme', '.btn-fab-mini'],
           scale: [0, 1],
           rotate: [-45, 0],
           opacity: [0, 1],
