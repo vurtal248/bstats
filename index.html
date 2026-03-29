@@ -2613,145 +2613,148 @@
         for (let i = 0; i < count; i++) {
           const rec = { id: nextId++ };
 
-          // 1. Generate MPG first based on averages and archetype
-          let baseMpgAvg = avg['mpg'] || 0;
-          let baseMpgVar = variance['mpg'] || 0;
+          // Box-Muller generator helper (bounded)
+          const ranZ = () => {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return Math.max(-3, Math.min(3, z)); // Clamp extreme outliers
+          };
+
+          // --- Phase 1: MPG ---
+          let baseMpgAvg = avg['mpg'] || (data.length === 0 ? 24 : 0);
+          let baseMpgVar = variance['mpg'] || 5;
 
           for (const archetype of archetypes) {
-            if (archetype === 'facilitator') {
-              baseMpgAvg = Math.min(baseMpgAvg * 1.1, 42);
-            } else if (archetype === 'workhorse') {
-              baseMpgAvg = Math.min(baseMpgAvg * 1.15, 44);
-            } else if (archetype === 'fringe') {
-              baseMpgAvg *= 0.7;
-              baseMpgVar *= 1.2;
-            }
+            if (archetype === 'facilitator') baseMpgAvg = Math.min(baseMpgAvg * 1.1, 42);
+            else if (archetype === 'workhorse') baseMpgAvg = Math.min(baseMpgAvg * 1.15, 44);
+            else if (archetype === 'fringe') { baseMpgAvg *= 0.7; baseMpgVar *= 1.2; }
           }
 
-          let uM = 0, vM = 0;
-          while (uM === 0) uM = Math.random();
-          while (vM === 0) vM = Math.random();
-          let zM = Math.sqrt(-2.0 * Math.log(uM)) * Math.cos(2.0 * Math.PI * vM);
-
-          let genMpg = baseMpgAvg + zM * baseMpgVar;
+          let genMpg = Math.round(baseMpgAvg + ranZ() * baseMpgVar);
           if (genMpg < 0) genMpg = 0;
           if (genMpg > 48) genMpg = 48 + Math.floor(Math.random() * 10);
-          genMpg = Math.round(genMpg);
           rec['mpg'] = genMpg;
 
-          // Compute minute ratio to scale other stats
           const minRatio = baseMpgAvg > 0 ? (genMpg / baseMpgAvg) : (genMpg > 0 ? 1 : 0);
 
-          METRICS_SCHEMA.forEach(c => {
-            if (!c.computed && c.key !== 'id' && c.key !== 'mpg') {
-              // Box-Muller transform
-              let u = 0, v = 0;
-              while (u === 0) u = Math.random();
-              while (v === 0) v = Math.random();
-              let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+          // --- Phase 2: Volume (Attempts) & Usage ---
+          let fgaAvg = (avg['fga'] || (data.length === 0 ? 10 : 0)) * minRatio;
+          let fgaVar = (variance['fga'] || 3) * Math.sqrt(minRatio);
+          let tpaAvg = (avg['tpa'] || (data.length === 0 ? 3 : 0)) * minRatio;
+          let tpaVar = (variance['tpa'] || 1) * Math.sqrt(minRatio);
+          let ftaAvg = (avg['fta'] || (data.length === 0 ? 2 : 0)) * minRatio;
+          let ftaVar = (variance['fta'] || 1) * Math.sqrt(minRatio);
 
-              let modAvg = avg[c.key];
-              let modVar = variance[c.key];
+          let tovAvg = (avg['topg'] || (data.length === 0 ? 1.5 : 0)) * minRatio;
+          let tovVar = (variance['topg'] || 1) * Math.sqrt(minRatio);
 
-              for (const archetype of archetypes) {
-                if (archetype === 'scorer') {
-                  // Pure bucket-getter: boosted shooting volume & FT
-                  if (['fgm', 'fga', 'ftm', 'fta'].includes(c.key)) { modAvg *= 1.35; modVar *= 1.15; }
-                  if (c.key === 'topg') { modAvg *= 1.1; } // scorers can be ball-dominant
-                } else if (archetype === 'playmaker') {
-                  // Pass-first: high assists, low turnovers, moderate scoring
-                  if (c.key === 'apg') { modAvg *= 1.5; modVar *= 1.2; }
-                  if (c.key === 'topg') { modAvg *= 0.75; }
-                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.85; }
-                } else if (archetype === 'sharp') {
-                  // Elite 3-point specialist
-                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 1.6; modVar *= 1.25; }
-                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.15; }
-                } else if (archetype === 'defender') {
-                  // Perimeter stopper: high steals/blocks, fewer shot attempts
-                  if (['spg', 'bpg'].includes(c.key)) { modAvg *= 1.7; modVar *= 1.3; }
-                  if (c.key === 'rpg') { modAvg *= 1.15; }
-                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 0.8; }
-                } else if (archetype === 'glass') {
-                  // Interior force: dominant rebounding & paint blocking
-                  if (c.key === 'rpg') { modAvg *= 1.6; modVar *= 1.2; }
-                  if (c.key === 'bpg') { modAvg *= 1.35; modVar *= 1.1; }
-                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.2; }
-                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.4; } // rarely shoots 3s
-                } else if (archetype === 'facilitator') {
-                  // High-usage playmaker: elite assists, heavy minutes
-                  if (c.key === 'apg') { modAvg *= 1.6; modVar *= 1.3; }
-                  if (c.key === 'topg') { modAvg *= 0.9; }
-                } else if (archetype === 'slasher') {
-                  // Drive-and-kick: gets to the line, attacks the rim
-                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.5; modVar *= 1.2; }
-                  if (['fgm', 'fga'].includes(c.key)) { modAvg *= 1.2; modVar *= 1.1; }
-                  if (['tpm', 'tpa'].includes(c.key)) { modAvg *= 0.6; } // doesn't stretch floor
-                } else if (archetype === 'workhorse') {
-                  modAvg *= 1.08;
-                } else if (archetype === 'erratic') {
-                  // Wild card: massive variance, anything goes
-                  modVar *= 2.5;
-                } else if (archetype === 'clutch') {
-                  // Calm under pressure: exceptional FT, low turnovers, tight variance
-                  if (['ftm', 'fta'].includes(c.key)) { modAvg *= 1.3; modVar *= 0.7; }
-                  if (c.key === 'topg') { modAvg *= 0.65; }
-                  modVar *= 0.75; // generally consistent
-                } else if (archetype === 'fringe') {
-                  // Off night / slump: across-the-board below average
-                  modAvg *= 0.7;
-                  modVar *= 1.2; // more unpredictable in slumps
-                }
+          for (const arch of archetypes) {
+            if (arch === 'scorer') { fgaAvg *= 1.35; fgaVar *= 1.15; ftaAvg *= 1.2; tovAvg *= 1.1; }
+            else if (arch === 'playmaker') { fgaAvg *= 0.85; tovAvg *= 0.75; }
+            else if (arch === 'sharp') { tpaAvg *= 1.6; tpaVar *= 1.25; fgaAvg *= 1.15; }
+            else if (arch === 'defender') { fgaAvg *= 0.8; }
+            else if (arch === 'glass') { tpaAvg *= 0.4; ftaAvg *= 1.2; }
+            else if (arch === 'slasher') { ftaAvg *= 1.5; ftaVar *= 1.2; fgaAvg *= 1.2; fgaVar *= 1.1; tpaAvg *= 0.6; }
+            else if (arch === 'erratic') { fgaVar *= 2.5; tpaVar *= 2.5; ftaVar *= 2.5; tovVar *= 2.5; }
+            else if (arch === 'clutch') { ftaAvg *= 1.3; tovAvg *= 0.65; fgaVar *= 0.75; tovVar *= 0.75; }
+            else if (arch === 'fringe') { fgaAvg *= 0.7; tpaAvg *= 0.7; ftaAvg *= 0.7; fgaVar *= 1.2; }
+          }
+
+          let fga = Math.round(fgaAvg + ranZ() * fgaVar);
+          let tpa = Math.round(tpaAvg + ranZ() * tpaVar);
+          let fta = Math.round(ftaAvg + ranZ() * ftaVar);
+          let topg = Math.round(tovAvg + ranZ() * tovVar);
+
+          if (fga < 0) fga = 0; if (tpa < 0) tpa = 0; if (fta < 0) fta = 0; if (topg < 0) topg = 0;
+          if (tpa > fga) tpa = fga; // Cannot shoot more 3s than total FGs
+
+          rec['fga'] = fga;
+          rec['tpa'] = tpa;
+          rec['fta'] = fta;
+          rec['topg'] = topg;
+
+          // --- Phase 3: Efficiencies & Makes ---
+          const histFgPct = acc.fga > 0 ? (acc.fgm / acc.fga) : 0.45;
+          const histTpPct = acc.tpa > 0 ? (acc.tpm / acc.tpa) : 0.35;
+          const histFtPct = acc.fta > 0 ? (acc.ftm / acc.fta) : 0.75;
+
+          let fgPctVar = 0.12, tpPctVar = 0.18, ftPctVar = 0.10;
+
+          for (const arch of archetypes) {
+            if (arch === 'erratic') { fgPctVar *= 2.0; tpPctVar *= 2.0; ftPctVar *= 2.0; }
+            else if (arch === 'clutch') { ftPctVar *= 0.5; }
+            else if (arch === 'scorer') { fgPctVar *= 0.95; tpPctVar *= 0.95; ftPctVar *= 0.95; } // Shoot more but slightly more consistent
+            else if (arch === 'sharp') { tpPctVar *= 0.7; }
+          }
+
+          let nightlyFgPct = histFgPct + ranZ() * fgPctVar;
+          let nightlyTpPct = histTpPct + ranZ() * tpPctVar;
+          let nightlyFtPct = histFtPct + ranZ() * ftPctVar;
+
+          // Enforce realistic boundaries for percentages
+          nightlyFgPct = Math.max(0.1, Math.min(1.0, nightlyFgPct));
+          nightlyTpPct = Math.max(0.0, Math.min(1.0, nightlyTpPct));
+          nightlyFtPct = Math.max(0.0, Math.min(1.0, nightlyFtPct));
+
+          let fgm = Math.round(fga * nightlyFgPct);
+          let tpm = Math.round(tpa * nightlyTpPct);
+          let ftm = Math.round(fta * nightlyFtPct);
+
+          if (tpm > fgm) {
+            fgm = Math.min(tpm + Math.floor(Math.random() * 3), fga); // Boost fgm if tpm is high
+            if (tpm > fgm) tpm = fgm;
+          }
+
+          rec['fgm'] = fgm;
+          rec['tpm'] = tpm;
+          rec['ftm'] = ftm;
+
+          // --- Phase 4: Peripherals (REB, AST, STL, BLK) ---
+          const periphKeys = ['rpg', 'apg', 'spg', 'bpg'];
+          const defaults = { rpg: 4, apg: 2, spg: 0.8, bpg: 0.4 };
+
+          periphKeys.forEach(key => {
+            let pAvg = (avg[key] || (data.length === 0 ? defaults[key] : 0)) * minRatio;
+            let pVar = (variance[key] || Math.max(pAvg * 0.3, 1)) * Math.sqrt(minRatio);
+
+            for (const arch of archetypes) {
+              if (arch === 'playmaker' && key === 'apg') { pAvg *= 1.5; pVar *= 1.2; }
+              if (arch === 'defender') {
+                if (['spg', 'bpg'].includes(key)) { pAvg *= 1.7; pVar *= 1.3; }
+                if (key === 'rpg') { pAvg *= 1.15; }
               }
-
-              // Age Multipliers
-              if (ageNum < 23) {
-                modVar *= 1.15; // Erratic youth variance
-              } else if (ageNum >= 30) {
-                // Veteran athletic decline
-                const athleticDecline = ageNum >= 35 ? 0.9 : 0.95;
-                if (['rpg', 'spg', 'bpg'].includes(c.key)) modAvg *= athleticDecline;
+              if (arch === 'glass') {
+                if (key === 'rpg') { pAvg *= 1.6; pVar *= 1.2; }
+                if (key === 'bpg') { pAvg *= 1.35; pVar *= 1.1; }
               }
-
-              // Height Multipliers (relative to baseline 6'6" / 78")
-              const heightDiff = heightInches - 78;
-              if (['rpg', 'bpg'].includes(c.key)) {
-                // +5% bonus per inch taller, penalty if shorter
-                modAvg *= Math.max(0.5, 1 + (heightDiff * 0.05));
-              }
-              if (['apg', 'spg'].includes(c.key)) {
-                // Tall players lose slightly on steals/assists (handling), short players gain
-                modAvg *= Math.max(0.5, 1 - (heightDiff * 0.03));
-              }
-
-              // Apply minute scaling to tie output to playtime
-              modAvg *= minRatio;
-              modVar *= Math.sqrt(minRatio); // Scale variance slightly less aggressively than avg
-
-              let val = modAvg + z * modVar;
-              if (val < 0) val = 0;
-
-              // Absolute Physical Ceilings (prevent impossible anomalies)
-              if (c.key === 'rpg' && val > 0.8 * genMpg) val = 0.8 * genMpg;  // Huge cap
-              if (c.key === 'apg' && val > 0.5 * genMpg) val = 0.5 * genMpg;
-              if (c.key === 'spg' && val > 0.25 * genMpg) val = 0.25 * genMpg;
-              if (c.key === 'bpg' && val > 0.3 * genMpg) val = 0.3 * genMpg;
-              if (['fgm', 'fga', 'tpm', 'tpa', 'ftm', 'fta'].includes(c.key)) {
-                // Cap shot attempts heavily per minute played
-                if (val > 1.35 * genMpg) val = 1.35 * genMpg;
-              }
-
-              val = Math.round(val);
-              rec[c.key] = val;
+              if (arch === 'facilitator' && key === 'apg') { pAvg *= 1.6; pVar *= 1.3; }
+              if (arch === 'erratic') { pVar *= 2.5; }
+              if (arch === 'fringe') { pAvg *= 0.7; pVar *= 1.2; }
             }
-          });
 
-          // Ensure logic invariants
-          if (rec.fga < rec.fgm) rec.fga = rec.fgm;
-          if (rec.fta < rec.ftm) rec.fta = rec.ftm;
-          if (rec.tpa < rec.tpm) rec.tpa = rec.tpm;
-          if (rec.fga < rec.tpa) rec.fga = rec.tpa;
-          if (rec.fgm < rec.tpm) rec.fgm = rec.tpm;
+            if (ageNum < 23) pVar *= 1.15;
+            else if (ageNum >= 30) {
+              const decline = ageNum >= 35 ? 0.9 : 0.95;
+              if (['rpg', 'spg', 'bpg'].includes(key)) pAvg *= decline;
+            }
+
+            const heightDiff = heightInches - 78;
+            if (['rpg', 'bpg'].includes(key)) pAvg *= Math.max(0.5, 1 + (heightDiff * 0.05));
+            if (['apg', 'spg'].includes(key)) pAvg *= Math.max(0.5, 1 - (heightDiff * 0.03));
+
+            let pVal = Math.round(pAvg + ranZ() * pVar);
+            if (pVal < 0) pVal = 0;
+
+            // Absolute Constraints vs Minutes
+            if (key === 'rpg' && pVal > 0.8 * genMpg) pVal = Math.floor(0.8 * genMpg);
+            if (key === 'apg' && pVal > 0.5 * genMpg) pVal = Math.floor(0.5 * genMpg);
+            if (key === 'spg' && pVal > 0.25 * genMpg) pVal = Math.floor(0.25 * genMpg);
+            if (key === 'bpg' && pVal > 0.3 * genMpg) pVal = Math.floor(0.3 * genMpg);
+
+            rec[key] = pVal;
+          });
 
           this.#computeDerived(rec);
           newRecords.unshift(rec);
