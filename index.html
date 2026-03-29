@@ -1133,8 +1133,29 @@
     }
 
     .archetype-icon {
-      font-size: 1.4rem;
-      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--clr-text-primary);
+    }
+
+    .archetype-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: color 0.2s var(--ease-out-expo);
+    }
+
+    .archetype-card label:hover .archetype-icon {
+      color: var(--clr-accent);
+    }
+
+    .archetype-card input[type="checkbox"]:checked+label .archetype-icon {
+      color: var(--clr-accent);
     }
 
     .archetype-name {
@@ -1356,7 +1377,15 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-balanced" value="balanced" checked>
               <label for="arch-balanced">
-                <span class="archetype-icon">⚖️</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                    <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                    <path d="M7 21h10" />
+                    <path d="M12 3v18" />
+                    <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Balanced</span>
                 <span class="archetype-tag">Trends</span>
               </label>
@@ -1364,7 +1393,12 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-scorer" value="scorer">
               <label for="arch-scorer">
-                <span class="archetype-icon">🔥</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Scorer</span>
                 <span class="archetype-tag">FG/FT+</span>
               </label>
@@ -1372,7 +1406,13 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-playmaker" value="playmaker">
               <label for="arch-playmaker">
-                <span class="archetype-icon">🎯</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="6" />
+                    <circle cx="12" cy="12" r="2" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Playmkr</span>
                 <span class="archetype-tag">AST/TO-</span>
               </label>
@@ -1380,7 +1420,15 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-sharp" value="sharp">
               <label for="arch-sharp">
-                <span class="archetype-icon">🎳</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="22" x2="18" y1="12" y2="12" />
+                    <line x1="6" x2="2" y1="12" y2="12" />
+                    <line x1="12" x2="12" y1="6" y2="2" />
+                    <line x1="12" x2="12" y1="22" y2="18" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Shooter</span>
                 <span class="archetype-tag">3PM/A+</span>
               </label>
@@ -1388,7 +1436,11 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-defender" value="defender">
               <label for="arch-defender">
-                <span class="archetype-icon">🛡️</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Defender</span>
                 <span class="archetype-tag">STL/BLK+</span>
               </label>
@@ -1396,7 +1448,13 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-glass" value="glass">
               <label for="arch-glass">
-                <span class="archetype-icon">💪</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 12 12 17 22 12" />
+                    <polyline points="2 17 12 22 22 17" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Big</span>
                 <span class="archetype-tag">REB/BLK+</span>
               </label>
@@ -1404,7 +1462,15 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-facilitator" value="facilitator">
               <label for="arch-facilitator">
-                <span class="archetype-icon">🤝</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+                    <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Facilitate</span>
                 <span class="archetype-tag">AST+</span>
               </label>
@@ -1412,7 +1478,11 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-slasher" value="slasher">
               <label for="arch-slasher">
-                <span class="archetype-icon">⚡</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Slasher</span>
                 <span class="archetype-tag">FTM+</span>
               </label>
@@ -1420,7 +1490,12 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-workhorse" value="workhorse">
               <label for="arch-workhorse">
-                <span class="archetype-icon">⏱️</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Workhorse</span>
                 <span class="archetype-tag">MIN+</span>
               </label>
@@ -1428,7 +1503,16 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-erratic" value="erratic">
               <label for="arch-erratic">
-                <span class="archetype-icon">🎲</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <path d="M8 8h.01" />
+                    <path d="M16 8h.01" />
+                    <path d="M8 16h.01" />
+                    <path d="M16 16h.01" />
+                    <path d="M12 12h.01" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Erratic</span>
                 <span class="archetype-tag">Variance</span>
               </label>
@@ -1436,7 +1520,12 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-clutch" value="clutch">
               <label for="arch-clutch">
-                <span class="archetype-icon">💎</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Clutch</span>
                 <span class="archetype-tag">FT/LowTO</span>
               </label>
@@ -1444,7 +1533,12 @@
             <div class="archetype-card">
               <input type="checkbox" name="archetype" id="arch-fringe" value="fringe">
               <label for="arch-fringe">
-                <span class="archetype-icon">📉</span>
+                <span class="archetype-icon">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                    <polyline points="16 17 22 17 22 11" />
+                  </svg>
+                </span>
                 <span class="archetype-name">Slump</span>
                 <span class="archetype-tag">Below Avg</span>
               </label>
