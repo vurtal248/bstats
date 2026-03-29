@@ -2136,25 +2136,46 @@
       }
 
       #initializeBioEdit(spanNode, key) {
-        if (spanNode.parentNode.querySelector('input')) return;
+        if (spanNode.parentNode.querySelector('.input-edit')) return;
 
         const prevVal = spanNode.textContent === '-' ? '' : spanNode.textContent;
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'input-edit';
-        input.value = prevVal;
-        input.style.width = Math.max(48, prevVal.length * 9 + 16) + 'px';
+        let input;
+
+        if (key === 'position') {
+          input = document.createElement('select');
+          input.className = 'input-edit';
+          input.style.width = '48px';
+          input.style.appearance = 'none';
+          input.style.cursor = 'pointer';
+          input.style.textAlign = 'right';
+          input.style.direction = 'rtl';
+          input.innerHTML = '<option value="PG">PG</option><option value="SG">SG</option><option value="SF">SF</option><option value="PF">PF</option><option value="C">C</option>';
+          input.value = ['PG', 'SG', 'SF', 'PF', 'C'].includes(prevVal) ? prevVal : 'PG';
+
+          Array.from(input.options).forEach(opt => {
+            opt.style.background = 'var(--clr-bg)';
+            opt.style.color = 'var(--clr-text-primary)';
+            opt.style.direction = 'ltr';
+          });
+        } else {
+          input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'input-edit';
+          input.value = prevVal;
+          input.style.width = Math.max(48, prevVal.length * 9 + 16) + 'px';
+
+          // Dynamically adjust width
+          input.addEventListener('input', () => {
+            input.style.width = Math.max(48, input.value.length * 9 + 16) + 'px';
+          });
+        }
+
         input.setAttribute('aria-label', `Edit ${key}`);
 
         spanNode.style.display = 'none';
         spanNode.parentNode.appendChild(input);
         input.focus();
-        input.select();
-
-        // Dynamically adjust width
-        input.addEventListener('input', () => {
-          input.style.width = Math.max(48, input.value.length * 9 + 16) + 'px';
-        });
+        if (input.select) input.select();
 
         let committed = false;
         const commit = () => {
@@ -2182,6 +2203,9 @@
           });
         };
 
+        if (key === 'position') {
+          input.addEventListener('change', commit);
+        }
         input.addEventListener('blur', commit);
         input.addEventListener('keydown', e => {
           if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
@@ -2652,6 +2676,7 @@
         const ft = parseInt(activeProfile.heightFt, 10) || 6;
         const inc = parseInt(activeProfile.heightIn, 10) || 6;
         const heightInches = (ft * 12) + inc; // default to 6'6" (78")
+        const pos = activeProfile.position || 'SG';
 
         const data = this.#state.data;
         const len = data.length || 1;
@@ -2735,6 +2760,12 @@
             else if (arch === 'fringe') { fgaAvg *= 0.7; tpaAvg *= 0.7; ftaAvg *= 0.7; fgaVar *= 1.2; }
           }
 
+          if (pos === 'PG') { tpaAvg *= 1.25; ftaAvg *= 1.1; tovAvg *= 1.3; }
+          else if (pos === 'SG') { tpaAvg *= 1.3; }
+          else if (pos === 'SF') { ftaAvg *= 1.1; }
+          else if (pos === 'PF') { tpaAvg *= 0.5; ftaAvg *= 1.2; }
+          else if (pos === 'C') { tpaAvg *= 0.1; ftaAvg *= 1.4; tovAvg *= 1.2; }
+
           let fga = Math.round(fgaAvg + ranZ() * fgaVar);
           let tpa = Math.round(tpaAvg + ranZ() * tpaVar);
           let fta = Math.round(ftaAvg + ranZ() * ftaVar);
@@ -2805,6 +2836,23 @@
               if (arch === 'facilitator' && key === 'apg') { pAvg *= 1.6; pVar *= 1.3; }
               if (arch === 'erratic') { pVar *= 2.5; }
               if (arch === 'fringe') { pAvg *= 0.7; pVar *= 1.2; }
+            }
+
+            if (pos === 'PG') {
+              if (key === 'apg') { pAvg *= 1.4; }
+              if (key === 'rpg') { pAvg *= 0.6; }
+            } else if (pos === 'SG') {
+              if (key === 'apg') { pAvg *= 1.1; }
+              if (key === 'rpg') { pAvg *= 0.8; }
+            } else if (pos === 'PF') {
+              if (key === 'rpg') { pAvg *= 1.3; }
+              if (key === 'bpg') { pAvg *= 1.4; }
+              if (key === 'apg') { pAvg *= 0.7; }
+            } else if (pos === 'C') {
+              if (key === 'rpg') { pAvg *= 1.6; }
+              if (key === 'bpg') { pAvg *= 1.8; }
+              if (key === 'apg') { pAvg *= 0.5; }
+              if (key === 'spg') { pAvg *= 0.6; }
             }
 
             if (ageNum < 23) pVar *= 1.15;
