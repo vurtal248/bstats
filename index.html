@@ -2756,6 +2756,16 @@
             rec[key] = pVal;
           });
 
+          // Ensure logic invariants
+          if (rec.fga < rec.fgm) rec.fga = rec.fgm;
+          if (rec.fta < rec.ftm) rec.fta = rec.ftm;
+          if (rec.tpa < rec.tpm) rec.tpa = rec.tpm;
+          if (rec.fga < rec.tpa) rec.fga = rec.tpa;
+          if (rec.fgm < rec.tpm) rec.fgm = rec.tpm;
+          if ((rec.fgm - rec.tpm) > (rec.fga - rec.tpa)) {
+            rec.fgm = rec.tpm + (rec.fga - rec.tpa);
+          }
+
           this.#computeDerived(rec);
           newRecords.unshift(rec);
         }
@@ -2792,7 +2802,12 @@
         const sortRef = this.#state.sortRef;
 
         if (sortRef.key === key) {
-          sortRef.asc = !sortRef.asc;
+          if (sortRef.asc) {
+            sortRef.asc = false;
+          } else {
+            sortRef.key = null;
+            sortRef.asc = true;
+          }
         } else {
           sortRef.key = key;
           sortRef.asc = true;
@@ -2800,9 +2815,11 @@
 
         // Update ARIA
         this.refs.thead.querySelectorAll('th').forEach(th => th.setAttribute('aria-sort', 'none'));
-        const activeTh = this.refs.thead.querySelector(`th[data-key="${key}"]`);
-        if (activeTh) {
-          activeTh.setAttribute('aria-sort', sortRef.asc ? 'ascending' : 'descending');
+        if (sortRef.key) {
+          const activeTh = this.refs.thead.querySelector(`th[data-key="${sortRef.key}"]`);
+          if (activeTh) {
+            activeTh.setAttribute('aria-sort', sortRef.asc ? 'ascending' : 'descending');
+          }
         }
 
         // Capture pre-sort positions for FLIP animation
@@ -2811,11 +2828,15 @@
         rows.forEach(r => rectMap.set(r.dataset.id, r.getBoundingClientRect().top));
 
         // Sort data
-        this.#state.data.sort((a, b) => {
-          const vA = Number(a[key]) || 0;
-          const vB = Number(b[key]) || 0;
-          return sortRef.asc ? vA - vB : vB - vA;
-        });
+        if (sortRef.key === null) {
+          this.#state.data.sort((a, b) => b.id - a.id);
+        } else {
+          this.#state.data.sort((a, b) => {
+            const vA = Number(a[sortRef.key]) || 0;
+            const vB = Number(b[sortRef.key]) || 0;
+            return sortRef.asc ? vA - vB : vB - vA;
+          });
+        }
 
         this.#persistState();
         this.#render();
