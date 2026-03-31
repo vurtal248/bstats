@@ -328,108 +328,64 @@
       gap: 8px;
     }
 
-    /* — Player Biodata Container ——————————————— */
-    .player-bio-container {
-      display: flex;
-      gap: clamp(16px, 2.5vw, 28px);
+    /* — HUD Modules: Player Vitals & Career Highs ——————————————— */
+    .player-bio-container,
+    .career-highs-container {
+      position: relative;
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
-      border-radius: 2px;
-      padding: 14px 28px;
+      padding: 36px 24px 20px;
       backdrop-filter: blur(32px);
       -webkit-backdrop-filter: blur(32px);
-      box-shadow:
-        0 1px 0 0 rgba(255, 255, 255, 0.03),
-        0 8px 24px rgba(0, 0, 0, 0.15),
-        0 24px 48px rgba(0, 0, 0, 0.2);
-      margin-bottom: 2px;
-      position: relative;
-      overflow: hidden;
       width: 100%;
       max-width: 500px;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(64px, auto));
+      gap: 16px 24px;
+      align-items: end;
+      margin-bottom: 2px;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+      transition: background-color 0.4s var(--ease-out-expo), border-color 0.4s, box-shadow 0.4s;
     }
 
-    /* — Container Badges ——————————————— */
-    .container-badge {
+    /* HUD Corner Brackets for structural telemetry aesthetic */
+    .player-bio-container::before,
+    .career-highs-container::before {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
-      background: rgba(255, 255, 255, 0.03);
-      border-right: 1px solid var(--clr-border);
-      border-bottom: 1px solid var(--clr-border);
-      color: var(--clr-text-secondary);
-      font-family: var(--font-mono);
-      font-size: 0.5rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      z-index: 10;
-      border-bottom-right-radius: 4px;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(90deg, var(--clr-text-secondary) 8px, transparent 8px) top left / 100% 2px no-repeat,
+        linear-gradient(180deg, var(--clr-text-secondary) 8px, transparent 8px) top left / 2px 100% no-repeat,
+        linear-gradient(270deg, var(--clr-text-secondary) 8px, transparent 8px) bottom right / 100% 2px no-repeat,
+        linear-gradient(0deg, var(--clr-text-secondary) 8px, transparent 8px) bottom right / 2px 100% no-repeat;
+      pointer-events: none;
+      opacity: 0.3;
+      z-index: 5;
     }
 
-    :root[data-theme="light"] .container-badge {
-      background: rgba(0, 0, 0, 0.03);
-    }
-
-    /* — Career Highs Container ——————————————— */
+    /* Automated scanning mesh background */
     .career-highs-container {
-      display: flex;
-      gap: clamp(12px, 2vw, 24px);
-      background: var(--clr-surface);
-      border: 1px solid var(--clr-border);
-      border-radius: 2px;
-      padding: 14px 28px;
-      backdrop-filter: blur(32px);
-      -webkit-backdrop-filter: blur(32px);
-      box-shadow:
-        0 1px 0 0 rgba(255, 255, 255, 0.03),
-        0 4px 16px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2px;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      max-width: 500px;
-      justify-content: space-between;
-      transition: background-color 0.3s;
+      background-image:
+        radial-gradient(var(--clr-border) 1px, transparent 1px),
+        var(--clr-surface);
+      background-size: 20px 20px;
+      background-position: center;
     }
 
     .career-highs-container:hover {
-      background: var(--clr-surface-hover);
+      background-color: var(--clr-surface-hover);
       border-color: var(--clr-border-active);
     }
 
-    .high-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+    .player-bio-container {
+      box-shadow: inset 0 0 120px rgba(255, 255, 255, 0.015);
     }
 
-    .high-label {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.18em;
-      color: var(--clr-text-dim);
-      text-transform: uppercase;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .high-value {
-      font-family: var(--font-display);
-      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
-      color: var(--clr-text-primary);
-      min-width: 28px;
-      text-align: center;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
-    }
-
-    /* Traveling shimmer on bio container */
-    .player-bio-container::before {
+    .player-bio-container::after {
       content: '';
       position: absolute;
       top: 0;
@@ -453,34 +409,108 @@
       }
     }
 
-    .bio-item {
+    /* HUD Docked Badges */
+    .container-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--clr-text-primary);
+      color: var(--clr-bg);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      font-weight: 700;
+      padding: 6px 12px 4px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      z-index: 10;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    }
+
+    :root[data-theme="light"] .container-badge {
+      background: var(--clr-text-primary);
+      color: var(--clr-bg);
+    }
+
+    /* Grid Items */
+    .bio-item,
+    .high-item {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 4px;
+      position: relative;
     }
 
-    .bio-label {
+    /* Small tracking lines between items */
+    .bio-item:not(:first-child)::before,
+    .high-item:not(:first-child)::before {
+      content: '';
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 24px;
+      width: 1px;
+      background: var(--clr-border);
+      opacity: 0.5;
+    }
+
+    .bio-label,
+    .high-label {
       font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.18em;
+      font-size: 0.55rem;
+      letter-spacing: 0.22em;
       color: var(--clr-text-dim);
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    .bio-value {
+    .bio-value,
+    .high-value {
       font-family: var(--font-display);
-      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+      font-size: clamp(1.2rem, 2vw, 1.4rem);
       color: var(--clr-text-primary);
-      min-width: 32px;
-      text-align: center;
-      cursor: pointer;
+      text-align: left;
       font-weight: 800;
-      letter-spacing: -0.02em;
-      transition: color 0.3s var(--ease-out-expo), text-shadow 0.3s;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
       position: relative;
+    }
+
+    /* Bracketed Hover Interaction */
+    .bio-value {
+      cursor: pointer;
+      padding: 0 4px;
+      margin-left: -4px;
+      display: inline-block;
       min-height: 1.2rem;
+    }
+
+    .bio-value::before,
+    .bio-value::after {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--clr-accent);
+      position: absolute;
+      top: 50%;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s var(--ease-out-expo);
+      font-weight: 400;
+      pointer-events: none;
+    }
+
+    .bio-value::before {
+      content: '[';
+      left: -4px;
+      transform: translateY(-50%) translateX(6px);
+    }
+
+    .bio-value::after {
+      content: ']';
+      right: -4px;
+      transform: translateY(-50%) translateX(-6px);
     }
 
     .bio-value:hover,
@@ -488,6 +518,19 @@
       color: var(--clr-accent);
       text-shadow: 0 0 16px var(--clr-accent-glow);
       outline: none;
+      z-index: 5;
+    }
+
+    .bio-value:hover::before,
+    .bio-value:focus-visible::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .bio-value:hover::after,
+    .bio-value:focus-visible::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
     }
 
     .header-title {
@@ -1640,28 +1683,19 @@
         align-items: flex-start;
       }
 
-      .player-bio-container {
-        width: 100%;
-        overflow-x: auto;
-        padding: 12px 16px;
-        justify-content: flex-start;
-        -ms-overflow-style: none;
-        /* IE and Edge */
-        scrollbar-width: none;
-        /* Firefox */
-      }
-
+      .player-bio-container,
       .career-highs-container {
         width: 100%;
-        overflow-x: auto;
-        padding: 12px 16px;
-        justify-content: flex-start;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+        padding: 40px 16px 16px;
+        /* Space for the top badge */
+        grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
       }
 
-      .career-highs-container::-webkit-scrollbar {
+      .bio-item:not(:first-child)::before,
+      .high-item:not(:first-child)::before {
         display: none;
+        /* remove separators on mobile, too cluttered */
       }
 
       .header-right {
@@ -1671,10 +1705,6 @@
 
       .archetype-grid {
         grid-template-columns: repeat(4, 1fr);
-      }
-
-      .player-bio-container::-webkit-scrollbar {
-        display: none;
       }
 
       :root {
