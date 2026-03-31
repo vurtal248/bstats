@@ -22,23 +22,23 @@
       Palette: Strict Monochrome
     */
     :root {
-      --clr-bg: #060606;
-      --clr-surface: rgba(255, 255, 255, 0.025);
-      --clr-surface-hover: rgba(255, 255, 255, 0.07);
-      --clr-border: rgba(255, 255, 255, 0.06);
-      --clr-border-active: rgba(255, 255, 255, 0.35);
+      --clr-bg: #030303;
+      --clr-surface: rgba(255, 255, 255, 0.015);
+      --clr-surface-hover: rgba(255, 255, 255, 0.05);
+      --clr-border: rgba(255, 255, 255, 0.08);
+      --clr-border-active: rgba(255, 255, 255, 0.5);
 
-      --clr-text-primary: #F0EDE8;
-      --clr-text-secondary: #7A7A76;
-      --clr-text-dim: #3A3A38;
+      --clr-text-primary: #FFFFFF;
+      --clr-text-secondary: #8E8E8E;
+      --clr-text-dim: #4B4B4B;
 
-      --clr-accent: #F0EDE8;
-      --clr-accent-glow: rgba(240, 237, 232, 0.25);
-      --clr-danger: #F0EDE8;
+      --clr-accent: #FFFFFF;
+      --clr-accent-glow: rgba(255, 255, 255, 0.3);
+      --clr-danger: #FFFFFF;
 
-      /* Warm-neutral scanline glow */
-      --clr-scan: rgba(240, 237, 232, 0.04);
-      --clr-scan-line: rgba(240, 237, 232, 0.08);
+      /* Colder scanline glow */
+      --clr-scan: rgba(255, 255, 255, 0.02);
+      --clr-scan-line: rgba(255, 255, 255, 0.05);
 
       --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
@@ -56,17 +56,17 @@
     }
 
     :root[data-theme="light"] {
-      --clr-bg: #F5F3EE;
-      --clr-surface: rgba(0, 0, 0, 0.025);
-      --clr-surface-hover: rgba(0, 0, 0, 0.055);
-      --clr-border: rgba(0, 0, 0, 0.07);
-      --clr-border-active: rgba(0, 0, 0, 0.25);
-      --clr-text-primary: #1A1A18;
-      --clr-text-secondary: #6B6B66;
-      --clr-text-dim: #A8A8A2;
-      --clr-accent: #1A1A18;
-      --clr-accent-glow: rgba(26, 26, 24, 0.12);
-      --clr-danger: #1A1A18;
+      --clr-bg: #FAFAFA;
+      --clr-surface: rgba(0, 0, 0, 0.02);
+      --clr-surface-hover: rgba(0, 0, 0, 0.05);
+      --clr-border: rgba(0, 0, 0, 0.1);
+      --clr-border-active: rgba(0, 0, 0, 0.4);
+      --clr-text-primary: #050505;
+      --clr-text-secondary: #707070;
+      --clr-text-dim: #A0A0A0;
+      --clr-accent: #050505;
+      --clr-accent-glow: rgba(5, 5, 5, 0.15);
+      --clr-danger: #050505;
       --clr-scan: rgba(0, 0, 0, 0.02);
       --clr-scan-line: rgba(0, 0, 0, 0.04);
     }
@@ -465,9 +465,9 @@
       text-transform: uppercase;
       font-weight: 800;
       font-style: normal;
-      letter-spacing: -0.04em;
-      font-size: clamp(2.8rem, 7vw, 6rem);
-      line-height: 0.85;
+      letter-spacing: -0.05em;
+      font-size: clamp(3rem, 8vw, 7.5rem);
+      line-height: 0.8;
       margin: 0;
       background: linear-gradient(180deg, var(--clr-text-primary) 0%, rgba(240, 237, 232, 0.4) 100%);
       -webkit-background-clip: text;
@@ -641,12 +641,12 @@
     /* — Table Headers ——————————————————————————— */
     .stats-grid th {
       font-family: var(--font-mono);
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--clr-text-dim);
-      background: rgba(6, 6, 6, 0.97);
+      background: var(--clr-bg);
       position: sticky;
       top: 0;
       z-index: 20;
@@ -730,9 +730,9 @@
     .stats-grid tbody tr:hover,
     .stats-grid tbody tr:focus-within {
       background-color: var(--clr-surface-hover);
-      transform: scaleX(1.003);
+      transform: scaleX(1.004) scaleY(1.02);
       z-index: 10;
-      box-shadow: 0 0 24px -8px var(--clr-accent-glow);
+      box-shadow: 0 0 0 1px var(--clr-border-active), 0 0 32px -8px var(--clr-accent-glow);
     }
 
     .stats-grid td:first-child {
