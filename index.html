@@ -350,6 +350,29 @@
       justify-content: space-between;
     }
 
+    /* — Container Badges ——————————————— */
+    .container-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.03);
+      border-right: 1px solid var(--clr-border);
+      border-bottom: 1px solid var(--clr-border);
+      color: var(--clr-text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      z-index: 10;
+      border-bottom-right-radius: 4px;
+    }
+
+    :root[data-theme="light"] .container-badge {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
     /* — Career Highs Container ——————————————— */
     .career-highs-container {
       display: flex;
@@ -1744,6 +1767,7 @@
 
       <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
         <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
+          <div class="container-badge">Player Vitals</div>
           <div class="bio-item">
             <span class="bio-label">POS</span>
             <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
@@ -1776,6 +1800,7 @@
         </div>
 
         <div class="career-highs-container" id="career-highs">
+          <div class="container-badge">Career Highs</div>
           <div class="high-item">
             <span class="high-label">PTS</span>
             <span class="high-value" data-high-key="pts">-</span>
