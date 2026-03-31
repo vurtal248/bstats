@@ -94,16 +94,16 @@
     }
 
     :root[data-theme="light"] .stats-grid th {
-      background: rgba(245, 243, 238, 0.97);
+      background: rgba(250, 250, 250, 0.97);
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     :root[data-theme="light"] .stats-grid tfoot td {
-      background: rgba(245, 243, 238, 0.97);
+      background: rgba(250, 250, 250, 0.97);
     }
 
     :root[data-theme="light"] .stats-grid tfoot td:first-child {
-      background: rgba(245, 243, 238, 0.97);
+      background: rgba(250, 250, 250, 0.97);
     }
 
     :root[data-theme="light"] .stats-grid tfoot td::before {
@@ -111,7 +111,7 @@
     }
 
     :root[data-theme="light"] .profile-menu {
-      background: rgba(245, 243, 238, 0.97);
+      background: rgba(250, 250, 250, 0.97);
     }
 
     :root[data-theme="light"] .profile-menu-actions {
@@ -124,7 +124,7 @@
     }
 
     :root[data-theme="light"] .modal-dialog::backdrop {
-      background: rgba(245, 243, 238, 0.6);
+      background: rgba(250, 250, 250, 0.6);
     }
 
     :root[data-theme="light"] .input-modern:focus {
@@ -350,19 +350,21 @@
     /* — Career Highs Container ——————————————— */
     .career-highs-container {
       display: flex;
-      gap: clamp(12px, 2vw, 24px);
+      gap: clamp(16px, 2.5vw, 28px);
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
       border-radius: 2px;
-      padding: 10px 24px;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      padding: 14px 28px;
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.03),
+        0 4px 16px rgba(0, 0, 0, 0.1);
       margin-bottom: 2px;
       position: relative;
       overflow: hidden;
       width: 100%;
-      justify-content: flex-end;
+      /* align left matching bio container */
       transition: background-color 0.3s;
     }
 
@@ -374,29 +376,28 @@
     .high-item {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
+      align-items: center;
+      gap: 4px;
     }
 
     .high-label {
       font-family: var(--font-mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.2em;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
       color: var(--clr-text-dim);
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 600;
       white-space: nowrap;
     }
 
     .high-value {
       font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2vw, 1.4rem);
-      color: var(--clr-accent);
+      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+      color: var(--clr-text-primary);
       min-width: 28px;
-      text-align: right;
+      text-align: center;
       font-weight: 800;
       letter-spacing: -0.02em;
-      text-shadow: 0 0 12px var(--clr-accent-glow);
       transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
     }
 
@@ -428,26 +429,28 @@
     .bio-item {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 4px;
     }
 
     .bio-label {
       font-family: var(--font-mono);
       font-size: 0.6rem;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.18em;
       color: var(--clr-text-dim);
       text-transform: uppercase;
-      font-weight: 400;
+      font-weight: 600;
     }
 
     .bio-value {
-      font-family: var(--font-mono);
-      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
       color: var(--clr-text-primary);
       min-width: 32px;
-      text-align: right;
+      text-align: center;
       cursor: pointer;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       transition: color 0.3s var(--ease-out-expo), text-shadow 0.3s;
       position: relative;
       min-height: 1.2rem;
