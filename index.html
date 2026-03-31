@@ -162,6 +162,12 @@
         0 24px 48px rgba(0, 0, 0, 0.08);
     }
 
+    :root[data-theme="light"] .career-highs-container {
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -339,6 +345,59 @@
       margin-bottom: 2px;
       position: relative;
       overflow: hidden;
+    }
+
+    /* — Career Highs Container ——————————————— */
+    .career-highs-container {
+      display: flex;
+      gap: clamp(12px, 2vw, 24px);
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 2px;
+      padding: 10px 24px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2px;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      justify-content: flex-end;
+      transition: background-color 0.3s;
+    }
+
+    .career-highs-container:hover {
+      background: var(--clr-surface-hover);
+      border-color: var(--clr-border-active);
+    }
+
+    .high-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .high-label {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--clr-text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .high-value {
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 2vw, 1.4rem);
+      color: var(--clr-accent);
+      min-width: 28px;
+      text-align: right;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 12px var(--clr-accent-glow);
+      transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
     }
 
     /* Traveling shimmer on bio container */
@@ -1562,6 +1621,19 @@
         /* Firefox */
       }
 
+      .career-highs-container {
+        width: 100%;
+        overflow-x: auto;
+        padding: 12px 16px;
+        justify-content: flex-start;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .career-highs-container::-webkit-scrollbar {
+        display: none;
+      }
+
       .header-right {
         width: 100%;
         align-items: flex-start !important;
@@ -1693,6 +1765,33 @@
           <div class="bio-item">
             <span class="bio-label">AGE</span>
             <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
+          </div>
+        </div>
+
+        <div class="career-highs-container" id="career-highs">
+          <div class="high-item">
+            <span class="high-label">PTS</span>
+            <span class="high-value" data-high-key="pts">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">REB</span>
+            <span class="high-value" data-high-key="reb">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">AST</span>
+            <span class="high-value" data-high-key="ast">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">STL</span>
+            <span class="high-value" data-high-key="stl">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">BLK</span>
+            <span class="high-value" data-high-key="blk">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">3PM</span>
+            <span class="high-value" data-high-key="3pm">-</span>
           </div>
         </div>
 
@@ -2117,6 +2216,7 @@
           btnCancelProfile: document.getElementById('btn-cancel-profile'),
           btnConfirmProfile: document.getElementById('btn-confirm-profile'),
           playerBio: document.getElementById('player-bio'),
+          careerHighsContainer: document.getElementById('career-highs'),
 
           modalPredict: document.getElementById('modal-predict'),
           inputPredictCount: document.getElementById('input-predict-count'),
@@ -2399,6 +2499,49 @@
             el.textContent = activeProfile[key] || '-';
           }
         });
+      }
+
+      #renderCareerHighs() {
+        if (!this.refs.careerHighsContainer) return;
+        const highs = { pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, '3pm': 0 };
+
+        if (this.#state.data.length > 0) {
+          this.#state.data.forEach(row => {
+            if (row.ppg > highs.pts) highs.pts = row.ppg;
+            if (row.rpg > highs.reb) highs.reb = row.rpg;
+            if (row.apg > highs.ast) highs.ast = row.apg;
+            if (row.spg > highs.stl) highs.stl = row.spg;
+            if (row.bpg > highs.blk) highs.blk = row.bpg;
+            if (row.tpm > highs['3pm']) highs['3pm'] = row.tpm;
+          });
+        }
+
+        const metrics = ['pts', 'reb', 'ast', 'stl', 'blk', '3pm'];
+        const updatedNodes = [];
+
+        metrics.forEach(key => {
+          const el = this.refs.careerHighsContainer.querySelector(`[data-high-key="${key}"]`);
+          if (el) {
+            const displayVal = this.#state.data.length > 0 ? highs[key] : '-';
+            if (el.textContent !== String(displayVal)) {
+              el.textContent = displayVal;
+              updatedNodes.push(el);
+            }
+          }
+        });
+
+        if (updatedNodes.length > 0) {
+          const tc = this.#getThemeColors();
+          anime({
+            targets: updatedNodes,
+            color: [tc.textSecondary, tc.accent],
+            scale: [0.95, 1],
+            textShadow: ['none', '0 0 16px ' + tc.accent],
+            duration: 800,
+            delay: anime.stagger(50),
+            easing: 'easeOutExpo'
+          });
+        }
       }
 
       #initializeBioEdit(spanNode, key) {
@@ -2789,6 +2932,8 @@
             easing: 'easeOutExpo'
           });
         }
+
+        this.#renderCareerHighs();
       }
 
       /* ——— Inline Edit ————————————————————————— */
