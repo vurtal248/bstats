@@ -345,12 +345,15 @@
       margin-bottom: 2px;
       position: relative;
       overflow: hidden;
+      width: 100%;
+      max-width: 500px;
+      justify-content: space-between;
     }
 
     /* — Career Highs Container ——————————————— */
     .career-highs-container {
       display: flex;
-      gap: clamp(16px, 2.5vw, 28px);
+      gap: clamp(12px, 2vw, 24px);
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
       border-radius: 2px;
@@ -364,7 +367,8 @@
       position: relative;
       overflow: hidden;
       width: 100%;
-      /* align left matching bio container */
+      max-width: 500px;
+      justify-content: space-between;
       transition: background-color 0.3s;
     }
 
