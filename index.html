@@ -11,155 +11,161 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100..900&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
   <style>
     /*
       MODERN CSS ARCHITECTURE
-      Aesthetic: Hyper-Minimalist Industrial Grid / Noir 
-      Palette: Absolute Monochrome
+      Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
+      Palette: Strict Monochrome
     */
     :root {
-      --clr-bg: #000000;
-      --clr-surface: #000000;
-      --clr-surface-hover: #FFFFFF;
-      --clr-border: #333333;
-      --clr-border-active: #FFFFFF;
+      --clr-bg: #030303;
+      --clr-surface: rgba(255, 255, 255, 0.015);
+      --clr-surface-hover: rgba(255, 255, 255, 0.05);
+      --clr-border: rgba(255, 255, 255, 0.08);
+      --clr-border-active: rgba(255, 255, 255, 0.5);
 
       --clr-text-primary: #FFFFFF;
-      --clr-text-secondary: #999999;
-      --clr-text-dim: #555555;
-      --clr-text-inverse: #000000;
-      /* New token for hover inversions */
+      --clr-text-secondary: #8E8E8E;
+      --clr-text-dim: #4B4B4B;
 
       --clr-accent: #FFFFFF;
-      --clr-accent-glow: transparent;
+      --clr-accent-glow: rgba(255, 255, 255, 0.3);
       --clr-danger: #FFFFFF;
 
-      --clr-scan: rgba(255, 255, 255, 0.03);
-      --clr-scan-line: transparent;
+      /* Colder scanline glow */
+      --clr-scan: rgba(255, 255, 255, 0.02);
+      --clr-scan-line: rgba(255, 255, 255, 0.05);
 
-      --font-display: 'Big Shoulders Display', system-ui, sans-serif;
+      --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
 
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      --ease-snap: cubic-bezier(0.85, 0, 0.15, 1);
-      /* Harsh mechanical snap */
 
       /* Spatial tokens */
       --space-edge: clamp(16px, 5vw, 64px);
       --space-gap: clamp(20px, 4vw, 48px);
-      --cell-pad-y: 12px;
-      --cell-pad-x: 16px;
-      --row-h: 48px;
+      --cell-pad-y: 14px;
+      --cell-pad-x: 14px;
+      --row-h: 52px;
     }
 
     :root[data-theme="light"] {
-      --clr-bg: #FFFFFF;
-      --clr-surface: #FFFFFF;
-      --clr-surface-hover: #000000;
-      --clr-border: #CCCCCC;
-      --clr-border-active: #000000;
-      --clr-text-primary: #000000;
-      --clr-text-secondary: #666666;
-      --clr-text-dim: #AAAAAA;
-      --clr-text-inverse: #FFFFFF;
-      --clr-accent: #000000;
-      --clr-accent-glow: transparent;
-      --clr-danger: #000000;
+      --clr-bg: #FAFAFA;
+      --clr-surface: rgba(0, 0, 0, 0.02);
+      --clr-surface-hover: rgba(0, 0, 0, 0.05);
+      --clr-border: rgba(0, 0, 0, 0.1);
+      --clr-border-active: rgba(0, 0, 0, 0.4);
+      --clr-text-primary: #050505;
+      --clr-text-secondary: #707070;
+      --clr-text-dim: #A0A0A0;
+      --clr-accent: #050505;
+      --clr-accent-glow: rgba(5, 5, 5, 0.15);
+      --clr-danger: #050505;
       --clr-scan: rgba(0, 0, 0, 0.02);
-      --clr-scan-line: transparent;
+      --clr-scan-line: rgba(0, 0, 0, 0.04);
     }
 
-    /* Remove light-mode specific glows and smooth treatments */
     :root[data-theme="light"] .ambient-bg {
-      background: #FFFFFF;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(0, 0, 0, 0.03) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 90% 110%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
     }
 
     :root[data-theme="light"] .ambient-noise {
-      opacity: 0.15;
-      mix-blend-mode: multiply;
+      opacity: 0.12;
     }
 
     :root[data-theme="light"] .scanline-overlay {
       mix-blend-mode: darken;
-      opacity: 0.10;
+      opacity: 0.15;
     }
 
     :root[data-theme="light"] .header-title {
-      background: none;
-      -webkit-background-clip: unset;
-      -webkit-text-fill-color: var(--clr-text-primary);
-      background-clip: unset;
+      background: linear-gradient(180deg, #1A1A18 0%, rgba(26, 26, 24, 0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     :root[data-theme="light"] .stats-grid th {
-      background: var(--clr-bg);
-      border-bottom: 1px solid var(--clr-border);
+      background: rgba(250, 250, 250, 0.97);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
-    :root[data-theme="light"] .stats-grid tfoot td,
+    :root[data-theme="light"] .stats-grid tfoot td {
+      background: rgba(250, 250, 250, 0.97);
+    }
+
     :root[data-theme="light"] .stats-grid tfoot td:first-child {
-      background: var(--clr-bg);
+      background: rgba(250, 250, 250, 0.97);
     }
 
     :root[data-theme="light"] .stats-grid tfoot td::before {
-      background: none;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.06), transparent);
     }
 
     :root[data-theme="light"] .profile-menu {
-      background: var(--clr-surface);
+      background: rgba(250, 250, 250, 0.97);
     }
 
     :root[data-theme="light"] .profile-menu-actions {
-      background: var(--clr-bg);
+      background: rgba(0, 0, 0, 0.03);
     }
 
     :root[data-theme="light"] .btn-delete-profile:hover,
     :root[data-theme="light"] .btn-new-profile:hover {
-      background: var(--clr-surface-hover);
-      color: var(--clr-text-inverse);
+      background: rgba(0, 0, 0, 0.04);
     }
 
     :root[data-theme="light"] .modal-dialog::backdrop {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(250, 250, 250, 0.6);
     }
 
     :root[data-theme="light"] .input-modern:focus {
-      background: var(--clr-bg);
-      border-color: var(--clr-text-primary);
+      background: rgba(0, 0, 0, 0.03);
     }
 
     :root[data-theme="light"] .input-edit::selection {
-      background: var(--clr-text-primary);
-      color: var(--clr-text-inverse);
+      background: rgba(0, 0, 0, 0.12);
     }
 
     :root[data-theme="light"] .btn-fab {
-      box-shadow: none;
-      border: 1px solid var(--clr-text-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     :root[data-theme="light"] .btn-fab:hover {
-      box-shadow: none;
-      background: var(--clr-text-primary);
-      color: var(--clr-bg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     :root[data-theme="light"] .btn-fab::after {
-      background: none;
+      background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.25));
     }
 
-    /* Striking out container box shadows across light mode */
-    :root[data-theme="light"] .data-container,
-    :root[data-theme="light"] .player-bio-container,
+    :root[data-theme="light"] .data-container {
+      box-shadow:
+        0 1px 0 0 var(--clr-border),
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 32px 64px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    }
+
+    :root[data-theme="light"] .player-bio-container {
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.5),
+        0 8px 24px rgba(0, 0, 0, 0.06),
+        0 24px 48px rgba(0, 0, 0, 0.08);
+    }
+
     :root[data-theme="light"] .career-highs-container {
-      box-shadow: none;
-      border: 1px solid var(--clr-border);
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -200,10 +206,28 @@
     /* — Ambient Background System ——————————————— */
     .ambient-bg {
       position: fixed;
-      inset: 0;
+      inset: -50%;
       z-index: -2;
       pointer-events: none;
-      background: var(--clr-bg);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(240, 237, 232, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 90% 110%, rgba(240, 237, 232, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(240, 237, 232, 0.01) 0%, transparent 70%);
+      animation: ambient-drift 50s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambient-drift {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-3%) scale(1.02) rotate(0.5deg);
+      }
+
+      100% {
+        transform: translateY(-6%) scale(1.04) rotate(1.5deg);
+      }
     }
 
     .ambient-noise {
@@ -310,9 +334,15 @@
       gap: clamp(16px, 2.5vw, 28px);
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
-      border-radius: 0;
+      border-radius: 2px;
       padding: 14px 28px;
-      margin-bottom: 0;
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.03),
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        0 24px 48px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2px;
       position: relative;
       overflow: hidden;
       width: 100%;
@@ -349,15 +379,20 @@
       gap: clamp(12px, 2vw, 24px);
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
-      border-radius: 0;
+      border-radius: 2px;
       padding: 14px 28px;
-      margin-bottom: 0;
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.03),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2px;
       position: relative;
       overflow: hidden;
       width: 100%;
       max-width: 500px;
       justify-content: space-between;
-      transition: background-color 0.2s var(--ease-snap), border-color 0.2s;
+      transition: background-color 0.3s;
     }
 
     .career-highs-container:hover {
@@ -388,10 +423,9 @@
       color: var(--clr-text-primary);
       min-width: 28px;
       text-align: center;
-      font-weight: 900;
-      letter-spacing: 0;
-      text-transform: uppercase;
-      transition: background-color 0.2s, color 0.2s;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
     }
 
     /* Traveling shimmer on bio container */
@@ -442,44 +476,46 @@
       min-width: 32px;
       text-align: center;
       cursor: pointer;
-      font-weight: 900;
-      letter-spacing: 0;
-      text-transform: uppercase;
-      transition: background-color 0.2s var(--ease-snap), color 0.2s var(--ease-snap);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      transition: color 0.3s var(--ease-out-expo), text-shadow 0.3s;
       position: relative;
       min-height: 1.2rem;
     }
 
     .bio-value:hover,
     .bio-value:focus-visible {
-      background-color: var(--clr-text-primary);
-      color: var(--clr-text-inverse);
+      color: var(--clr-accent);
+      text-shadow: 0 0 16px var(--clr-accent-glow);
       outline: none;
     }
 
     .header-title {
       font-family: var(--font-display);
       text-transform: uppercase;
-      font-weight: 900;
+      font-weight: 800;
       font-style: normal;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.05em;
       font-size: clamp(3rem, 8vw, 7.5rem);
       line-height: 0.8;
       margin: 0;
-      color: var(--clr-text-primary);
+      background: linear-gradient(180deg, var(--clr-text-primary) 0%, rgba(240, 237, 232, 0.4) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       position: relative;
     }
 
-    /* Solid architectural underline */
+    /* Editorial underline flourish */
     .header-title::after {
       content: '';
       position: absolute;
-      bottom: -8px;
+      bottom: -4px;
       left: 0;
       width: 0;
-      height: 4px;
-      background: var(--clr-text-primary);
-      animation: title-underline 0.8s var(--ease-snap) 0.2s forwards;
+      height: 1px;
+      background: linear-gradient(90deg, var(--clr-text-primary), transparent);
+      animation: title-underline 1.8s var(--ease-out-expo) 0.6s forwards;
     }
 
     @keyframes title-underline {
@@ -513,7 +549,14 @@
       position: relative;
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
-      border-radius: 0;
+      border-radius: 2px;
+      box-shadow:
+        0 1px 0 0 var(--clr-border),
+        0 8px 24px rgba(0, 0, 0, 0.2),
+        0 32px 64px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
       overflow: hidden;
       flex: 1;
       display: flex;
@@ -692,61 +735,57 @@
 
     /* — Row Aesthetics —————————————————————————— */
     .stats-grid tbody tr {
-      transition: background-color 0.15s var(--ease-snap), transform 0.15s var(--ease-snap), color 0.15s var(--ease-snap);
+      transition: background-color 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
       position: relative;
-      content-visibility: auto;
-      /* extreme performance */
     }
 
-    /* Solid architectural edge trace on hover */
+    /* Luminous edge trace on hover */
     .stats-grid tbody tr::after {
       content: '';
       position: absolute;
       left: 0;
-      top: 0;
       bottom: 0;
-      width: 4px;
-      background: var(--clr-text-primary);
-      transform: scaleY(0);
-      transform-origin: center;
-      transition: transform 0.15s var(--ease-snap);
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--clr-accent-glow), transparent);
+      transition: width 0.6s var(--ease-out-expo);
       pointer-events: none;
     }
 
     .stats-grid tbody tr:hover::after,
     .stats-grid tbody tr:focus-within::after {
-      transform: scaleY(1);
+      width: 100%;
     }
 
     .stats-grid tbody tr:hover,
     .stats-grid tbody tr:focus-within {
-      background-color: var(--clr-text-primary);
-      color: var(--clr-text-inverse);
-      transform: translateX(4px);
+      background-color: var(--clr-surface-hover);
+      transform: scaleX(1.004) scaleY(1.02);
       z-index: 10;
+      box-shadow: 0 0 0 1px var(--clr-border-active), 0 0 32px -8px var(--clr-accent-glow);
     }
 
     .stats-grid td:first-child {
       background: var(--clr-bg);
-      transition: background-color 0.15s var(--ease-snap), color 0.15s var(--ease-snap);
+      transition: background-color 0.3s var(--ease-out-expo);
     }
 
     .stats-grid tbody tr:hover td:first-child,
     .stats-grid tbody tr:focus-within td:first-child {
-      background-color: var(--clr-text-primary);
-      color: var(--clr-text-inverse);
+      background-color: var(--clr-surface-hover);
     }
 
     /* — Cell Interactions —————————————————————— */
     .cell-interactive {
       cursor: pointer;
       position: relative;
-      font-weight: 700;
-      transition: transform 0.15s var(--ease-snap);
+      transition: color 0.3s var(--ease-out-expo), text-shadow 0.4s, transform 0.3s var(--ease-out-expo);
     }
 
     .cell-interactive:hover {
-      transform: translateY(-2px);
+      color: var(--clr-accent);
+      text-shadow: 0 0 20px var(--clr-accent-glow), 0 0 40px rgba(240, 237, 232, 0.08);
+      transform: translateY(-1px);
     }
 
     /* Subtle scan-pulse on hover */
