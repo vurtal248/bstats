@@ -1,85 +1,114 @@
 import { getThemeColors } from './utils.js';
 
 export function choreographEntrance() {
-  /* Cinematic: terminal boot sequence feel */
-  const tl = anime.timeline({ easing: 'easeOutExpo' });
+  // Guard: if anime.js failed to load from CDN, content is already visible at
+  // its natural CSS opacity — don't attempt to animate.
+  if (typeof anime === 'undefined') return;
 
-  /* Phase 1: Title materializes with vertical clip reveal */
-  tl.add({
-    targets: '.header-block',
-    opacity: [0, 1],
-    translateY: [-20, 0],
-    filter: ['blur(8px)', 'blur(0px)'],
-    duration: 1400,
-  })
-    /* Phase 2: Data container rises with scale + shadow bloom */
-    .add({
-      targets: '.data-container',
+  // Respect OS/browser "Reduce Motion" accessibility preference.
+  // If set, skip the entrance sequence entirely — content stays visible.
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+
+  // Safety net: if the animation throws for any reason (GPU issues, browser flags,
+  // extensions killing RAF), immediately restore visibility of critical elements.
+  const restoreVisibility = () => {
+    ['.header-block', '.data-container'].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) { el.style.opacity = '1'; el.style.filter = ''; el.style.transform = ''; }
+    });
+  };
+
+  try {
+    /* Cinematic: terminal boot sequence feel */
+    const tl = anime.timeline({ easing: 'easeOutExpo' });
+
+    /* Phase 1: Title materializes with vertical clip reveal */
+    tl.add({
+      targets: '.header-block',
       opacity: [0, 1],
-      translateY: [50, 0],
-      scale: [0.97, 1],
-      duration: 1200,
-    }, '-=900')
-    /* Phase 3: Table header columns fade in left-to-right stagger */
-    .add({
-      targets: '.stats-grid th',
+      translateY: [-20, 0],
+      filter: ['blur(8px)', 'blur(0px)'],
+      duration: 1400,
+    })
+      /* Phase 2: Data container rises with scale + shadow bloom */
+      .add({
+        targets: '.data-container',
+        opacity: [0, 1],
+        translateY: [50, 0],
+        scale: [0.97, 1],
+        duration: 1200,
+      }, '-=900')
+      /* Phase 3: Table header columns fade in left-to-right stagger */
+      .add({
+        targets: '.stats-grid th',
+        opacity: [0, 1],
+        translateY: [-10, 0],
+        delay: anime.stagger(25),
+        duration: 500,
+        easing: 'easeOutQuad'
+      }, '-=900')
+      /* Phase 4: Data rows slide in with alternating X offset */
+      .add({
+        targets: 'tr.data-row',
+        opacity: [0, 1],
+        translateX: (el, i) => [i % 2 === 0 ? -20 : 20, 0],
+        delay: anime.stagger(45),
+        duration: 700,
+        easing: 'easeOutCubic',
+        begin: (anim) => {
+          /* Flash each row with a scan pulse as it appears */
+          const tc = getThemeColors();
+          anim.animatables.forEach((a, idx) => {
+            setTimeout(() => {
+              anime({
+                targets: a.target,
+                backgroundColor: [tc.bgFlash, 'transparent'],
+                duration: 600,
+                easing: 'easeOutExpo'
+              });
+            }, idx * 45);
+          });
+        }
+      }, '-=700')
+      /* Phase 5: Footer rises with breathing glow */
+      .add({
+        targets: '#footer-row',
+        opacity: [0, 1],
+        translateY: [15, 0],
+        duration: 900,
+      }, '-=400');
+
+    /* FABs entrance: elastic pop with rotation */
+    anime({
+      targets: ['.btn-fab', '.btn-theme', '.btn-fab-mini'],
+      scale: [0, 1],
+      rotate: [-120, 0],
       opacity: [0, 1],
-      translateY: [-10, 0],
-      delay: anime.stagger(25),
-      duration: 500,
+      delay: anime.stagger(120, { start: 1000 }),
+      duration: 1100,
+      easing: 'easeOutElastic(1, .5)'
+    });
+
+    /* Scanline overlay fades in subtly */
+    anime({
+      targets: '.scanline-overlay',
+      opacity: [0, 0.4],
+      duration: 2000,
+      delay: 500,
       easing: 'easeOutQuad'
-    }, '-=900')
-    /* Phase 4: Data rows slide in with alternating X offset */
-    .add({
-      targets: 'tr.data-row',
-      opacity: [0, 1],
-      translateX: (el, i) => [i % 2 === 0 ? -20 : 20, 0],
-      delay: anime.stagger(45),
-      duration: 700,
-      easing: 'easeOutCubic',
-      begin: (anim) => {
-        /* Flash each row with a scan pulse as it appears */
-        const tc = getThemeColors();
-        anim.animatables.forEach((a, idx) => {
-          setTimeout(() => {
-            anime({
-              targets: a.target,
-              backgroundColor: [tc.bgFlash, 'transparent'],
-              duration: 600,
-              easing: 'easeOutExpo'
-            });
-          }, idx * 45);
-        });
-      }
-    }, '-=700')
-    /* Phase 5: Footer rises with breathing glow */
-    .add({
-      targets: '#footer-row',
-      opacity: [0, 1],
-      translateY: [15, 0],
-      duration: 900,
-    }, '-=400');
+    });
 
-  /* FABs entrance: elastic pop with rotation */
-  anime({
-    targets: ['.btn-fab', '.btn-theme', '.btn-fab-mini'],
-    scale: [0, 1],
-    rotate: [-120, 0],
-    opacity: [0, 1],
-    delay: anime.stagger(120, { start: 1000 }),
-    duration: 1100,
-    easing: 'easeOutElastic(1, .5)'
-  });
+    // Fallback: if the animation stalls for 4s (RAF blocked, GPU failure, etc.),
+    // force visibility so content is never permanently hidden.
+    setTimeout(restoreVisibility, 4000);
 
-  /* Scanline overlay fades in subtly */
-  anime({
-    targets: '.scanline-overlay',
-    opacity: [0, 0.4],
-    duration: 2000,
-    delay: 500,
-    easing: 'easeOutQuad'
-  });
+  } catch (e) {
+    console.warn('[BMetrics] Entrance animation failed, restoring visibility.', e);
+    restoreVisibility();
+  }
 }
+
 
 export function playRowConfirmFlash(tdNode) {
   const tc = getThemeColors();
