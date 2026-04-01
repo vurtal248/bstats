@@ -1,23 +1,43 @@
 import { getThemeColors } from './utils.js';
 
 export function choreographEntrance() {
-  // Guard: if anime.js failed to load from CDN, content is already visible at
-  // its natural CSS opacity — don't attempt to animate.
-  if (typeof anime === 'undefined') return;
-
-  // Respect OS/browser "Reduce Motion" accessibility preference.
-  // If set, skip the entrance sequence entirely — content stays visible.
-  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReduced) return;
-
-  // Safety net: if the animation throws for any reason (GPU issues, browser flags,
-  // extensions killing RAF), immediately restore visibility of critical elements.
+  // Safety net: if the animation throws or is skipped (GPU issues, browser flags,
+  // extensions killing RAF, accessibility set to reduced motion), 
+  // immediately restore visibility of critical elements.
   const restoreVisibility = () => {
-    ['.header-block', '.data-container'].forEach(sel => {
-      const el = document.querySelector(sel);
-      if (el) { el.style.opacity = '1'; el.style.filter = ''; el.style.transform = ''; }
+    const selectors = [
+      '.header-block', 
+      '.data-container', 
+      '.stats-grid th',
+      'tr.data-row',
+      '#footer-row',
+      '.btn-fab', 
+      '.btn-theme', 
+      '.btn-fab-mini',
+      '.scanline-overlay'
+    ];
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.style.opacity = '1';
+        el.style.filter = '';
+        el.style.transform = 'none';
+      });
     });
   };
+
+  // Guard: if anime.js failed to load from CDN, force visibility and skip animation.
+  if (typeof anime === 'undefined') {
+    restoreVisibility();
+    return;
+  }
+
+  // Respect OS/browser "Reduce Motion" accessibility preference.
+  // If set, skip the entrance sequence entirely — but ensure content becomes visible.
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    restoreVisibility();
+    return;
+  }
 
   try {
     /* Cinematic: terminal boot sequence feel */
