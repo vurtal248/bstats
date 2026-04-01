@@ -75,7 +75,15 @@ import { choreographEntrance, playRowConfirmFlash, playAggregateFlash, playCaree
 
       /* ——— Theme Setup ————————————————————————— */
 
-      
+      #initTheme() {
+        const saved = localStorage.getItem('bstats_theme');
+        if (saved === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      }
+
 
       /* ——— Lifecycle ——————————————————————————— */
 
