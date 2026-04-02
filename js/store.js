@@ -84,6 +84,37 @@ export class Store {
     this.saveProfiles();
   }
 
+  exportProfile() {
+    const profile = this.getActiveProfile();
+    const data = this.restoreState();
+    return {
+      profile,
+      data
+    };
+  }
+
+  importProfile(parsedJson) {
+    if (!parsedJson || !parsedJson.profile || !parsedJson.profile.name) {
+      throw new Error("Invalid profile format");
+    }
+    const name = parsedJson.profile.name;
+    const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    
+    // Copy all bio data, but assign new unique ID
+    const newProfile = { ...parsedJson.profile, id: newId };
+    
+    this.profiles.push(newProfile);
+    this.activeProfileId = newId;
+    this.saveProfiles();
+    
+    try {
+      const dataToSave = Array.isArray(parsedJson.data) ? parsedJson.data : [];
+      localStorage.setItem(STORAGE_KEY_PREFIX + newId, JSON.stringify(dataToSave));
+    } catch { }
+
+    return newId;
+  }
+
   getActiveProfile() {
     return this.profiles.find(p => p.id === this.activeProfileId);
   }
