@@ -1,8 +1,3 @@
-/**
- * @file onboarding.js
- * @description Guided onboarding flow with "Terminal Glass / HUD Spotlight" aesthetic.
- */
-
 const STEPS = [
   {
     target: '.scroll-context',
@@ -14,7 +9,7 @@ const STEPS = [
     target: '#main-fab-container',
     title: 'Trend Projection',
     desc: 'The engine automatically calculates derived metrics like True Shooting %. Use the <strong>Predict</strong> button to simulate future performance based on your historical variance.',
-    align: 'left'
+    align: 'top'
   },
   {
     target: '#profile-selector',
@@ -151,7 +146,8 @@ export function initOnboarding(force = false) {
 
     // Read actual dimensions after DOM update
     const actualTtWidth = tooltip.offsetWidth || 380;
-    const actualTtHeight = tooltip.offsetHeight || 320;
+    // Fallback to 400 to ensure we generously clear the bottom edge if offsetHeight reads 0
+    const actualTtHeight = tooltip.offsetHeight > 50 ? tooltip.offsetHeight : 400;
 
     // Tooltip constraints
     let ttTop = 0;
@@ -163,7 +159,7 @@ export function initOnboarding(force = false) {
       ttLeft = hole.left;
     } else if (step.align === 'top') {
       ttTop = hole.top - ttMargin - actualTtHeight;
-      ttLeft = hole.left;
+      ttLeft = hole.left - actualTtWidth + (hole.width); // Shift left to align right-edges for FAB
     } else if (step.align === 'left') {
       ttTop = hole.top + (hole.height / 2) - (actualTtHeight / 2);
       ttLeft = hole.left - ttMargin - actualTtWidth;
