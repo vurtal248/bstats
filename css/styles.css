@@ -1606,6 +1606,174 @@ select.input-modern option {
   line-height: 1.2;
 }
 
+.arch.empty-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--clr-text-secondary);
+  letter-spacing: 0.05em;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  /* JS animation handles reveal */
+}
+
+/* — Onboarding Spotlight HUD ——————————————————————— */
+.ob-spotlight-container {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  display: flex;
+}
+
+.ob-spotlight-backdrop {
+  position: absolute;
+  background: rgba(3, 3, 3, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.6s var(--ease-out-expo);
+  pointer-events: auto;
+  /* Block clicks on background */
+}
+
+:root[data-theme="light"] .ob-spotlight-backdrop {
+  background: rgba(250, 250, 250, 0.85);
+}
+
+.ob-spotlight-hole-bracket {
+  position: absolute;
+  border: 1px solid var(--clr-accent);
+  box-shadow: 0 0 24px var(--clr-accent-glow), inset 0 0 12px var(--clr-accent-glow);
+  transition: all 0.6s var(--ease-out-expo);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Corner markers for bracket */
+.ob-spotlight-hole-bracket::before,
+.ob-spotlight-hole-bracket::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--clr-accent);
+  pointer-events: none;
+}
+
+.ob-spotlight-hole-bracket::before {
+  top: -4px;
+  left: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  clip-path: polygon(0 0, 12px 0, 12px 2px, 2px 2px, 2px 12px, 0 12px,
+      0 0,
+      100% 0, 100% 12px, calc(100% - 2px) 12px, calc(100% - 2px) 2px, calc(100% - 12px) 2px, calc(100% - 12px) 0);
+}
+
+.ob-spotlight-hole-bracket::after {
+  bottom: -4px;
+  left: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  clip-path: polygon(0 100%, 0 calc(100% - 12px), 2px calc(100% - 12px), 2px calc(100% - 2px), 12px calc(100% - 2px), 12px 100%,
+      0 100%,
+      100% 100%, calc(100% - 12px) 100%, calc(100% - 12px) calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) calc(100% - 12px), 100% calc(100% - 12px));
+}
+
+.ob-spotlight-tooltip {
+  position: absolute;
+  width: 340px;
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border-active);
+  padding: 24px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--clr-accent-glow);
+  z-index: 20;
+  pointer-events: auto;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+.ob-spotlight-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, var(--clr-scan) 2px, var(--clr-scan) 4px);
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.ob-spotlight-terminal-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--clr-accent);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-spotlight-terminal-text::before {
+  content: '>';
+  animation: blink 1s step-end infinite;
+}
+
+.ob-spotlight-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--clr-text-primary);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.ob-spotlight-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--clr-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.ob-spotlight-desc strong {
+  color: var(--clr-text-primary);
+}
+
+.ob-spotlight-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--clr-border);
+  padding-top: 16px;
+}
+
+.ob-spotlight-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.ob-spotlight-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--clr-border);
+  transition: all 0.3s;
+}
+
+.ob-spotlight-dot.active {
+  background: var(--clr-accent);
+  box-shadow: 0 0 8px var(--clr-accent-glow);
+}
+
+.ob-floating-target {
+  position: relative !important;
+  z-index: 100000 !important;
+  pointer-events: none;
+  /* Let the backdrop capture clicks if we don't want them clicking it */
+}
+
 .archetype-tag {
   font-family: var(--font-mono);
   font-size: 0.5rem;
@@ -1751,7 +1919,8 @@ select.input-modern option {
 .onboarding-terminal {
   padding: 48px 32px;
   background: #030303;
-  color: #00ff41; /* classic terminal green */
+  color: #00ff41;
+  /* classic terminal green */
   font-family: var(--font-mono);
   font-size: 0.9rem;
   line-height: 1.5;
@@ -1766,19 +1935,22 @@ select.input-modern option {
 
 :root[data-theme="light"] .onboarding-terminal {
   background: #111;
-  color: #00ff41; 
+  color: #00ff41;
 }
 
 .onboarding-terminal::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.05) 2px, rgba(0,255,65,0.05) 4px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 65, 0.05) 2px, rgba(0, 255, 65, 0.05) 4px);
   pointer-events: none;
 }
 
 .terminal-text {
-  text-shadow: 0 0 4px rgba(0,255,65,0.4);
+  text-shadow: 0 0 4px rgba(0, 255, 65, 0.4);
   white-space: pre-wrap;
 }
 
@@ -1792,7 +1964,11 @@ select.input-modern option {
   margin-left: 4px;
 }
 
-@keyframes blink { 50% { opacity: 0; } }
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 
 .ob-dot {
   width: 6px;
