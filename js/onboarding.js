@@ -49,6 +49,15 @@ export function initOnboarding(force = false) {
 
   const bracket = document.createElement('div');
   bracket.className = 'ob-spotlight-hole-bracket';
+  bracket.innerHTML = `
+    <div class="ob-bracket-corner top-left"></div>
+    <div class="ob-bracket-corner top-right"></div>
+    <div class="ob-bracket-corner bottom-left"></div>
+    <div class="ob-bracket-corner bottom-right"></div>
+    <div class="ob-crosshair x-axis"></div>
+    <div class="ob-crosshair y-axis"></div>
+    <div class="ob-scan-bar"></div>
+  `;
 
   const tooltip = document.createElement('div');
   tooltip.className = 'ob-spotlight-tooltip';
@@ -110,7 +119,11 @@ export function initOnboarding(force = false) {
 
     // Build the tooltip UI
     tooltipContent.innerHTML = `
-      <div class="ob-spotlight-terminal-text">SYS.INIT_STEP[M_${currentStep + 1}]</div>
+      <div class="ob-spotlight-terminal-text">
+        <span class="ob-status-indicator"></span> 
+        <span>SYS.INIT_STEP[M_${currentStep + 1}]</span>
+        <span class="ob-coord-readout">[X:${Math.round(cx)} Y:${Math.round(cy)}]</span>
+      </div>
       <h3 class="ob-spotlight-title">${step.title}</h3>
       <p class="ob-spotlight-desc">${step.desc}</p>
       <div class="ob-spotlight-actions">
@@ -118,8 +131,10 @@ export function initOnboarding(force = false) {
           ${STEPS.map((_, i) => `<div class="ob-spotlight-dot ${i === currentStep ? 'active' : ''}"></div>`).join('')}
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-ghost" id="ob-btn-skip">Skip</button>
-          <button class="btn-primary" id="ob-btn-next" style="width: 100px;">${currentStep === STEPS.length - 1 ? 'Execute' : 'Next'}</button>
+          <button class="btn-ghost" id="ob-btn-skip">ABORT</button>
+          <button class="btn-primary" id="ob-btn-next" style="width: 110px;">
+            ${currentStep === STEPS.length - 1 ? 'EXECUTE' : 'PROCEED'}
+          </button>
         </div>
       </div>
     `;
