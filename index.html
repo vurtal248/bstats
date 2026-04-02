@@ -404,7 +404,8 @@
     <!-- Theme Toggle -->
     <div class="theme-toggle-container">
       <button class="btn-theme" id="help-toggle-btn" aria-label="Replay Onboarding" style="margin-right: 8px;">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="currentColor">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"
+          stroke="currentColor">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
           <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -462,29 +463,9 @@
   </dialog>
 
 
-  <!-- Modal dialog for onboarding -->
+  <!-- Modal dialog for onboarding (replaced dynamically by JS, but keeping markup structure intact if needed) -->
   <dialog class="modal-dialog onboarding-dialog" id="modal-onboarding" style="max-width: 600px;">
-    <div class="modal-content" style="padding: 0;">
-      <!-- Terminal sequence stage -->
-      <div class="onboarding-terminal" id="ob-terminal">
-        <div class="terminal-text" id="ob-terminal-text"></div>
-        <div class="terminal-cursor"></div>
-      </div>
-      <!-- HUD UI stage -->
-      <div class="onboarding-ui" id="ob-ui" hidden>
-        <div class="ob-header" style="padding: 24px 24px 16px; border-bottom: 1px solid var(--clr-border); display: flex; justify-content: space-between; align-items: center;">
-          <h2 class="modal-title" id="ob-step-title" style="margin: 0; font-size: 1rem; color: var(--clr-text-primary);">Terminal Initialization</h2>
-          <div class="ob-dots" id="ob-dots" style="display: flex; gap: 6px;"></div>
-        </div>
-        <div class="ob-body" id="ob-step-body" style="padding: 24px; min-height: 120px;">
-          <!-- Content via JS -->
-        </div>
-        <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid var(--clr-border);">
-          <button class="btn-ghost" id="btn-ob-skip">Skip</button>
-          <button class="btn-primary" id="btn-ob-next" style="width: 120px;">Next</button>
-        </div>
-      </div>
-    </div>
+    <!-- ... -->
   </dialog>
 
   <script type="module" src="./js/app.js"></script>
