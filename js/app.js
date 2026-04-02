@@ -2,6 +2,7 @@ import { METRICS_SCHEMA, EDITABLE_KEYS, COMPUTED_COLS, SEED_DATA } from './schem
 import { STORAGE_KEY_PROFILES, STORAGE_KEY_ACTIVE, STORAGE_KEY_PREFIX, LEGACY_STORAGE_KEY } from './store.js';
 import { formatValue, computeDerived, ranZ, getThemeColors } from './utils.js';
 import { choreographEntrance, playRowConfirmFlash, playAggregateFlash, playCareerHighsFlash } from './animation.js';
+import { initOnboarding } from './onboarding.js';
 
 /**
      * @file BMetrics — Interactive Logic & State Management
@@ -100,6 +101,7 @@ class BMetricsApp {
       setTimeout(() => {
         this.#render();
         choreographEntrance();
+        initOnboarding();
       }, 120);
     });
   }
@@ -575,6 +577,13 @@ class BMetricsApp {
 
     // initial render profile menu
     this.#renderProfileMenu();
+
+    const helpBtn = document.getElementById('help-toggle-btn');
+    if (helpBtn) {
+      helpBtn.addEventListener('click', () => {
+        initOnboarding(true);
+      });
+    }
 
     const themeBtn = document.getElementById('theme-toggle-btn');
     if (themeBtn) {
