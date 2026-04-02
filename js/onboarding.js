@@ -1,20 +1,26 @@
 /**
  * @file onboarding.js
- * @description Guided onboarding flow with "Terminal Glass" aesthetic.
+ * @description Guided onboarding flow with "Terminal Glass / HUD Spotlight" aesthetic.
  */
 
 const STEPS = [
   {
+    target: '.scroll-context',
     title: 'Data Engine',
-    desc: 'Welcome to BMetrics. This is your professional performance engine. <strong>Click any cell</strong> to safely overwrite metrics, or tap the <strong style="color:var(--clr-text-primary);">+</strong> button to log new game data.'
+    desc: 'Welcome to BMetrics. This is your professional performance engine. <strong>Click any cell</strong> to safely overwrite metrics, or tap the <strong style="color:var(--clr-text-primary);">+</strong> button to log new game data.',
+    align: 'top'
   },
   {
+    target: '#main-fab-container',
     title: 'Trend Projection',
-    desc: 'The engine automatically calculates derived metrics like True Shooting %. Use the <strong>Predict</strong> button to simulate future performance based on your historical variance.'
+    desc: 'The engine automatically calculates derived metrics like True Shooting %. Use the <strong>Predict</strong> button to simulate future performance based on your historical variance.',
+    align: 'left'
   },
   {
+    target: '#profile-selector',
     title: 'Profile Isolation',
-    desc: 'You can create separate databases for different players, tournaments, or seasons. Click <strong>Database</strong> in the top left to manage your profiles.'
+    desc: 'You can create separate databases for different players, tournaments, or seasons. Click <strong>Database</strong> in the top left to manage your profiles.',
+    align: 'bottom'
   }
 ];
 
@@ -22,160 +28,191 @@ export function initOnboarding(force = false) {
   const onboarded = localStorage.getItem('bstats_onboarded');
   if (onboarded === 'true' && !force) return;
 
-  const modal = document.getElementById('modal-onboarding');
-  if (!modal) return;
+  // Remove existing spotlight if forced trigger
+  const existing = document.getElementById('ob-spotlight');
+  if (existing) existing.remove();
 
-  const terminalContainer = document.getElementById('ob-terminal');
-  const terminalText = document.getElementById('ob-terminal-text');
-  const uiContainer = document.getElementById('ob-ui');
-  const stepTitle = document.getElementById('ob-step-title');
-  const stepBody = document.getElementById('ob-step-body');
-  const dotsContainer = document.getElementById('ob-dots');
-  const btnNext = document.getElementById('btn-ob-next');
-  const btnSkip = document.getElementById('btn-ob-skip');
+  // Create Spotlight HUD Container
+  const container = document.createElement('div');
+  container.className = 'ob-spotlight-container';
+  container.id = 'ob-spotlight';
+
+  // Create the 4 backdrop masks to form the spotlight hole
+  const panels = ['top', 'bottom', 'left', 'right'].map(pos => {
+    const el = document.createElement('div');
+    el.className = 'ob-spotlight-backdrop';
+    el.dataset.pos = pos;
+    // Set initial size to 0 to avoid flashing large panels
+    el.style.width = '0px'; el.style.height = '0px'; el.style.top = '0px'; el.style.left = '0px';
+    return el;
+  });
+
+  const bracket = document.createElement('div');
+  bracket.className = 'ob-spotlight-hole-bracket';
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'ob-spotlight-tooltip';
+
+  const tooltipContent = document.createElement('div');
+  tooltipContent.style.position = 'relative';
+  tooltip.appendChild(tooltipContent);
+
+  container.append(...panels, bracket, tooltip);
+  document.body.appendChild(container);
 
   let currentStep = 0;
   let isAnimating = false;
+  let activeTarget = null;
 
-  // Reset Phase
-  terminalContainer.hidden = false;
-  uiContainer.hidden = true;
-  terminalText.textContent = '';
-  modal.showModal();
+  // Ensure table fills layout properly so `.scroll-context` isn't tiny
+  // Sometimes when empty, the container compresses. Not critical, but we adapt.
 
-  // Terminal boot sequence
-  async function runTerminalBoot() {
-    isAnimating = true;
-    const lines = [
-      'BMetrics System Initialization...',
-      'Allocating memory arrays...',
-      'Loading core schema... OK',
-      'Mounting visual interfaces...',
-      'Bypassing auth protocols... OK',
-      '[SYSTEM ONLINE]'
-    ];
-
-    for (let i = 0; i < lines.length; i++) {
-      await typeLine(lines[i], 20);
-      terminalText.textContent += '\n';
-      await sleep(150);
+  function renderStep(initial = false) {
+    if (currentStep >= STEPS.length) {
+      closeOnboarding();
+      return;
     }
-    
-    await sleep(400);
 
-    // Fade out terminal, fade in UI
-    anime({
-      targets: terminalContainer,
-      opacity: 0,
-      duration: 500,
-      easing: 'easeInQuad',
-      complete: () => {
-        terminalContainer.hidden = true;
-        terminalContainer.style.opacity = '1'; // reset
-        startUiFlow();
-      }
-    });
-  }
-
-  function typeLine(text, speed) {
-    return new Promise(resolve => {
-      let charIndex = 0;
-      function type() {
-        if (charIndex < text.length) {
-          terminalText.textContent += text.charAt(charIndex);
-          charIndex++;
-          setTimeout(type, speed + Math.random() * 20); // Add variability
-        } else {
-          resolve();
-        }
-      }
-      type();
-    });
-  }
-
-  function startUiFlow() {
-    uiContainer.hidden = false;
-    uiContainer.style.opacity = '0';
-    uiContainer.style.transform = 'translateY(10px)';
-    
-    anime({
-      targets: uiContainer,
-      opacity: 1,
-      translateY: 0,
-      duration: 600,
-      easing: 'easeOutExpo',
-      complete: () => { isAnimating = false; }
-    });
-
-    renderStep();
-  }
-
-  function renderStep() {
     const step = STEPS[currentStep];
-    
-    // Update text content with slight fade
-    anime({
-      targets: [stepTitle, stepBody],
-      opacity: [0, 1],
-      translateX: [5, 0],
-      duration: 400,
-      easing: 'easeOutQuad'
-    });
-    
-    stepTitle.textContent = step.title;
-    stepBody.innerHTML = `<p class="ob-desc">${step.desc}</p>`;
-    
-    // Build dots
-    dotsContainer.innerHTML = STEPS.map((_, i) => 
-      `<div class="ob-dot ${i === currentStep ? 'active' : ''}"></div>`
-    ).join('');
+    const targetEl = document.querySelector(step.target);
 
-    btnNext.textContent = currentStep === STEPS.length - 1 ? 'Enter Matrix' : 'Next';
-  }
-
-  function nextStep() {
-    if (isAnimating) return;
-    if (currentStep < STEPS.length - 1) {
+    if (!targetEl) {
+      console.warn(`Onboarding target not found: ${step.target}`);
       currentStep++;
       renderStep();
-    } else {
-      closeOnboarding();
+      return;
     }
+
+    if (activeTarget) {
+      activeTarget.classList.remove('ob-floating-target');
+    }
+    activeTarget = targetEl;
+    activeTarget.classList.add('ob-floating-target');
+
+    // Dimensions
+    const rect = activeTarget.getBoundingClientRect();
+    const pad = 12; // padding around element
+
+    // Safety check for tiny rects (like if hidden)
+    const cw = Math.max(rect.width, 40);
+    const ch = Math.max(rect.height, 40);
+    const cx = rect.left + (rect.width / 2) - (cw / 2);
+    const cy = rect.top + (rect.height / 2) - (ch / 2);
+
+    const hole = {
+      top: cy - pad,
+      left: cx - pad,
+      width: cw + (pad * 2),
+      height: ch + (pad * 2)
+    };
+    hole.bottom = hole.top + hole.height;
+    hole.right = hole.left + hole.width;
+
+    // Build the tooltip UI
+    tooltipContent.innerHTML = `
+      <div class="ob-spotlight-terminal-text">SYS.INIT_STEP[M_${currentStep + 1}]</div>
+      <h3 class="ob-spotlight-title">${step.title}</h3>
+      <p class="ob-spotlight-desc">${step.desc}</p>
+      <div class="ob-spotlight-actions">
+        <div class="ob-spotlight-dots">
+          ${STEPS.map((_, i) => `<div class="ob-spotlight-dot ${i === currentStep ? 'active' : ''}"></div>`).join('')}
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-ghost" id="ob-btn-skip">Skip</button>
+          <button class="btn-primary" id="ob-btn-next" style="width: 100px;">${currentStep === STEPS.length - 1 ? 'Execute' : 'Next'}</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('ob-btn-skip').addEventListener('click', closeOnboarding);
+    document.getElementById('ob-btn-next').addEventListener('click', () => {
+      if (isAnimating) return;
+      currentStep++;
+      renderStep();
+    });
+
+    const l = window.innerWidth;
+    const t = window.innerHeight;
+
+    // Tooltip constraints
+    let ttTop = 0;
+    let ttLeft = 0;
+    const ttMargin = 24;
+
+    if (step.align === 'bottom') {
+      ttTop = hole.bottom + ttMargin;
+      ttLeft = hole.left;
+    } else if (step.align === 'top') {
+      ttTop = hole.top - ttMargin - 220;
+      ttLeft = hole.left;
+    } else if (step.align === 'left') {
+      ttTop = hole.top;
+      ttLeft = hole.left - ttMargin - 340;
+    } else if (step.align === 'right') {
+      ttTop = hole.top;
+      ttLeft = hole.right + ttMargin;
+    }
+
+    ttLeft = Math.max(16, Math.min(ttLeft, l - 340 - 16));
+    ttTop = Math.max(16, Math.min(ttTop, t - 260));
+
+    // Animations
+    const dur = initial ? 0 : 500;
+    const easing = 'easeOutExpo';
+
+    // Top Panel: 0 to hole.top
+    anime({ targets: panels[0], top: 0, left: 0, width: '100%', height: Math.max(0, hole.top), duration: dur, easing });
+    // Bottom Panel: hole.bottom to end
+    anime({ targets: panels[1], top: hole.bottom, left: 0, width: '100%', height: Math.max(0, t - hole.bottom), duration: dur, easing });
+    // Left Panel: middle slice, left to hole.left
+    anime({ targets: panels[2], top: hole.top, left: 0, width: Math.max(0, hole.left), height: hole.height, duration: dur, easing });
+    // Right Panel: middle slice, hole.right to end
+    anime({ targets: panels[3], top: hole.top, left: hole.right, width: Math.max(0, l - hole.right), height: hole.height, duration: dur, easing });
+
+    anime({ targets: bracket, top: hole.top, left: hole.left, width: hole.width, height: hole.height, duration: dur, easing });
+
+    anime({
+      targets: tooltip,
+      top: ttTop, left: ttLeft,
+      opacity: [0, 1],
+      translateX: initial ? 0 : (step.align === 'left' ? [10, 0] : [-10, 0]),
+      duration: dur, easing
+    });
   }
 
   function closeOnboarding() {
     localStorage.setItem('bstats_onboarded', 'true');
-    modal.setAttribute('closing', '');
+    if (activeTarget) {
+      activeTarget.classList.remove('ob-floating-target');
+    }
     anime({
-      targets: modal,
+      targets: container,
       opacity: 0,
-      translateY: 20,
-      duration: 300,
+      duration: 400,
       easing: 'easeInExpo',
       complete: () => {
-        modal.close();
-        modal.removeAttribute('closing');
-        anime.set(modal, { opacity: '', translateY: '' });
+        container.remove();
+        isAnimating = false;
       }
     });
 
-    // Clean up events
-    btnNext.removeEventListener('click', nextStep);
-    btnSkip.removeEventListener('click', closeOnboarding);
+    const oldModal = document.getElementById('modal-onboarding');
+    if (oldModal && oldModal.hasAttribute('open')) {
+      oldModal.close();
+    }
   }
 
-  btnNext.addEventListener('click', nextStep);
-  btnSkip.addEventListener('click', closeOnboarding);
+  window.addEventListener('resize', () => {
+    if (document.getElementById('ob-spotlight')) renderStep(true);
+  });
 
-  // If we are forcing (via help button), skip the terminal sequence for speed
-  if (force) {
-    terminalContainer.hidden = true;
-    startUiFlow();
-  } else {
-    runTerminalBoot();
-  }
-}
+  container.style.opacity = '0';
+  renderStep(true);
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  anime({
+    targets: container,
+    opacity: 1,
+    duration: 800,
+    easing: 'easeOutExpo'
+  });
 }
