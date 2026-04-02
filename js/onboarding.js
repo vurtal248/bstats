@@ -152,24 +152,27 @@ export function initOnboarding(force = false) {
     // Tooltip constraints
     let ttTop = 0;
     let ttLeft = 0;
-    const ttMargin = 24;
+    const ttMargin = 32;
+    const ttWidth = 380; // Matches CSS width
+    const ttHeightEst = 280; // Estimated dynamic height
 
     if (step.align === 'bottom') {
       ttTop = hole.bottom + ttMargin;
       ttLeft = hole.left;
     } else if (step.align === 'top') {
-      ttTop = hole.top - ttMargin - 220;
+      ttTop = hole.top - ttMargin - ttHeightEst;
       ttLeft = hole.left;
     } else if (step.align === 'left') {
-      ttTop = hole.top;
-      ttLeft = hole.left - ttMargin - 340;
+      ttTop = hole.top + (hole.height / 2) - (ttHeightEst / 2);
+      ttLeft = hole.left - ttMargin - ttWidth;
     } else if (step.align === 'right') {
-      ttTop = hole.top;
+      ttTop = hole.top + (hole.height / 2) - (ttHeightEst / 2);
       ttLeft = hole.right + ttMargin;
     }
 
-    ttLeft = Math.max(16, Math.min(ttLeft, l - 340 - 16));
-    ttTop = Math.max(16, Math.min(ttTop, t - 260));
+    // Keep it on screen rigorously
+    ttLeft = Math.max(16, Math.min(ttLeft, l - ttWidth - 16));
+    ttTop = Math.max(16, Math.min(ttTop, t - ttHeightEst - 32));
 
     // Animations
     const dur = initial ? 0 : 500;
