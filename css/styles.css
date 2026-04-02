@@ -1737,3 +1737,81 @@ select.input-modern option {
     height: 14px;
   }
 }
+
+/* — Onboarding Flow ————————————————————————— */
+.onboarding-dialog {
+  border: 1px solid var(--clr-border);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: var(--clr-surface);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-radius: 4px;
+}
+
+.onboarding-terminal {
+  padding: 48px 32px;
+  background: #030303;
+  color: #00ff41; /* classic terminal green */
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 240px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+:root[data-theme="light"] .onboarding-terminal {
+  background: #111;
+  color: #00ff41; 
+}
+
+.onboarding-terminal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.05) 2px, rgba(0,255,65,0.05) 4px);
+  pointer-events: none;
+}
+
+.terminal-text {
+  text-shadow: 0 0 4px rgba(0,255,65,0.4);
+  white-space: pre-wrap;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background-color: #00ff41;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  margin-left: 4px;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.ob-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--clr-border);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.ob-dot.active {
+  background: var(--clr-accent);
+  transform: scale(1.5);
+  box-shadow: 0 0 8px var(--clr-accent-glow);
+}
+
+.ob-desc {
+  font-family: var(--font-mono);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  color: var(--clr-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
