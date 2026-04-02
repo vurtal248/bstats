@@ -149,30 +149,33 @@ export function initOnboarding(force = false) {
     const l = window.innerWidth;
     const t = window.innerHeight;
 
+    // Read actual dimensions after DOM update
+    const actualTtWidth = tooltip.offsetWidth || 380;
+    const actualTtHeight = tooltip.offsetHeight || 320;
+
     // Tooltip constraints
     let ttTop = 0;
     let ttLeft = 0;
     const ttMargin = 32;
-    const ttWidth = 380; // Matches CSS width
-    const ttHeightEst = 280; // Estimated dynamic height
 
     if (step.align === 'bottom') {
       ttTop = hole.bottom + ttMargin;
       ttLeft = hole.left;
     } else if (step.align === 'top') {
-      ttTop = hole.top - ttMargin - ttHeightEst;
+      ttTop = hole.top - ttMargin - actualTtHeight;
       ttLeft = hole.left;
     } else if (step.align === 'left') {
-      ttTop = hole.top + (hole.height / 2) - (ttHeightEst / 2);
-      ttLeft = hole.left - ttMargin - ttWidth;
+      ttTop = hole.top + (hole.height / 2) - (actualTtHeight / 2);
+      ttLeft = hole.left - ttMargin - actualTtWidth;
     } else if (step.align === 'right') {
-      ttTop = hole.top + (hole.height / 2) - (ttHeightEst / 2);
+      ttTop = hole.top + (hole.height / 2) - (actualTtHeight / 2);
       ttLeft = hole.right + ttMargin;
     }
 
     // Keep it on screen rigorously
-    ttLeft = Math.max(16, Math.min(ttLeft, l - ttWidth - 16));
-    ttTop = Math.max(16, Math.min(ttTop, t - ttHeightEst - 32));
+    const safeMargin = 24;
+    ttLeft = Math.max(safeMargin, Math.min(ttLeft, l - actualTtWidth - safeMargin));
+    ttTop = Math.max(safeMargin, Math.min(ttTop, t - actualTtHeight - safeMargin));
 
     // Animations
     const dur = initial ? 0 : 500;
