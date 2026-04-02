@@ -57,6 +57,9 @@ class BMetricsApp {
       profileList: document.getElementById('profile-list'),
       activeProfileName: document.getElementById('active-profile-name'),
       btnNewProfile: document.getElementById('btn-new-profile'),
+      btnExportProfile: document.getElementById('btn-export-profile'),
+      btnImportProfile: document.getElementById('btn-import-profile'),
+      inputImportFile: document.getElementById('input-import-file'),
       modalNewProfile: document.getElementById('modal-new-profile'),
       inputProfileName: document.getElementById('input-profile-name'),
       btnCancelProfile: document.getElementById('btn-cancel-profile'),
@@ -261,6 +264,69 @@ class BMetricsApp {
 
     this.#saveProfiles();
     this.#renderProfileMenu();
+  }
+
+  #handleExportProfile() {
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (!activeProfile) return;
+
+    const payload = {
+      profile: activeProfile,
+      data: this.#state.data
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bstats-${activeProfile.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.#closeProfileMenu();
+  }
+
+  #handleImportFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsedJson = JSON.parse(e.target.result);
+        if (!parsedJson || !parsedJson.profile || !parsedJson.profile.name) {
+          throw new Error('Invalid profile format');
+        }
+
+        const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        const newProfile = { ...parsedJson.profile, id: newId };
+        
+        this.#profiles.push(newProfile);
+        this.#activeProfileId = newId;
+        this.#saveProfiles();
+
+        const dataToSave = Array.isArray(parsedJson.data) ? parsedJson.data : [];
+        localStorage.setItem(STORAGE_KEY_PREFIX + newId, JSON.stringify(dataToSave));
+
+        // Switch to imported profile
+        this.#state.data = this.#restoreState();
+        this.#state.sortRef = { key: null, asc: true };
+        this.#hydrateComputed();
+
+        this.#renderProfileMenu();
+        this.#renderProfileBio();
+        this.#render();
+
+        // Clear input for next time
+        this.refs.inputImportFile.value = '';
+        this.#closeProfileMenu();
+
+      } catch (err) {
+        alert("Failed to import database: " + err.message);
+      }
+    };
+    reader.readAsText(file);
   }
 
   #toggleProfileMenu() {
@@ -574,6 +640,17 @@ class BMetricsApp {
         this.#handleCreateProfile();
       }
     });
+
+    if (this.refs.btnExportProfile) {
+      this.refs.btnExportProfile.addEventListener('click', () => this.#handleExportProfile());
+    }
+
+    if (this.refs.btnImportProfile && this.refs.inputImportFile) {
+      this.refs.btnImportProfile.addEventListener('click', () => {
+        this.refs.inputImportFile.click();
+      });
+      this.refs.inputImportFile.addEventListener('change', (e) => this.#handleImportFile(e));
+    }
 
     // initial render profile menu
     this.#renderProfileMenu();
