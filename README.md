@@ -1,6 +1,6 @@
 # B-Stats
 
-**B-Stats** is a web that allows you to keep track of basketball stats, as well as allowing you to simulate future game performances based on your past performances.
+**B-Stats** is a website that allows you to keep track of basketball stats, as well as allowing you to simulate future game performances based on your past performances.
 
 🔗 **[Link](https://vurtal248.github.io/bstats/)**
 
