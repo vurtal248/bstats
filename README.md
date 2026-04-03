@@ -14,15 +14,6 @@
 - **Simulation Engine**: Predict future game performances based on recent statistical averages and historical variance.
 - **Adaptive Interface**: Toggleable dark/light modes and immersive fluid animations powered by the `anime.js` library.
 
-## Technical Implementation
-
-B-Stats is built on:
-
-- **HTML5**: Document structuring and accessibility compliance.
-- **CSS3 (`css/styles.css`)**: Utilizes custom CSS variables, flexbox, CSS grid, backdrop-filters, and noise overlays to achieve the Liquid Glass aesthetic without large styling frameworks.
-- **JavaScript (`js/app.js`, `js/store.js`)**: ES Modules handle application logic, local storage hydration, complex DOM manipulation, and data schema management.
-- **Animation (`anime.js`)**: Lightweight library controlling spatial transitions, spotlight reticles, and layout reveals.
-
 ## 📁 Repository Structure
 
 - `index.html`: Main application skeleton and UI scaffolding.
@@ -30,5 +21,12 @@ B-Stats is built on:
 - `js/app.js`: Core controller interfacing with the UI.
 - `js/store.js`: Data structures, serialization, and `localStorage` persistence logic.
 - `js/onboarding.js`: Specialized logic for the HUD onboarding experience.
+
+B-Stats is built on:
+
+- **HTML5**: Document structuring and accessibility compliance.
+- **CSS3 (`css/styles.css`)**: Utilizes custom CSS variables, flexbox, CSS grid, backdrop-filters, and noise overlays to achieve the Liquid Glass aesthetic without large styling frameworks.
+- **JavaScript (`js/app.js`, `js/store.js`)**: ES Modules handle application logic, local storage hydration, complex DOM manipulation, and data schema management.
+- **Animation (`anime.js`)**: Lightweight library controlling spatial transitions, spotlight reticles, and layout reveals.
 
 ---
