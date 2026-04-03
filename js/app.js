@@ -301,7 +301,7 @@ class BMetricsApp {
 
         const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         const newProfile = { ...parsedJson.profile, id: newId };
-        
+
         this.#profiles.push(newProfile);
         this.#activeProfileId = newId;
         this.#saveProfiles();
@@ -396,7 +396,7 @@ class BMetricsApp {
   #renderProfileBio() {
     const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
     if (!activeProfile) return;
-    ['position', 'heightFt', 'heightIn', 'weight', 'wingspan', 'age'].forEach(key => {
+    ['position', 'heightFt', 'heightIn', 'weight', 'wingspan', 'age', 'team'].forEach(key => {
       const el = this.refs.playerBio.querySelector(`[data-bio-key="${key}"]`);
       if (el) {
         el.textContent = activeProfile[key] || '-';
@@ -469,6 +469,43 @@ class BMetricsApp {
         opt.style.color = 'var(--clr-text-primary)';
         opt.style.direction = 'ltr';
       });
+    } else if (key === 'team') {
+      // Searchable NBA team picker via datalist
+      const NBA_TEAMS = [
+        'Atlanta Hawks', 'Boston Celtics', 'Brooklyn Nets', 'Charlotte Hornets',
+        'Chicago Bulls', 'Cleveland Cavaliers', 'Dallas Mavericks', 'Denver Nuggets',
+        'Detroit Pistons', 'Golden State Warriors', 'Houston Rockets', 'Indiana Pacers',
+        'LA Clippers', 'Los Angeles Lakers', 'Memphis Grizzlies', 'Miami Heat',
+        'Milwaukee Bucks', 'Minnesota Timberwolves', 'New Orleans Pelicans', 'New York Knicks',
+        'Oklahoma City Thunder', 'Orlando Magic', 'Philadelphia 76ers', 'Phoenix Suns',
+        'Portland Trail Blazers', 'Sacramento Kings', 'San Antonio Spurs', 'Toronto Raptors',
+        'Utah Jazz', 'Washington Wizards'
+      ];
+
+      // Unique datalist id to avoid collisions
+      const listId = 'nba-team-list';
+      let datalist = document.getElementById(listId);
+      if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = listId;
+        datalist.innerHTML = NBA_TEAMS.map(t => `<option value="${t}"></option>`).join('');
+        document.body.appendChild(datalist);
+      }
+
+      input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input-edit';
+      input.setAttribute('list', listId);
+      input.autocomplete = 'off';
+      input.placeholder = 'Search team…';
+      input.value = prevVal;
+      input.style.width = '140px';
+
+      // Snap to exact team name on valid match
+      input.addEventListener('input', () => {
+        const match = NBA_TEAMS.find(t => t.toLowerCase() === input.value.toLowerCase());
+        if (match) input.value = match;
+      });
     } else {
       input = document.createElement('input');
       input.type = 'text';
@@ -522,6 +559,7 @@ class BMetricsApp {
     if (key === 'position') {
       input.addEventListener('change', commit);
     }
+    // For datalist inputs, also commit on Enter immediately (blur fires after)
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
