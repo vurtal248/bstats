@@ -499,7 +499,7 @@ class BMetricsApp {
       input.autocomplete = 'off';
       input.placeholder = 'Search team…';
       input.value = prevVal;
-      input.style.width = '140px';
+      input.style.width = '220px';
 
       // Snap to exact team name on valid match
       input.addEventListener('input', () => {
