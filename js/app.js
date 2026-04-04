@@ -202,21 +202,31 @@ class BMetricsApp {
     this.refs.profileList.innerHTML = this.#profiles.map(p => `
           <div class="profile-item ${p.id === this.#activeProfileId ? 'is-active' : ''}" data-id="${p.id}" tabindex="0" role="menuitem">
             <span class="profile-item-name">${p.name}</span>
-            ${this.#profiles.length > 1 ? `
-            <button class="btn-delete-profile" aria-label="Delete ${p.name}" data-action="delete" data-id="${p.id}">
-              <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
-            </button>
-            ` : ''}
+            <div style="display:flex; gap:4px; margin-left: 8px;">
+              <button class="btn-profile-action btn-rename-profile" aria-label="Rename ${p.name}" data-action="rename" data-id="${p.id}">
+                <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+              ${this.#profiles.length > 1 ? `
+              <button class="btn-profile-action btn-delete-profile" aria-label="Delete ${p.name}" data-action="delete" data-id="${p.id}">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+              </button>
+              ` : ''}
+            </div>
           </div>
         `).join('');
 
     // Attach events to list items
     this.refs.profileList.querySelectorAll('.profile-item').forEach(item => {
       item.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
         const deleteBtn = e.target.closest('.btn-delete-profile');
+        const renameBtn = e.target.closest('.btn-rename-profile');
         if (deleteBtn) {
           e.stopPropagation();
           this.#handleDeleteProfile(item.dataset.id);
+        } else if (renameBtn) {
+          e.stopPropagation();
+          this.#handleRenameProfile(item.dataset.id, item.querySelector('.profile-item-name'));
         } else {
           this.#handleSwitchProfile(item.dataset.id);
         }
@@ -321,6 +331,51 @@ class BMetricsApp {
 
     this.#saveProfiles();
     this.#renderProfileMenu();
+  }
+
+  #handleRenameProfile(id, nameSpan) {
+    if (nameSpan.parentNode.querySelector('.input-rename')) return;
+    
+    const profile = this.#profiles.find(p => p.id === id);
+    if (!profile) return;
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'input-edit input-rename';
+    input.value = profile.name;
+    input.style.width = '100%';
+    input.style.minWidth = '80px';
+    
+    nameSpan.style.display = 'none';
+    nameSpan.parentNode.insertBefore(input, nameSpan);
+    input.focus();
+    input.select();
+    
+    let committed = false;
+    const commit = () => {
+      if (committed) return;
+      committed = true;
+      
+      const newName = input.value.trim();
+      if (newName && newName !== profile.name) {
+        profile.name = newName;
+        this.#saveProfiles();
+      }
+      
+      this.#renderProfileMenu();
+      if (this.#activeProfileId === id) {
+        this.refs.activeProfileName.textContent = profile.name;
+      }
+    };
+    
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') {
+        committed = true;
+        this.#renderProfileMenu();
+      }
+    });
   }
 
   #handleExportProfile() {
@@ -438,20 +493,30 @@ class BMetricsApp {
     this.refs.seasonList.innerHTML = activeProfile.seasons.map(s => `
           <div class="profile-item ${s.id === this.#activeSeasonId ? 'is-active' : ''}" data-id="${s.id}" tabindex="0" role="menuitem">
             <span class="profile-item-name">${s.name}</span>
-            ${activeProfile.seasons.length > 1 ? `
-            <button class="btn-delete-profile" aria-label="Delete ${s.name}" data-action="delete" data-id="${s.id}">
-              <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
-            </button>
-            ` : ''}
+            <div style="display:flex; gap:4px; margin-left: 8px;">
+              <button class="btn-profile-action btn-rename-profile" aria-label="Rename ${s.name}" data-action="rename" data-id="${s.id}">
+                <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+              ${activeProfile.seasons.length > 1 ? `
+              <button class="btn-profile-action btn-delete-profile" aria-label="Delete ${s.name}" data-action="delete" data-id="${s.id}">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+              </button>
+              ` : ''}
+            </div>
           </div>
         `).join('');
 
     this.refs.seasonList.querySelectorAll('.profile-item').forEach(item => {
       item.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
         const deleteBtn = e.target.closest('.btn-delete-profile');
+        const renameBtn = e.target.closest('.btn-rename-profile');
         if (deleteBtn) {
           e.stopPropagation();
           this.#handleDeleteSeason(item.dataset.id);
+        } else if (renameBtn) {
+          e.stopPropagation();
+          this.#handleRenameSeason(item.dataset.id, item.querySelector('.profile-item-name'));
         } else {
           this.#handleSwitchSeason(item.dataset.id);
         }
@@ -547,6 +612,53 @@ class BMetricsApp {
     this.#saveProfiles();
     this.#renderSeasonMenu();
     this.#renderCareerHighs();
+  }
+
+  #handleRenameSeason(id, nameSpan) {
+    if (nameSpan.parentNode.querySelector('.input-rename')) return;
+    
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (!activeProfile) return;
+    const season = activeProfile.seasons.find(s => s.id === id);
+    if (!season) return;
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'input-edit input-rename';
+    input.value = season.name;
+    input.style.width = '100%';
+    input.style.minWidth = '80px';
+    
+    nameSpan.style.display = 'none';
+    nameSpan.parentNode.insertBefore(input, nameSpan);
+    input.focus();
+    input.select();
+    
+    let committed = false;
+    const commit = () => {
+      if (committed) return;
+      committed = true;
+      
+      const newName = input.value.trim();
+      if (newName && newName !== season.name) {
+        season.name = newName;
+        this.#saveProfiles();
+      }
+      
+      this.#renderSeasonMenu();
+      if (this.#activeSeasonId === id) {
+        this.refs.activeSeasonName.textContent = season.name;
+      }
+    };
+    
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') {
+        committed = true;
+        this.#renderSeasonMenu();
+      }
+    });
   }
 
   #toggleSeasonMenu() {
