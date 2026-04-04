@@ -1,26 +1,31 @@
 /*
-      MODERN CSS ARCHITECTURE
-      Aesthetic: Cyber-Athletics / Dark Glassmorphism 2.0
-      Palette: Strict Monochrome
-    */
+  BMETRICS — PRECISION TELEMETRY
+  Aesthetic: Military HUD × Editorial Sports Data
+  Palette: Strict Monochrome — Bricolage Grotesque + JetBrains Mono
+  Revised: Enhanced depth, hierarchy, and spatial composition
+*/
 :root {
-  --clr-bg: #030303;
-  --clr-surface: rgba(255, 255, 255, 0.015);
-  --clr-surface-hover: rgba(255, 255, 255, 0.05);
-  --clr-border: rgba(255, 255, 255, 0.08);
-  --clr-border-active: rgba(255, 255, 255, 0.5);
+  --clr-bg: #020202;
+  --clr-surface: rgba(255, 255, 255, 0.018);
+  --clr-surface-hover: rgba(255, 255, 255, 0.055);
+  --clr-border: rgba(255, 255, 255, 0.07);
+  --clr-border-strong: rgba(255, 255, 255, 0.14);
+  --clr-border-active: rgba(255, 255, 255, 0.55);
 
-  --clr-text-primary: #FFFFFF;
-  --clr-text-secondary: #8E8E8E;
-  --clr-text-dim: #4B4B4B;
+  --clr-text-primary: #F5F5F3;
+  --clr-text-secondary: #7A7A7A;
+  --clr-text-dim: #3E3E3E;
 
-  --clr-accent: #FFFFFF;
-  --clr-accent-glow: rgba(255, 255, 255, 0.3);
-  --clr-danger: #FFFFFF;
+  --clr-accent: #F5F5F3;
+  --clr-accent-glow: rgba(245, 245, 243, 0.28);
+  --clr-danger: #F5F5F3;
 
-  /* Colder scanline glow */
-  --clr-scan: rgba(255, 255, 255, 0.02);
-  --clr-scan-line: rgba(255, 255, 255, 0.05);
+  /* Row alternation tint */
+  --clr-row-alt: rgba(255, 255, 255, 0.012);
+
+  /* Scanline & glow */
+  --clr-scan: rgba(255, 255, 255, 0.015);
+  --clr-scan-line: rgba(255, 255, 255, 0.045);
 
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -29,12 +34,17 @@
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-  /* Spatial tokens */
-  --space-edge: clamp(16px, 5vw, 64px);
-  --space-gap: clamp(20px, 4vw, 48px);
-  --cell-pad-y: 14px;
-  --cell-pad-x: 14px;
-  --row-h: 52px;
+  /* Spatial tokens — tighter for density */
+  --space-edge: clamp(14px, 3.5vw, 52px);
+  --space-gap: clamp(14px, 2.8vw, 36px);
+  --cell-pad-y: 13px;
+  --cell-pad-x: 16px;
+  --row-h: 50px;
+
+  /* Corner clip geometry */
+  --clip-sm: 12px;
+  --clip-md: 16px;
+  --clip-lg: 24px;
 }
 
 :root[data-theme="light"] {
@@ -199,10 +209,14 @@ body {
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(240, 237, 232, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 60% at 90% 110%, rgba(240, 237, 232, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(240, 237, 232, 0.01) 0%, transparent 70%);
-  animation: ambient-drift 50s ease-in-out infinite alternate;
+    /* Corner brightnesses */
+    radial-gradient(ellipse 60% 40% at 5% -5%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 95% 105%, rgba(255, 255, 255, 0.035) 0%, transparent 50%),
+    /* Center vignette kill */
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.008) 0%, transparent 65%),
+    /* Deep center darkening for depth */
+    radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.4) 100%);
+  animation: ambient-drift 60s ease-in-out infinite alternate;
 }
 
 @keyframes ambient-drift {
@@ -624,27 +638,32 @@ body {
   text-transform: uppercase;
   font-weight: 800;
   font-style: normal;
-  letter-spacing: -0.05em;
-  font-size: clamp(3rem, 8vw, 7.5rem);
-  line-height: 0.8;
+  letter-spacing: -0.055em;
+  font-size: clamp(2.6rem, 7vw, 7rem);
+  line-height: 0.82;
   margin: 0;
-  background: linear-gradient(180deg, var(--clr-text-primary) 0%, rgba(240, 237, 232, 0.4) 100%);
+  /* Rich vertical gradient — bright top, fading bottom */
+  background:
+    linear-gradient(175deg,
+      var(--clr-text-primary) 0%,
+      rgba(245, 245, 243, 0.85) 40%,
+      rgba(245, 245, 243, 0.28) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
 }
 
-/* Editorial underline flourish */
+/* Editorial underline flourish — wider, more pronounced */
 .header-title::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -6px;
   left: 0;
   width: 0;
   height: 1px;
-  background: linear-gradient(90deg, var(--clr-text-primary), transparent);
-  animation: title-underline 1.8s var(--ease-out-expo) 0.6s forwards;
+  background: linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.15) 60%, transparent 100%);
+  animation: title-underline 2.2s var(--ease-out-expo) 0.5s forwards;
 }
 
 @keyframes title-underline {
@@ -864,11 +883,31 @@ th[aria-sort="descending"] .sort-indicator {
 
 /* — Row Aesthetics —————————————————————————— */
 .stats-grid tbody tr {
-  transition: background-color 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  transition: background-color 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
   position: relative;
 }
 
-/* Luminous edge trace on hover */
+/* Alternating row tint for readability — subtle data grid rhythm */
+.stats-grid tbody tr:nth-child(even) {
+  background-color: var(--clr-row-alt);
+}
+
+/* Luminous left-edge trace that expands on hover */
+.stats-grid tbody tr::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--clr-accent);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out-expo), transform 0.35s var(--ease-out-expo);
+  transform: scaleY(0);
+  transform-origin: center;
+  z-index: 5;
+}
+
 .stats-grid tbody tr::after {
   content: '';
   position: absolute;
@@ -877,8 +916,14 @@ th[aria-sort="descending"] .sort-indicator {
   width: 0;
   height: 1px;
   background: linear-gradient(90deg, var(--clr-accent-glow), transparent);
-  transition: width 0.6s var(--ease-out-expo);
+  transition: width 0.5s var(--ease-out-expo);
   pointer-events: none;
+}
+
+.stats-grid tbody tr:hover::before,
+.stats-grid tbody tr:focus-within::before {
+  opacity: 0.6;
+  transform: scaleY(1);
 }
 
 .stats-grid tbody tr:hover::after,
@@ -889,9 +934,9 @@ th[aria-sort="descending"] .sort-indicator {
 .stats-grid tbody tr:hover,
 .stats-grid tbody tr:focus-within {
   background-color: var(--clr-surface-hover);
-  transform: scaleX(1.004) scaleY(1.02);
+  transform: scaleX(1.002) scaleY(1.015);
   z-index: 10;
-  box-shadow: 0 0 0 1px var(--clr-border-active), 0 0 32px -8px var(--clr-accent-glow);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 4px 24px -8px rgba(0,0,0,0.6);
 }
 
 .stats-grid td:first-child {
@@ -1609,20 +1654,21 @@ select.input-modern option {
 /* — Archetype Card Picker ——————————————————— */
 .archetype-label {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-style: normal;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--clr-text-dim);
-  margin-top: 16px;
-  margin-bottom: 8px;
+  margin-top: 14px;
+  margin-bottom: 6px;
   display: block;
 }
 
 .archetype-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  /* 6 columns on wide, fluid on narrow */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
 }
 
 .archetype-card {
@@ -1640,29 +1686,33 @@ select.input-modern option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 6px;
+  gap: 5px;
+  padding: 9px 4px 8px;
   border: 1px solid var(--clr-border);
-  border-radius: 2px;
+  /* Cut-corner clip — matches HUD aesthetic */
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
   cursor: pointer;
   background: var(--clr-surface);
-  transition: border-color 0.3s, background 0.3s, transform 0.35s var(--ease-spring), box-shadow 0.35s;
+  transition: border-color 0.25s, background 0.25s, transform 0.3s var(--ease-spring), box-shadow 0.3s;
   text-align: center;
   user-select: none;
 }
 
 .archetype-card label:hover {
   background: var(--clr-surface-hover);
-  border-color: var(--clr-text-dim);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.5);
 }
 
 .archetype-card input[type="checkbox"]:checked+label {
-  border-color: var(--clr-border-active);
-  background: rgba(240, 237, 232, 0.06);
-  box-shadow: 0 0 0 1px var(--clr-border-active), 0 0 16px -4px var(--clr-accent-glow);
-  transform: scale(1.04);
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 0 20px -6px rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  transform: scale(1.035);
 }
 
 :root[data-theme="light"] .archetype-card input[type="checkbox"]:checked+label {
@@ -2205,4 +2255,403 @@ select.input-modern option {
   color: var(--clr-text-secondary);
   line-height: 1.6;
   margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENHANCEMENT LAYER — Precision Telemetry v2
+   These styles refine and elevate the existing system
+   ═══════════════════════════════════════════════════════════════ */
+
+/* — Global Vignette ——————————————————————————————————————————— */
+/* Edge darkening creates cinematic depth and frames the content */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="light"] body::after {
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.06) 100%);
+}
+
+/* — Header vertical divider rule ————————————————————————————— */
+/* A single-pixel luminous vertical rule between the left panel and right HUDs */
+.header-block {
+  gap: 24px;
+}
+
+.header-right {
+  position: relative;
+}
+
+.header-right::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--clr-border-strong) 25%,
+    var(--clr-border-strong) 75%,
+    transparent 100%);
+  pointer-events: none;
+}
+
+/* — Header meta refined —————————————————————————————————————— */
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--clr-text-dim);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.header-meta::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.35), transparent);
+  flex-shrink: 0;
+}
+
+/* — Refined HUD container depth ————————————————————————————— */
+/* Stronger scanning mesh on career-highs, improved glow depth */
+.career-highs-container {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px),
+    var(--clr-surface);
+  background-size: 18px 18px, 18px 18px, auto;
+  background-position: center;
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.4),
+    0 1px 0 0 rgba(255,255,255,0.04),
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    0 40px 80px rgba(0, 0, 0, 0.4);
+}
+
+.player-bio-container {
+  box-shadow:
+    inset 0 0 80px rgba(0, 0, 0, 0.3),
+    0 1px 0 0 rgba(255,255,255,0.04),
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 32px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* — Container badge refinement ——————————————————————————————— */
+/* Sharper diagonal clip with improved text legibility */
+.container-badge {
+  font-size: 0.5rem;
+  letter-spacing: 0.24em;
+  padding: 5px 14px 4px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+/* — HUD divider lines between items ————————————————————————— */
+.bio-item:not(:first-child)::before,
+.high-item:not(:first-child)::before,
+.total-item:not(:first-child)::before {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255,255,255,0.12) 30%,
+    rgba(255,255,255,0.12) 70%,
+    transparent 100%
+  );
+  opacity: 1;
+}
+
+/* — Data container corner cut ———————————————————————————————— */
+.data-container {
+  clip-path: polygon(0 0, calc(100% - var(--clip-md)) 0, 100% var(--clip-md), 100% 100%, var(--clip-md) 100%, 0 calc(100% - var(--clip-md)));
+  border-radius: 0;
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.05),
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 48px 96px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="light"] .data-container {
+  clip-path: polygon(0 0, calc(100% - var(--clip-md)) 0, 100% var(--clip-md), 100% 100%, var(--clip-md) 100%, 0 calc(100% - var(--clip-md)));
+}
+
+/* — Stats table header line separators —————————————————————— */
+/* Subtle column dividers on the header row */
+.stats-grid th {
+  border-right: 1px solid rgba(255,255,255,0.025);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+}
+
+.stats-grid th:last-child {
+  border-right: none;
+}
+
+/* — First-column styling ————————————————————————————————————— */
+/* Game number column: centered w/ subtle number-like mono face */
+.stats-grid th:first-child,
+.stats-grid td:first-child {
+  color: var(--clr-text-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+
+/* — Footer row enhanced ————————————————————————————————————— */
+.stats-grid tfoot td {
+  background: rgba(4, 4, 4, 0.98);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* — Empty state refined ————————————————————————————————————— */
+.empty-state {
+  background: transparent;
+}
+
+.empty-icon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+  /* Gentle rotation animation */
+  animation: empty-rotate 12s linear infinite;
+}
+
+@keyframes empty-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.empty-message {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--clr-text-dim);
+}
+
+.empty-hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--clr-text-dim);
+  opacity: 0.7;
+}
+
+/* — FAB refinement ——————————————————————————————————————————— */
+/* Cut-corner shape to match HUD aesthetic */
+.btn-fab {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  width: 56px;
+  height: 56px;
+  box-shadow:
+    0 8px 20px rgba(255, 255, 255, 0.07),
+    0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+.btn-fab:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow:
+    0 16px 36px rgba(255, 255, 255, 0.14),
+    0 4px 12px rgba(255, 255, 255, 0.08);
+}
+
+/* — Profile trigger refinement ——————————————————————————————— */
+.profile-trigger {
+  height: 100%;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  border-radius: 0;
+}
+
+/* — Modal refinement ————————————————————————————————————————— */
+/* Diagonal corner cut to match HUD design language */
+.modal-dialog {
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  border-radius: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow:
+    0 2px 0 0 rgba(255,255,255,0.06),
+    0 24px 48px rgba(0, 0, 0, 0.5),
+    0 64px 96px rgba(0, 0, 0, 0.6);
+}
+
+/* Decorative grid overlay on modals */
+.modal-content {
+  position: relative;
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.modal-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Modal title with gradient treatment */
+.modal-title {
+  background: linear-gradient(175deg, var(--clr-text-primary) 0%, rgba(245,245,243,0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* — Profile menu styling ————————————————————————————————————— */
+.profile-menu {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  border-radius: 0;
+}
+
+/* — Button primary refinement ——————————————————————————————— */
+.btn-primary {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  border-radius: 0;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+/* — Scrollbar polish ————————————————————————————————————————— */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--clr-text-dim);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-text-secondary);
+}
+
+/* — Archetype checked icon treatment ————————————————————————— */
+/* White-glow icon on selected state */
+.archetype-card input[type="checkbox"]:checked + label .archetype-icon {
+  color: var(--clr-text-primary);
+  filter: drop-shadow(0 0 8px rgba(245,245,243,0.5));
+  transform: scale(1.1);
+}
+
+/* — Archetype name sizing ———————————————————————————————————— */
+.archetype-name {
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
+.archetype-tag {
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  color: var(--clr-text-dim);
+  opacity: 0.8;
+}
+
+/* — Career totals: lighter amber on dark for better contrast —— */
+:root {
+  --clr-totals-accent: #C8941A;
+  --clr-totals-glow: rgba(200, 148, 26, 0.22);
+}
+
+/* — Light mode adjustments ——————————————————————————————————— */
+:root[data-theme="light"] .data-container {
+  box-shadow:
+    0 1px 0 0 var(--clr-border),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    0 32px 64px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+}
+
+:root[data-theme="light"] body::after {
+  display: none;
+}
+
+:root[data-theme="light"] .header-right::before {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(0,0,0,0.08) 25%,
+    rgba(0,0,0,0.08) 75%,
+    transparent 100%);
+}
+
+:root[data-theme="light"] .career-highs-container {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px),
+    var(--clr-surface);
+  background-size: 18px 18px, 18px 18px, auto;
+}
+
+:root[data-theme="light"] .stats-grid th {
+  border-right: 1px solid rgba(0,0,0,0.04);
+}
+
+:root[data-theme="light"] .stats-grid tfoot td {
+  background: rgba(250, 250, 250, 0.98);
+}
+
+:root[data-theme="light"] .stats-grid tfoot td:first-child {
+  background: rgba(250, 250, 250, 0.98);
+}
+
+:root[data-theme="light"] .modal-content::before {
+  background:
+    linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+:root[data-theme="light"] .modal-title {
+  background: linear-gradient(175deg, #050505 0%, rgba(5,5,5,0.55) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* — Responsive override for clip-path on narrow ————————————— */
+@media (max-width: 768px) {
+  .data-container {
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .btn-fab {
+    width: 50px;
+    height: 50px;
+  }
+
+  .header-right::before {
+    display: none;
+  }
+
+  .career-highs-container {
+    background-size: 14px 14px, 14px 14px, auto;
+  }
 }
