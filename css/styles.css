@@ -2596,10 +2596,6 @@ body::after {
 
 /* — Responsive override for clip-path on narrow ————————————— */
 @media (max-width: 768px) {
-  .data-container {
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-  }
-
   .btn-fab {
     width: 50px;
     height: 50px;
