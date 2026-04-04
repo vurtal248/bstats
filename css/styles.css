@@ -1130,9 +1130,9 @@ th[aria-sort="descending"] .sort-indicator {
 
 /* — Theme Toggle Button ————————————————————— */
 .theme-toggle-container {
-  position: fixed;
-  bottom: clamp(24px, 5vw, 48px);
-  left: clamp(24px, 5vw, 48px);
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
   z-index: 100;
 }
 
