@@ -100,7 +100,7 @@
   background: rgba(0, 0, 0, 0.03);
 }
 
-:root[data-theme="light"] .btn-delete-profile:hover,
+:root[data-theme="light"] .btn-profile-action:hover,
 :root[data-theme="light"] .btn-new-profile:hover {
   background: rgba(0, 0, 0, 0.04);
 }
@@ -1335,7 +1335,7 @@ th[aria-sort="descending"] .sort-indicator {
   white-space: nowrap;
 }
 
-.btn-delete-profile {
+.btn-profile-action {
   background: none;
   border: none;
   color: var(--clr-text-dim);
@@ -1348,17 +1348,22 @@ th[aria-sort="descending"] .sort-indicator {
   opacity: 0;
 }
 
-.profile-item:hover .btn-delete-profile,
-.profile-item:focus-within .btn-delete-profile {
+.profile-item:hover .btn-profile-action,
+.profile-item:focus-within .btn-profile-action {
   opacity: 1;
 }
 
-.btn-delete-profile:hover {
+.btn-profile-action:hover {
+  color: var(--clr-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-profile-action.btn-delete-profile:hover {
   color: var(--clr-danger);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.btn-delete-profile svg {
+.btn-profile-action svg {
   width: 14px;
   height: 14px;
   stroke: currentColor;
