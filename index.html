@@ -121,77 +121,8 @@
             </button>
           </div>
         </div>
-      </div>
-
-      <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
-        <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
-          <div class="container-badge">Player Vitals</div>
-          <div class="bio-item">
-            <span class="bio-label">POS</span>
-            <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
-              aria-label="Edit Position">-</span>
-          </div>
-          <div class="bio-item">
-            <span class="bio-label">HGT</span>
-            <div style="display: flex; gap: 4px; align-items: baseline;">
-              <span class="bio-value" data-bio-key="heightFt" tabindex="0" role="textbox"
-                aria-label="Edit Feet">-</span>
-              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">'</span>
-              <span class="bio-value" data-bio-key="heightIn" tabindex="0" role="textbox"
-                aria-label="Edit Inches">-</span>
-              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">"</span>
-            </div>
-          </div>
-          <div class="bio-item">
-            <span class="bio-label">WGT</span>
-            <span class="bio-value" data-bio-key="weight" tabindex="0" role="textbox" aria-label="Edit Weight">-</span>
-          </div>
-          <div class="bio-item">
-            <span class="bio-label">WING</span>
-            <span class="bio-value" data-bio-key="wingspan" tabindex="0" role="textbox"
-              aria-label="Edit Wingspan">-</span>
-          </div>
-          <div class="bio-item">
-            <span class="bio-label">AGE</span>
-            <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
-          </div>
-          <div class="bio-item">
-            <span class="bio-label">TEAM</span>
-            <span class="bio-value bio-value--team" data-bio-key="team" tabindex="0" role="textbox"
-              aria-label="Edit Team">-</span>
-          </div>
-        </div>
-
-        <div class="career-highs-container" id="career-highs">
-          <div class="container-badge">Career Highs</div>
-          <div class="high-item">
-            <span class="high-label">PTS</span>
-            <span class="high-value" data-high-key="pts">-</span>
-          </div>
-          <div class="high-item">
-            <span class="high-label">REB</span>
-            <span class="high-value" data-high-key="reb">-</span>
-          </div>
-          <div class="high-item">
-            <span class="high-label">AST</span>
-            <span class="high-value" data-high-key="ast">-</span>
-          </div>
-          <div class="high-item">
-            <span class="high-label">STL</span>
-            <span class="high-value" data-high-key="stl">-</span>
-          </div>
-          <div class="high-item">
-            <span class="high-label">BLK</span>
-            <span class="high-value" data-high-key="blk">-</span>
-          </div>
-          <div class="high-item">
-            <span class="high-label">3PM</span>
-            <span class="high-value" data-high-key="3pm">-</span>
-          </div>
-        </div>
-
-        <div class="archetype-container" style="width: 100%; max-width: 500px; padding-bottom: 8px;">
-          <span class="archetype-label" style="text-align: right; margin-top: 0; margin-bottom: 12px;">Archetypes (Max
+        <div class="archetype-container" style="width: 100%; max-width: 500px;">
+          <span class="archetype-label" style="text-align: left; margin-top: 0; margin-bottom: 12px;">Archetypes (Max
             2)</span>
           <div class="archetype-grid" id="archetype-grid" role="group" aria-label="Player archetypes">
             <div class="archetype-card">
@@ -365,6 +296,75 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
+        <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
+          <div class="container-badge">Player Vitals</div>
+          <div class="bio-item">
+            <span class="bio-label">POS</span>
+            <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
+              aria-label="Edit Position">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">HGT</span>
+            <div style="display: flex; gap: 4px; align-items: baseline;">
+              <span class="bio-value" data-bio-key="heightFt" tabindex="0" role="textbox"
+                aria-label="Edit Feet">-</span>
+              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">'</span>
+              <span class="bio-value" data-bio-key="heightIn" tabindex="0" role="textbox"
+                aria-label="Edit Inches">-</span>
+              <span style="color: var(--clr-text-secondary); font-family: var(--font-mono); font-size: 0.8rem;">"</span>
+            </div>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WGT</span>
+            <span class="bio-value" data-bio-key="weight" tabindex="0" role="textbox" aria-label="Edit Weight">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WING</span>
+            <span class="bio-value" data-bio-key="wingspan" tabindex="0" role="textbox"
+              aria-label="Edit Wingspan">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">AGE</span>
+            <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">TEAM</span>
+            <span class="bio-value bio-value--team" data-bio-key="team" tabindex="0" role="textbox"
+              aria-label="Edit Team">-</span>
+          </div>
+        </div>
+
+        <div class="career-highs-container" id="career-highs">
+          <div class="container-badge">Career Highs</div>
+          <div class="high-item">
+            <span class="high-label">PTS</span>
+            <span class="high-value" data-high-key="pts">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">REB</span>
+            <span class="high-value" data-high-key="reb">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">AST</span>
+            <span class="high-value" data-high-key="ast">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">STL</span>
+            <span class="high-value" data-high-key="stl">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">BLK</span>
+            <span class="high-value" data-high-key="blk">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">3PM</span>
+            <span class="high-value" data-high-key="3pm">-</span>
+          </div>
+        </div>
+
       </div>
     </header>
 
