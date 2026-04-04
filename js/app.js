@@ -65,7 +65,7 @@ class BMetricsApp {
       inputProfileName: document.getElementById('input-profile-name'),
       btnCancelProfile: document.getElementById('btn-cancel-profile'),
       btnConfirmProfile: document.getElementById('btn-confirm-profile'),
-      
+
       seasonToggle: document.getElementById('season-toggle'),
       seasonMenu: document.getElementById('season-menu'),
       seasonList: document.getElementById('season-list'),
@@ -78,6 +78,7 @@ class BMetricsApp {
 
       playerBio: document.getElementById('player-bio'),
       careerHighsContainer: document.getElementById('career-highs'),
+      careerTotalsContainer: document.getElementById('career-totals'),
 
       modalPredict: document.getElementById('modal-predict'),
       inputPredictCount: document.getElementById('input-predict-count'),
@@ -135,13 +136,13 @@ class BMetricsApp {
           this.#activeProfileId = this.#profiles[0].id;
           localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
         }
-        
+
         // Migrate legacy profiles to support seasons
         this.#profiles.forEach(p => {
           if (!p.seasons || p.seasons.length === 0) {
             p.seasons = [{ id: 's_1', name: 'Season 1' }];
             p.activeSeasonId = 's_1';
-            
+
             // Migrate their data key safely
             const oldData = localStorage.getItem(STORAGE_KEY_PREFIX + p.id);
             if (oldData) {
@@ -153,14 +154,14 @@ class BMetricsApp {
             p.activeSeasonId = p.seasons[0].id;
           }
         });
-        
+
         const activeP = this.#profiles.find(p => p.id === this.#activeProfileId);
         this.#activeSeasonId = activeP.activeSeasonId;
 
       } else {
         // First time or legacy migration
-        this.#profiles = [{ 
-          id: 'default', 
+        this.#profiles = [{
+          id: 'default',
           name: 'Player 1',
           seasons: [{ id: 's_1', name: 'Season 1' }],
           activeSeasonId: 's_1'
@@ -177,8 +178,8 @@ class BMetricsApp {
         }
       }
     } catch {
-      this.#profiles = [{ 
-        id: 'default', 
+      this.#profiles = [{
+        id: 'default',
         name: 'Player 1',
         seasons: [{ id: 's_1', name: 'Season 1' }],
         activeSeasonId: 's_1'
@@ -335,39 +336,39 @@ class BMetricsApp {
 
   #handleRenameProfile(id, nameSpan) {
     if (nameSpan.parentNode.querySelector('.input-rename')) return;
-    
+
     const profile = this.#profiles.find(p => p.id === id);
     if (!profile) return;
-    
+
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'input-edit input-rename';
     input.value = profile.name;
     input.style.width = '100%';
     input.style.minWidth = '80px';
-    
+
     nameSpan.style.display = 'none';
     nameSpan.parentNode.insertBefore(input, nameSpan);
     input.focus();
     input.select();
-    
+
     let committed = false;
     const commit = () => {
       if (committed) return;
       committed = true;
-      
+
       const newName = input.value.trim();
       if (newName && newName !== profile.name) {
         profile.name = newName;
         this.#saveProfiles();
       }
-      
+
       this.#renderProfileMenu();
       if (this.#activeProfileId === id) {
         this.refs.activeProfileName.textContent = profile.name;
       }
     };
-    
+
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
@@ -421,7 +422,7 @@ class BMetricsApp {
 
         const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         const newProfile = { ...parsedJson.profile, id: newId };
-        
+
         // Safety checks for imported profiles that are old format
         if (!newProfile.seasons || newProfile.seasons.length === 0) {
           newProfile.seasons = [{ id: 's_1', name: 'Season 1' }];
@@ -577,7 +578,7 @@ class BMetricsApp {
     // Init empty data
     this.#state.data = [];
     this.#state.sortRef = { key: null, asc: true };
-    this.#persistState(); 
+    this.#persistState();
 
     this.#closeSeasonModal();
     this.#closeSeasonMenu();
@@ -612,45 +613,46 @@ class BMetricsApp {
     this.#saveProfiles();
     this.#renderSeasonMenu();
     this.#renderCareerHighs();
+    this.#renderCareerTotals();
   }
 
   #handleRenameSeason(id, nameSpan) {
     if (nameSpan.parentNode.querySelector('.input-rename')) return;
-    
+
     const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
     if (!activeProfile) return;
     const season = activeProfile.seasons.find(s => s.id === id);
     if (!season) return;
-    
+
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'input-edit input-rename';
     input.value = season.name;
     input.style.width = '100%';
     input.style.minWidth = '80px';
-    
+
     nameSpan.style.display = 'none';
     nameSpan.parentNode.insertBefore(input, nameSpan);
     input.focus();
     input.select();
-    
+
     let committed = false;
     const commit = () => {
       if (committed) return;
       committed = true;
-      
+
       const newName = input.value.trim();
       if (newName && newName !== season.name) {
         season.name = newName;
         this.#saveProfiles();
       }
-      
+
       this.#renderSeasonMenu();
       if (this.#activeSeasonId === id) {
         this.refs.activeSeasonName.textContent = season.name;
       }
     };
-    
+
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
@@ -812,6 +814,67 @@ class BMetricsApp {
         textShadow: ['none', '0 0 16px ' + tc.accent],
         duration: 800,
         delay: anime.stagger(50),
+        easing: 'easeOutExpo'
+      });
+    }
+  }
+
+  #renderCareerTotals() {
+    if (!this.refs.careerTotalsContainer) return;
+
+    const totals = { gp: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, '3pm': 0 };
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+
+    if (activeProfile && activeProfile.seasons) {
+      activeProfile.seasons.forEach(s => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + '_' + s.id);
+          if (raw) {
+            const seasonData = JSON.parse(raw);
+            if (Array.isArray(seasonData)) {
+              seasonData.forEach(row => {
+                totals.gp++;
+                totals.pts += Number(row.ppg) || 0;
+                totals.reb += Number(row.rpg) || 0;
+                totals.ast += Number(row.apg) || 0;
+                totals.stl += Number(row.spg) || 0;
+                totals.blk += Number(row.bpg) || 0;
+                totals['3pm'] += Number(row.tpm) || 0;
+              });
+            }
+          }
+        } catch { } // skip corrupt data
+      });
+    }
+
+    const hasGames = totals.gp > 0;
+    const updatedNodes = [];
+
+    Object.keys(totals).forEach(key => {
+      const el = this.refs.careerTotalsContainer.querySelector(`[data-total-key="${key}"]`);
+      if (!el) return;
+      // Round to 1 decimal for per-game stats, whole for GP
+      let displayVal;
+      if (!hasGames) {
+        displayVal = '-';
+      } else if (key === 'gp') {
+        displayVal = totals.gp;
+      } else {
+        displayVal = Math.round(totals[key]);
+      }
+      if (el.textContent !== String(displayVal)) {
+        el.textContent = displayVal;
+        updatedNodes.push(el);
+      }
+    });
+
+    if (updatedNodes.length > 0) {
+      anime({
+        targets: updatedNodes,
+        color: ['rgba(212,151,26,0.4)', '#D4971A', 'var(--clr-text-primary)'],
+        scale: [0.92, 1],
+        duration: 900,
+        delay: anime.stagger(40),
         easing: 'easeOutExpo'
       });
     }
@@ -1258,6 +1321,7 @@ class BMetricsApp {
     }
 
     this.#renderCareerHighs();
+    this.#renderCareerTotals();
   }
 
   /* ——— Inline Edit ————————————————————————— */
