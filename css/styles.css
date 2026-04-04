@@ -872,22 +872,6 @@ th[aria-sort="descending"] .sort-indicator {
   background-color: var(--clr-row-alt);
 }
 
-/* Luminous left-edge trace that expands on hover */
-.stats-grid tbody tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: var(--clr-accent);
-  opacity: 0;
-  transition: opacity 0.35s var(--ease-out-expo), transform 0.35s var(--ease-out-expo);
-  transform: scaleY(0);
-  transform-origin: center;
-  z-index: 5;
-}
-
 .stats-grid tbody tr::after {
   content: '';
   position: absolute;
@@ -898,12 +882,6 @@ th[aria-sort="descending"] .sort-indicator {
   background: linear-gradient(90deg, var(--clr-accent-glow), transparent);
   transition: width 0.5s var(--ease-out-expo);
   pointer-events: none;
-}
-
-.stats-grid tbody tr:hover::before,
-.stats-grid tbody tr:focus-within::before {
-  opacity: 0.6;
-  transform: scaleY(1);
 }
 
 .stats-grid tbody tr:hover::after,
