@@ -24,9 +24,33 @@ export class Store {
           this.activeProfileId = this.profiles[0].id;
           localStorage.setItem(STORAGE_KEY_ACTIVE, this.activeProfileId);
         }
+
+        // Migrate legacy profiles to support seasons
+        this.profiles.forEach(p => {
+          if (!p.seasons || p.seasons.length === 0) {
+            p.seasons = [{ id: 's_1', name: 'Season 1' }];
+            p.activeSeasonId = 's_1';
+            
+            // Migrate their data key safely
+            const oldData = localStorage.getItem(STORAGE_KEY_PREFIX + p.id);
+            if (oldData) {
+              localStorage.setItem(STORAGE_KEY_PREFIX + p.id + '_s_1', oldData);
+              localStorage.removeItem(STORAGE_KEY_PREFIX + p.id); // clean up old
+            }
+          }
+          if (!p.activeSeasonId && p.seasons.length > 0) {
+            p.activeSeasonId = p.seasons[0].id;
+          }
+        });
+
       } else {
         // First time or legacy migration
-        this.profiles = [{ id: 'default', name: 'Player 1' }];
+        this.profiles = [{ 
+          id: 'default', 
+          name: 'Player 1',
+          seasons: [{ id: 's_1', name: 'Season 1' }],
+          activeSeasonId: 's_1' 
+        }];
         this.activeProfileId = 'default';
         localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(this.profiles));
         localStorage.setItem(STORAGE_KEY_ACTIVE, this.activeProfileId);
@@ -34,11 +58,16 @@ export class Store {
         // Migrate legacy data
         const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
         if (legacyData) {
-          localStorage.setItem(STORAGE_KEY_PREFIX + 'default', legacyData);
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'default_s_1', legacyData);
         }
       }
     } catch {
-      this.profiles = [{ id: 'default', name: 'Player 1' }];
+      this.profiles = [{ 
+        id: 'default', 
+        name: 'Player 1',
+        seasons: [{ id: 's_1', name: 'Season 1' }],
+        activeSeasonId: 's_1' 
+      }];
       this.activeProfileId = 'default';
     }
   }
@@ -52,7 +81,9 @@ export class Store {
 
   restoreState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + this.activeProfileId);
+      const profile = this.getActiveProfile();
+      const seasonId = profile ? profile.activeSeasonId : 's_1';
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + this.activeProfileId + '_' + seasonId);
       if (!raw) return structuredClone(SEED_DATA);
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : structuredClone(SEED_DATA);
@@ -63,7 +94,9 @@ export class Store {
 
   persistState(data) {
     try {
-      localStorage.setItem(STORAGE_KEY_PREFIX + this.activeProfileId, JSON.stringify(data));
+      const profile = this.getActiveProfile();
+      const seasonId = profile ? profile.activeSeasonId : 's_1';
+      localStorage.setItem(STORAGE_KEY_PREFIX + this.activeProfileId + '_' + seasonId, JSON.stringify(data));
     } catch { /* quota exceeded or private mode — silently degrade */ }
   }
 
