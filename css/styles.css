@@ -175,13 +175,12 @@ body {
   font-size: clamp(12px, 1vw + 4px, 14px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: auto 1fr;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   cursor: crosshair;
 }
 
@@ -1663,15 +1662,40 @@ select.input-modern option {
   height: 16px;
   border: 2px solid var(--clr-accent);
 }
-.ob-bracket-corner.top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-.ob-bracket-corner.top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-.ob-bracket-corner.bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-.ob-bracket-corner.bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+.ob-bracket-corner.top-left {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.ob-bracket-corner.top-right {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.ob-bracket-corner.bottom-left {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+.ob-bracket-corner.bottom-right {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
 
 .ob-crosshair {
   position: absolute;
   background: rgba(255, 255, 255, 0.15);
 }
+
 :root[data-theme="light"] .ob-crosshair {
   background: rgba(0, 0, 0, 0.15);
 }
@@ -1682,6 +1706,7 @@ select.input-modern option {
   right: -40px;
   height: 1px;
 }
+
 .ob-crosshair.y-axis {
   left: 50%;
   top: -40px;
@@ -1702,10 +1727,23 @@ select.input-modern option {
 }
 
 @keyframes scan-bracket {
-  0% { top: 0%; opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.8; }
-  100% { top: 100%; opacity: 0; }
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
 }
 
 .ob-spotlight-tooltip {
@@ -1731,7 +1769,7 @@ select.input-modern option {
   content: '';
   position: absolute;
   inset: 0;
-  background: 
+  background:
     linear-gradient(90deg, var(--clr-border) 1px, transparent 1px) 0 0 / 20px 20px,
     linear-gradient(0deg, var(--clr-border) 1px, transparent 1px) 0 0 / 20px 20px;
   pointer-events: none;
@@ -1768,8 +1806,13 @@ select.input-modern option {
 }
 
 @keyframes pulse-indicator {
-  from { opacity: 0.4; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .ob-spotlight-title {
