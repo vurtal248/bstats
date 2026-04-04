@@ -295,7 +295,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 16px;
   opacity: 0;
   position: relative;
@@ -306,6 +306,7 @@ body {
 .header-left {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 8px;
 }
 
