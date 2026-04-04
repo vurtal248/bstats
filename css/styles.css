@@ -150,6 +150,14 @@
     0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+:root[data-theme="light"] .career-totals-container {
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+  --clr-totals-accent: #8B5A00;
+  --clr-totals-glow: rgba(139, 90, 0, 0.18);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -361,6 +369,102 @@ body {
 .career-highs-container:hover {
   background-color: var(--clr-surface-hover);
   border-color: var(--clr-border-active);
+}
+
+/* — Career Totals HUD Module —————————————————— */
+:root {
+  --clr-totals-accent: #D4971A;
+  --clr-totals-glow: rgba(212, 151, 26, 0.25);
+}
+
+.career-totals-container {
+  position: relative;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(212, 151, 26, 0.04) 0%, transparent 70%),
+    var(--clr-surface);
+  border: 1px solid rgba(212, 151, 26, 0.2);
+  padding: 36px 24px 20px;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  width: 100%;
+  max-width: 500px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  gap: 16px 20px;
+  align-items: end;
+  margin-bottom: 2px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  transition: background-color 0.4s var(--ease-out-expo), border-color 0.4s, box-shadow 0.4s;
+}
+
+.career-totals-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(90deg, var(--clr-totals-accent) 8px, transparent 8px) top left / 100% 2px no-repeat,
+    linear-gradient(180deg, var(--clr-totals-accent) 8px, transparent 8px) top left / 2px 100% no-repeat,
+    linear-gradient(270deg, var(--clr-totals-accent) 8px, transparent 8px) bottom right / 100% 2px no-repeat,
+    linear-gradient(0deg, var(--clr-totals-accent) 8px, transparent 8px) bottom right / 2px 100% no-repeat;
+  pointer-events: none;
+  opacity: 0.35;
+  z-index: 5;
+}
+
+.career-totals-container:hover {
+  background-color: var(--clr-surface-hover);
+  border-color: rgba(212, 151, 26, 0.45);
+  box-shadow: 0 0 32px rgba(212, 151, 26, 0.08);
+}
+
+.container-badge--totals {
+  background: var(--clr-totals-accent);
+  color: #0A0600;
+}
+
+.total-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+}
+
+.total-item:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  width: 1px;
+  background: rgba(212, 151, 26, 0.2);
+  opacity: 0.7;
+}
+
+.total-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  color: var(--clr-totals-accent);
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.total-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+  color: var(--clr-text-primary);
+  text-align: left;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  transition: color 0.4s var(--ease-out-expo), text-shadow 0.4s, transform 0.4s var(--ease-out-expo);
 }
 
 .player-bio-container {
