@@ -32,6 +32,7 @@ class BMetricsApp {
   #state;
   #profiles;
   #activeProfileId;
+  #activeSeasonId;
 
   constructor() {
     this.#initTheme();
@@ -64,6 +65,17 @@ class BMetricsApp {
       inputProfileName: document.getElementById('input-profile-name'),
       btnCancelProfile: document.getElementById('btn-cancel-profile'),
       btnConfirmProfile: document.getElementById('btn-confirm-profile'),
+      
+      seasonToggle: document.getElementById('season-toggle'),
+      seasonMenu: document.getElementById('season-menu'),
+      seasonList: document.getElementById('season-list'),
+      activeSeasonName: document.getElementById('active-season-name'),
+      btnNewSeason: document.getElementById('btn-new-season'),
+      modalNewSeason: document.getElementById('modal-new-season'),
+      inputSeasonName: document.getElementById('input-season-name'),
+      btnCancelSeason: document.getElementById('btn-cancel-season'),
+      btnConfirmSeason: document.getElementById('btn-confirm-season'),
+
       playerBio: document.getElementById('player-bio'),
       careerHighsContainer: document.getElementById('career-highs'),
 
@@ -123,22 +135,56 @@ class BMetricsApp {
           this.#activeProfileId = this.#profiles[0].id;
           localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
         }
+        
+        // Migrate legacy profiles to support seasons
+        this.#profiles.forEach(p => {
+          if (!p.seasons || p.seasons.length === 0) {
+            p.seasons = [{ id: 's_1', name: 'Season 1' }];
+            p.activeSeasonId = 's_1';
+            
+            // Migrate their data key safely
+            const oldData = localStorage.getItem(STORAGE_KEY_PREFIX + p.id);
+            if (oldData) {
+              localStorage.setItem(STORAGE_KEY_PREFIX + p.id + '_s_1', oldData);
+              localStorage.removeItem(STORAGE_KEY_PREFIX + p.id); // clean up old
+            }
+          }
+          if (!p.activeSeasonId && p.seasons.length > 0) {
+            p.activeSeasonId = p.seasons[0].id;
+          }
+        });
+        
+        const activeP = this.#profiles.find(p => p.id === this.#activeProfileId);
+        this.#activeSeasonId = activeP.activeSeasonId;
+
       } else {
         // First time or legacy migration
-        this.#profiles = [{ id: 'default', name: 'Player 1' }];
+        this.#profiles = [{ 
+          id: 'default', 
+          name: 'Player 1',
+          seasons: [{ id: 's_1', name: 'Season 1' }],
+          activeSeasonId: 's_1'
+        }];
         this.#activeProfileId = 'default';
+        this.#activeSeasonId = 's_1';
         localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(this.#profiles));
         localStorage.setItem(STORAGE_KEY_ACTIVE, this.#activeProfileId);
 
-        // Migrate legacy data
+        // Migrate extreme legacy data
         const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
         if (legacyData) {
-          localStorage.setItem(STORAGE_KEY_PREFIX + 'default', legacyData);
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'default_s_1', legacyData);
         }
       }
     } catch {
-      this.#profiles = [{ id: 'default', name: 'Player 1' }];
+      this.#profiles = [{ 
+        id: 'default', 
+        name: 'Player 1',
+        seasons: [{ id: 's_1', name: 'Season 1' }],
+        activeSeasonId: 's_1'
+      }];
       this.#activeProfileId = 'default';
+      this.#activeSeasonId = 's_1';
     }
   }
 
@@ -193,12 +239,14 @@ class BMetricsApp {
     this.#activeProfileId = id;
     this.#saveProfiles();
 
-    // Load new data
+    // Load new data using the profile's activeSeasonId
+    this.#activeSeasonId = this.#profiles.find(p => p.id === this.#activeProfileId).activeSeasonId;
     this.#state.data = this.#restoreState();
     this.#state.sortRef = { key: null, asc: true };
     this.#hydrateComputed();
 
     this.#renderProfileMenu();
+    this.#renderSeasonMenu();
     this.#renderProfileBio();
     this.#render();
     this.#closeProfileMenu();
@@ -235,6 +283,7 @@ class BMetricsApp {
     this.#closeProfileMenu();
 
     this.#renderProfileMenu();
+    this.#renderSeasonMenu();
     this.#renderProfileBio();
     this.#render();
   }
@@ -247,17 +296,25 @@ class BMetricsApp {
       return;
     }
 
-    // Remove data from localstorage
-    localStorage.removeItem(STORAGE_KEY_PREFIX + id);
+    // Remove all associated season data from localstorage
+    if (profileToDelete.seasons) {
+      profileToDelete.seasons.forEach(s => {
+        localStorage.removeItem(STORAGE_KEY_PREFIX + id + '_' + s.id);
+      });
+    } else {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + id); // fallback cleaner
+    }
 
     this.#profiles = this.#profiles.filter(p => p.id !== id);
 
     // If deleted profile was active, switch to the first available
     if (this.#activeProfileId === id) {
       this.#activeProfileId = this.#profiles[0].id;
+      this.#activeSeasonId = this.#profiles[0].activeSeasonId;
       this.#state.data = this.#restoreState();
       this.#state.sortRef = { key: null, asc: true };
       this.#hydrateComputed();
+      this.#renderSeasonMenu();
       this.#renderProfileBio();
       this.#render();
     }
@@ -270,9 +327,17 @@ class BMetricsApp {
     const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
     if (!activeProfile) return;
 
+    // Export all seasons for the active profile
+    const allData = {};
+    activeProfile.seasons.forEach(s => {
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + '_' + s.id);
+      allData[s.id] = raw ? JSON.parse(raw) : [];
+    });
+
     const payload = {
       profile: activeProfile,
-      data: this.#state.data
+      dataMap: allData,
+      data: this.#state.data // legacy inclusion mapping
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -301,13 +366,28 @@ class BMetricsApp {
 
         const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         const newProfile = { ...parsedJson.profile, id: newId };
+        
+        // Safety checks for imported profiles that are old format
+        if (!newProfile.seasons || newProfile.seasons.length === 0) {
+          newProfile.seasons = [{ id: 's_1', name: 'Season 1' }];
+          newProfile.activeSeasonId = 's_1';
+        }
 
         this.#profiles.push(newProfile);
         this.#activeProfileId = newId;
+        this.#activeSeasonId = newProfile.activeSeasonId;
         this.#saveProfiles();
 
-        const dataToSave = Array.isArray(parsedJson.data) ? parsedJson.data : [];
-        localStorage.setItem(STORAGE_KEY_PREFIX + newId, JSON.stringify(dataToSave));
+        // Restore mapped data correctly
+        if (parsedJson.dataMap) {
+          Object.keys(parsedJson.dataMap).forEach(sId => {
+            localStorage.setItem(STORAGE_KEY_PREFIX + newId + '_' + sId, JSON.stringify(parsedJson.dataMap[sId] || []));
+          });
+        } else {
+          // Old export format fallback
+          const dataToSave = Array.isArray(parsedJson.data) ? parsedJson.data : [];
+          localStorage.setItem(STORAGE_KEY_PREFIX + newId + '_' + newProfile.seasons[0].id, JSON.stringify(dataToSave));
+        }
 
         // Switch to imported profile
         this.#state.data = this.#restoreState();
@@ -315,6 +395,7 @@ class BMetricsApp {
         this.#hydrateComputed();
 
         this.#renderProfileMenu();
+        this.#renderSeasonMenu();
         this.#renderProfileBio();
         this.#render();
 
@@ -334,6 +415,7 @@ class BMetricsApp {
     if (isExpanded) {
       this.#closeProfileMenu();
     } else {
+      this.#closeSeasonMenu(); // Close season menu if open
       this.refs.profileMenu.hidden = false;
       this.refs.profileToggle.setAttribute('aria-expanded', 'true');
     }
@@ -342,6 +424,168 @@ class BMetricsApp {
   #closeProfileMenu() {
     this.refs.profileMenu.hidden = true;
     this.refs.profileToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  /* ——— Season Management —————————————————— */
+
+  #renderSeasonMenu() {
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (!activeProfile || !activeProfile.seasons) return;
+
+    const activeSeason = activeProfile.seasons.find(s => s.id === this.#activeSeasonId);
+    this.refs.activeSeasonName.textContent = activeSeason ? activeSeason.name : 'Unknown';
+
+    this.refs.seasonList.innerHTML = activeProfile.seasons.map(s => `
+          <div class="profile-item ${s.id === this.#activeSeasonId ? 'is-active' : ''}" data-id="${s.id}" tabindex="0" role="menuitem">
+            <span class="profile-item-name">${s.name}</span>
+            ${activeProfile.seasons.length > 1 ? `
+            <button class="btn-delete-profile" aria-label="Delete ${s.name}" data-action="delete" data-id="${s.id}">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+            </button>
+            ` : ''}
+          </div>
+        `).join('');
+
+    this.refs.seasonList.querySelectorAll('.profile-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.btn-delete-profile');
+        if (deleteBtn) {
+          e.stopPropagation();
+          this.#handleDeleteSeason(item.dataset.id);
+        } else {
+          this.#handleSwitchSeason(item.dataset.id);
+        }
+      });
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.#handleSwitchSeason(item.dataset.id);
+        }
+      });
+    });
+  }
+
+  #handleSwitchSeason(id) {
+    if (this.#activeSeasonId === id) {
+      this.#closeSeasonMenu();
+      return;
+    }
+
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    this.#activeSeasonId = id;
+    activeProfile.activeSeasonId = id;
+    this.#saveProfiles();
+
+    // Load new data
+    this.#state.data = this.#restoreState();
+    this.#state.sortRef = { key: null, asc: true };
+    this.#hydrateComputed();
+
+    this.#renderSeasonMenu();
+    this.#render();
+    this.#closeSeasonMenu();
+
+    const rows = this.refs.tbody.querySelectorAll('tr.data-row');
+    if (rows.length > 0) {
+      anime({
+        targets: rows,
+        opacity: [0, 1],
+        translateX: [-10, 0],
+        delay: anime.stagger(20),
+        duration: 400,
+        easing: 'easeOutExpo'
+      });
+    }
+  }
+
+  #handleCreateSeason() {
+    const name = this.refs.inputSeasonName.value.trim();
+    if (!name) return;
+
+    const id = 's_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    activeProfile.seasons.push({ id, name });
+    activeProfile.activeSeasonId = id;
+    this.#activeSeasonId = id;
+    this.#saveProfiles();
+
+    // Init empty data
+    this.#state.data = [];
+    this.#state.sortRef = { key: null, asc: true };
+    this.#persistState(); 
+
+    this.#closeSeasonModal();
+    this.#closeSeasonMenu();
+
+    this.#renderSeasonMenu();
+    this.#render();
+  }
+
+  #handleDeleteSeason(id) {
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (activeProfile.seasons.length <= 1) return; // Cannot delete last season
+    const seasonToDelete = activeProfile.seasons.find(s => s.id === id);
+
+    if (!confirm(`Are you sure you want to delete the season "${seasonToDelete.name}" and all its records? This cannot be undone.`)) {
+      return;
+    }
+
+    // Remove data
+    localStorage.removeItem(STORAGE_KEY_PREFIX + this.#activeProfileId + '_' + id);
+
+    activeProfile.seasons = activeProfile.seasons.filter(s => s.id !== id);
+
+    if (this.#activeSeasonId === id) {
+      this.#activeSeasonId = activeProfile.seasons[0].id;
+      activeProfile.activeSeasonId = this.#activeSeasonId;
+      this.#state.data = this.#restoreState();
+      this.#state.sortRef = { key: null, asc: true };
+      this.#hydrateComputed();
+      this.#render();
+    }
+
+    this.#saveProfiles();
+    this.#renderSeasonMenu();
+    this.#renderCareerHighs();
+  }
+
+  #toggleSeasonMenu() {
+    const isExpanded = this.refs.seasonToggle.getAttribute('aria-expanded') === 'true';
+    if (isExpanded) {
+      this.#closeSeasonMenu();
+    } else {
+      this.#closeProfileMenu(); // Close player menu if open
+      this.refs.seasonMenu.hidden = false;
+      this.refs.seasonToggle.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  #closeSeasonMenu() {
+    this.refs.seasonMenu.hidden = true;
+    this.refs.seasonToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  #openSeasonModal() {
+    this.#closeSeasonMenu();
+    this.refs.inputSeasonName.value = '';
+    this.refs.modalNewSeason.showModal();
+    this.refs.btnConfirmSeason.disabled = true;
+  }
+
+  #closeSeasonModal() {
+    this.refs.modalNewSeason.setAttribute('closing', '');
+    anime({
+      targets: this.refs.modalNewSeason,
+      opacity: 0,
+      translateY: 20,
+      duration: 300,
+      easing: 'easeInExpo',
+      complete: () => {
+        this.refs.modalNewSeason.close();
+        this.refs.modalNewSeason.removeAttribute('closing');
+        anime.set(this.refs.modalNewSeason, { opacity: '', translateY: '' });
+      }
+    });
   }
 
   #openProfileModal() {
@@ -408,14 +652,28 @@ class BMetricsApp {
     if (!this.refs.careerHighsContainer) return;
     const highs = { pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, '3pm': 0 };
 
-    if (this.#state.data.length > 0) {
-      this.#state.data.forEach(row => {
-        if (row.ppg > highs.pts) highs.pts = row.ppg;
-        if (row.rpg > highs.reb) highs.reb = row.rpg;
-        if (row.apg > highs.ast) highs.ast = row.apg;
-        if (row.spg > highs.stl) highs.stl = row.spg;
-        if (row.bpg > highs.blk) highs.blk = row.bpg;
-        if (row.tpm > highs['3pm']) highs['3pm'] = row.tpm;
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    let totalGames = 0;
+
+    if (activeProfile && activeProfile.seasons) {
+      activeProfile.seasons.forEach(s => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + '_' + s.id);
+          if (raw) {
+            const seasonData = JSON.parse(raw);
+            if (Array.isArray(seasonData)) {
+              seasonData.forEach(row => {
+                totalGames++;
+                if (row.ppg > highs.pts) highs.pts = row.ppg;
+                if (row.rpg > highs.reb) highs.reb = row.rpg;
+                if (row.apg > highs.ast) highs.ast = row.apg;
+                if (row.spg > highs.stl) highs.stl = row.spg;
+                if (row.bpg > highs.blk) highs.blk = row.bpg;
+                if (row.tpm > highs['3pm']) highs['3pm'] = row.tpm;
+              });
+            }
+          }
+        } catch { } // skip bad data
       });
     }
 
@@ -425,7 +683,7 @@ class BMetricsApp {
     metrics.forEach(key => {
       const el = this.refs.careerHighsContainer.querySelector(`[data-high-key="${key}"]`);
       if (el) {
-        const displayVal = this.#state.data.length > 0 ? highs[key] : '-';
+        const displayVal = totalGames > 0 ? highs[key] : '-';
         if (el.textContent !== String(displayVal)) {
           el.textContent = displayVal;
           updatedNodes.push(el);
@@ -575,7 +833,7 @@ class BMetricsApp {
 
   #restoreState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + this.#activeProfileId);
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + this.#activeProfileId + '_' + this.#activeSeasonId);
       if (!raw) return structuredClone(SEED_DATA);
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : structuredClone(SEED_DATA);
@@ -586,7 +844,7 @@ class BMetricsApp {
 
   #persistState() {
     try {
-      localStorage.setItem(STORAGE_KEY_PREFIX + this.#activeProfileId, JSON.stringify(this.#state.data));
+      localStorage.setItem(STORAGE_KEY_PREFIX + this.#activeProfileId + '_' + this.#activeSeasonId, JSON.stringify(this.#state.data));
     } catch { /* quota exceeded or private mode — silently degrade */ }
   }
 
@@ -655,18 +913,20 @@ class BMetricsApp {
 
     // Profile events
     this.refs.profileToggle.addEventListener('click', () => this.#toggleProfileMenu());
+    this.refs.seasonToggle.addEventListener('click', () => this.#toggleSeasonMenu());
 
     // Close menu on outside click
     document.addEventListener('click', (e) => {
       if (!this.refs.profileToggle.contains(e.target) && !this.refs.profileMenu.contains(e.target)) {
         this.#closeProfileMenu();
       }
+      if (!this.refs.seasonToggle.contains(e.target) && !this.refs.seasonMenu.contains(e.target)) {
+        this.#closeSeasonMenu();
+      }
     });
 
     this.refs.btnNewProfile.addEventListener('click', () => this.#openProfileModal());
-
     this.refs.btnCancelProfile.addEventListener('click', () => this.#closeProfileModal());
-
     this.refs.btnConfirmProfile.addEventListener('click', () => this.#handleCreateProfile());
 
     this.refs.inputProfileName.addEventListener('input', (e) => {
@@ -676,6 +936,20 @@ class BMetricsApp {
     this.refs.inputProfileName.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !this.refs.btnConfirmProfile.disabled) {
         this.#handleCreateProfile();
+      }
+    });
+
+    this.refs.btnNewSeason.addEventListener('click', () => this.#openSeasonModal());
+    this.refs.btnCancelSeason.addEventListener('click', () => this.#closeSeasonModal());
+    this.refs.btnConfirmSeason.addEventListener('click', () => this.#handleCreateSeason());
+
+    this.refs.inputSeasonName.addEventListener('input', (e) => {
+      this.refs.btnConfirmSeason.disabled = e.target.value.trim().length === 0;
+    });
+
+    this.refs.inputSeasonName.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !this.refs.btnConfirmSeason.disabled) {
+        this.#handleCreateSeason();
       }
     });
 
@@ -692,6 +966,7 @@ class BMetricsApp {
 
     // initial render profile menu
     this.#renderProfileMenu();
+    this.#renderSeasonMenu();
 
     const helpBtn = document.getElementById('help-toggle-btn');
     if (helpBtn) {
