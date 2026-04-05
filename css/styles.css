@@ -1195,29 +1195,45 @@ th[aria-sort="descending"] .sort-indicator {
 /* — Floating Action Button ————————————————— */
 .fab-container {
   position: fixed;
-  bottom: clamp(24px, 5vw, 48px);
-  right: clamp(24px, 5vw, 48px);
+  bottom: clamp(24px, 3vh, 32px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row-reverse;
+  align-items: center;
   gap: 16px;
+  background: var(--clr-surface);
+  padding: 8px 16px;
+  border-radius: 40px;
+  border: 1px solid var(--clr-border-strong);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+:root[data-theme="light"] .fab-container {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .fab-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
+  align-items: center;
   gap: 16px;
   transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-back);
-  transform-origin: bottom center;
+  transform-origin: right center;
 }
 
 .fab-container.is-collapsed .fab-actions {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(20px) scale(0.9);
+  transform: translateX(20px) scale(0.9);
   position: absolute;
-  bottom: 60px;
+  right: 70px;
   visibility: hidden;
 }
 
@@ -1700,15 +1716,14 @@ select.input-modern option {
 }
 
 .archetype-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  /* 6 columns on wide, fluid on narrow */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
 }
 
 .archetype-card {
   position: relative;
-  flex: 1 1 auto;
-  min-width: 70px;
 }
 
 .archetype-card input[type="checkbox"] {
@@ -1720,33 +1735,40 @@ select.input-modern option {
 
 .archetype-card label {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-  border: 1px solid var(--clr-border-strong);
-  background: transparent;
-  color: var(--clr-text-dim);
-  transition: all 0.2s cubic-bezier(0,0,0,1);
+  gap: 5px;
+  padding: 9px 4px 8px;
+  border: 1px solid var(--clr-border);
+  /* Cut-corner clip — matches HUD aesthetic */
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
   cursor: pointer;
+  background: var(--clr-surface);
+  transition: border-color 0.25s, background 0.25s, transform 0.3s var(--ease-spring), box-shadow 0.3s;
+  text-align: center;
   user-select: none;
 }
 
 .archetype-card label:hover {
   background: var(--clr-surface-hover);
-  border-color: rgba(255,255,255,0.3);
-  color: var(--clr-text-secondary);
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.5);
 }
 
 .archetype-card input[type="checkbox"]:checked+label {
-  border-color: var(--clr-accent);
-  background: var(--clr-accent-glow);
-  color: var(--clr-accent);
-  box-shadow: inset 0 0 20px var(--clr-accent-glow), 0 0 10px var(--clr-accent-glow);
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 0 20px -6px rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  transform: scale(1.035);
 }
 
 :root[data-theme="light"] .archetype-card input[type="checkbox"]:checked+label {
   background: rgba(0, 0, 0, 0.05);
-  box-shadow: inset 0 0 0 1px var(--clr-border-active);
+  box-shadow: 0 0 0 1px var(--clr-border-active), 0 0 12px -4px var(--clr-accent-glow);
 }
 
 .archetype-card input[type="checkbox"]:focus-visible+label {
@@ -1755,26 +1777,43 @@ select.input-modern option {
 }
 
 .archetype-icon {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-text-secondary);
+  transition: color 0.3s, transform 0.4s var(--ease-spring), filter 0.3s;
+}
+
+.archetype-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.archetype-card label:hover .archetype-icon {
+  color: var(--clr-accent);
+  transform: scale(1.1);
+}
+
+.archetype-card input[type="checkbox"]:checked+label .archetype-icon {
+  color: var(--clr-accent);
+  filter: drop-shadow(0 0 6px var(--clr-accent-glow));
+  transform: scale(1.12);
 }
 
 .archetype-name {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  font-style: normal;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: inherit;
-}
-
-.archetype-card input[type="checkbox"]:checked+label .archetype-name::before {
-  content: '[';
-  margin-right: 4px;
-}
-
-.archetype-card input[type="checkbox"]:checked+label .archetype-name::after {
-  content: ']';
-  margin-left: 4px;
+  color: var(--clr-text-primary);
+  line-height: 1.2;
 }
 
 .arch.empty-hint {
@@ -2052,7 +2091,11 @@ select.input-modern option {
 }
 
 .archetype-tag {
-  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--clr-text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .modal-footer {
