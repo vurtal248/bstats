@@ -1192,36 +1192,30 @@ th[aria-sort="descending"] .sort-indicator {
   margin-top: -4px;
 }
 
-/* — Floating Action Button ————————————————— */
+/* — Action Command Panel ————————————————— */
 .fab-container {
-  position: fixed;
-  bottom: clamp(24px, 3vh, 32px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
+  position: relative;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
   background: var(--clr-surface);
-  padding: 8px 16px;
-  border-radius: 40px;
+  padding: 12px 24px;
   border: 1px solid var(--clr-border-strong);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(0 0, calc(100% - var(--clip-md)) 0, 100% var(--clip-md), 100% 100%, var(--clip-md) 100%, 0 calc(100% - var(--clip-md)));
   transition: background 0.3s, border-color 0.3s;
+  width: 100%;
 }
 
 :root[data-theme="light"] .fab-container {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .fab-actions {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
   gap: 16px;
   transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-back);
@@ -1231,9 +1225,9 @@ th[aria-sort="descending"] .sort-indicator {
 .fab-container.is-collapsed .fab-actions {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(20px) scale(0.9);
+  transform: translateX(12px) scale(0.95);
   position: absolute;
-  right: 70px;
+  right: 84px; /* padding 24 + width 44 + gap 16 */
   visibility: hidden;
 }
 
