@@ -281,8 +281,12 @@ class BMetricsApp {
     if (!name) return;
 
     const id = 'p_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    this.#profiles.push({ id, name });
+    const defaultSeason = { id: 's_1', name: 'Season 1' };
+    // Initialize with a proper default season so the season menu renders correctly
+    // and #persistState writes to the right storage key from the start.
+    this.#profiles.push({ id, name, seasons: [defaultSeason], activeSeasonId: 's_1' });
     this.#activeProfileId = id;
+    this.#activeSeasonId = 's_1'; // Must be set BEFORE #persistState is called
     this.#saveProfiles();
 
     // Init empty data
