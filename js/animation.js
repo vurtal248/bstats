@@ -6,7 +6,7 @@ export function choreographEntrance() {
   // immediately restore visibility of critical elements.
   const restoreVisibility = () => {
     const selectors = [
-      '.header-block', 
+      '.editorial-header', 
       '.data-container', 
       '.stats-grid th',
       'tr.data-row',
@@ -45,7 +45,7 @@ export function choreographEntrance() {
 
     /* Phase 1: Title materializes with vertical clip reveal */
     tl.add({
-      targets: '.header-block',
+      targets: '.editorial-header',
       opacity: [0, 1],
       translateY: [-20, 0],
       filter: ['blur(8px)', 'blur(0px)'],
