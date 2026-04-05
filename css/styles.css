@@ -317,10 +317,11 @@ body {
 
 /* — Header Composition ————————————————————— */
 .editorial-header {
-  display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(400px, 2fr);
-  gap: var(--space-gap);
-  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: max(2vw, 32px);
+  align-items: flex-start;
+  justify-content: space-between;
   opacity: 0; /* JS handles reveal */
   position: relative;
   z-index: 100;
@@ -333,19 +334,20 @@ body {
 }
 
 .header-core {
+  flex: 1 1 360px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 16px;
 }
 
 /* — HUD Dashboard Clusters —————————————————— */
 .hud-dashboard-cluster {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 12px;
-  align-items: start;
-  align-content: start;
+  flex: 2 1 600px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .player-bio-container,
@@ -356,12 +358,13 @@ body {
   padding: 36px 20px 20px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap: 12px;
-  align-items: end;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  flex: 1 1 320px;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 16px;
+  column-gap: 32px;
+  align-items: flex-end;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
   transition: background-color 0.4s var(--ease-out-expo), border-color 0.4s, box-shadow 0.4s;
 }
 
@@ -413,14 +416,14 @@ body {
   padding: 36px 20px 20px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap: 12px;
-  align-items: end;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 16px;
+  column-gap: 40px;
+  align-items: flex-end;
+  clip-path: polygon(0 16px, 16px 0, 100% 0, 100% 100%, 0 100%);
   transition: background-color 0.4s var(--ease-out-expo), border-color 0.4s, box-shadow 0.4s;
-  grid-column: 1 / -1; /* spans full width of the cluster */
 }
 
 .career-totals-container::before {
@@ -737,6 +740,7 @@ body {
   min-height: 280px;
   content-visibility: auto;
   contain-intrinsic-size: 800px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 
 /* Top luminous edge — animated breathing */
@@ -1766,9 +1770,8 @@ select.input-modern option {
 
 .archetype-grid {
   display: grid;
-  /* 6 columns on wide, fluid on narrow */
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 5px;
+  grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+  gap: 6px;
 }
 
 .archetype-card {
