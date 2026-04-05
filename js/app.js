@@ -1874,7 +1874,7 @@ class BMetricsApp {
 
     /* Phase 1: Title materializes with vertical clip reveal */
     tl.add({
-      targets: '.header-block',
+      targets: '.editorial-header',
       opacity: [0, 1],
       translateY: [-20, 0],
       filter: ['blur(8px)', 'blur(0px)'],
