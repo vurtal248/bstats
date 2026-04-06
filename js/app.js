@@ -94,8 +94,9 @@ class BMetricsApp {
 
   #initTheme() {
     const saved = localStorage.getItem('bstats_theme');
-    if (saved === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
+    // Light is the default (no attribute). Dark mode sets data-theme="dark".
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }
@@ -1157,13 +1158,15 @@ class BMetricsApp {
     const themeBtn = document.getElementById('theme-toggle-btn');
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        if (isLight) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          // Switch to light (default — remove attribute)
           document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('bstats_theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light');
           localStorage.setItem('bstats_theme', 'light');
+        } else {
+          // Switch to dark
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('bstats_theme', 'dark');
         }
       });
     }
