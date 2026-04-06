@@ -31,12 +31,13 @@ export function ranZ() {
 }
 
 export function getThemeColors() {
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  // Light is defualt (no attribute). Dark has data-theme="dark".
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   return {
-    bgFlash: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
-    bgFlashStrong: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)',
-    textPrimary: isLight ? '#050505' : '#FFFFFF',
-    textSecondary: isLight ? '#666666' : '#888888',
-    accent: isLight ? '#050505' : '#FFFFFF'
+    bgFlash: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+    bgFlashStrong: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)',
+    textPrimary: isDark ? '#F0F0F0' : '#0C0C0C',
+    textSecondary: isDark ? '#888888' : '#666666',
+    accent: isDark ? '#F0F0F0' : '#0C0C0C'
   };
 }
