@@ -1875,14 +1875,29 @@ select.input-modern option {
   }
 
   .fab-container {
-    position: fixed;
-    bottom: calc(85px + env(safe-area-inset-bottom, 0px));
-    right: 16px;
-    width: auto;
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 100%;
     border: none;
+    border-top: 1px solid var(--border-mid);
     background: transparent;
-    padding: 0;
-    z-index: 500;
+    padding: 24px 16px 32px;
+    z-index: 10;
+    justify-content: flex-end;
+  }
+
+  .fab-container.is-collapsed .fab-actions {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    visibility: visible !important;
+    position: relative !important;
+    right: auto !important;
+  }
+
+  .btn-fab-mini {
+    display: none !important;
   }
   
   .data-container {
