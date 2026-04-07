@@ -816,7 +816,6 @@ class BMetricsApp {
         targets: updatedNodes,
         color: [tc.textSecondary, tc.accent],
         scale: [0.95, 1],
-        textShadow: ['none', '0 0 16px ' + tc.accent],
         duration: 800,
         delay: anime.stagger(50),
         easing: 'easeOutExpo'
