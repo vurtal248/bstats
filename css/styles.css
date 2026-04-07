@@ -1,12 +1,12 @@
 /*
-  B-STATS — CLINICAL EDITORIAL
+  B-STATS — MODERN MINIMALIST
   Aesthetic: Sports intelligence dossier. Data as document.
   Palette:   Warm off-white + ink black + dim slate. One dark accent panel.
-  Type:      Barlow Condensed (display) + IBM Plex Mono (data/labels)
+  Type:      Space Grotesk (display) + Outfit (data) + JetBrains Mono (labels)
   Rule:      Every element earns its space. Function IS the form.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500;600&family=Barlow:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
 
 /* ─── Tokens ──────────────────────────────────────────── */
 :root {
@@ -27,9 +27,9 @@
 
   --sidebar-w: 188px;
 
-  --font-display: 'Barlow Condensed', sans-serif;
-  --font-data: 'Barlow', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-data: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
