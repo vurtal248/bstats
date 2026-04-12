@@ -1292,6 +1292,8 @@ class BMetricsApp {
     avg.fgPct = acc.fga > 0 ? (acc.fgm / acc.fga) * 100 : 0;
     avg.tpPct = acc.tpa > 0 ? (acc.tpm / acc.tpa) * 100 : 0;
     avg.ftPct = acc.fta > 0 ? (acc.ftm / acc.fta) * 100 : 0;
+    const tsAvgDenom = 2 * (acc.fga + 0.44 * acc.fta);
+    avg.tsPct = tsAvgDenom > 0 ? (acc.ppg / tsAvgDenom) * 100 : 0;
 
     const updatedNodes = [];
 
