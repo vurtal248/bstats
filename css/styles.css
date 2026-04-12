@@ -1989,3 +1989,83 @@ select.input-modern option {
     opacity: 1;
   }
 }
+
+/* ─── Advanced Tab ────────────────────────────────────── */
+.adv-card {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.adv-card:hover {
+  border-color: var(--border-strong);
+}
+
+.adv-card-header {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.adv-card-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.2rem;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.adv-card-sub {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+  margin-top: auto;
+}
+
+.adv-sparkline-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 80px;
+  width: 100%;
+}
+
+.spark-bar {
+  flex: 1;
+  background: var(--text-primary);
+  min-height: 2px;
+  transition: height 0.5s var(--ease-out), background 0.2s;
+  position: relative;
+}
+
+.spark-bar::after {
+  content: "PTS: " attr(data-val);
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.spark-bar:hover {
+  background: var(--text-secondary);
+}
+
+.spark-bar:hover::after {
+  opacity: 1;
+}
