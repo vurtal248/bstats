@@ -1530,7 +1530,7 @@ class BMetricsApp {
         data.forEach(r => {
           sumSquares += Math.pow((Number(r[c.key]) || 0) - avg[c.key], 2);
         });
-        const stdDev = data.length > 1 ? Math.sqrt(sumSquares / (len - 1)) : (Math.max(avg[c.key] * 0.2, 1));
+        const stdDev = data.length > 1 ? Math.sqrt(sumSquares / (len - 1)) : (Math.max(avg[c.key] * 0.05, 0.5));
         variance[c.key] = stdDev;
       }
     });
@@ -1563,11 +1563,10 @@ class BMetricsApp {
         else if (archetype === 'fringe') { mpgMod *= 0.7; mpgVarMod *= 1.2; }
       }
 
-      if (data.length === 0) {
-        baseMpgAvg *= mpgMod;
-        if (archetypes.includes('facilitator')) baseMpgAvg = Math.min(baseMpgAvg, 42);
-        if (archetypes.includes('workhorse')) baseMpgAvg = Math.min(baseMpgAvg, 44);
-      }
+      baseMpgAvg *= mpgMod;
+      if (archetypes.includes('facilitator')) baseMpgAvg = Math.min(baseMpgAvg, 42);
+      if (archetypes.includes('workhorse')) baseMpgAvg = Math.min(baseMpgAvg, 44);
+
       baseMpgVar *= mpgVarMod;
 
       let genMpg = Math.round(baseMpgAvg + ranZ() * baseMpgVar);
@@ -1610,12 +1609,10 @@ class BMetricsApp {
       else if (pos === 'PF') { mod_tpa *= 0.5; mod_fta *= 1.2; }
       else if (pos === 'C') { mod_tpa *= 0.1; mod_fta *= 1.4; mod_tov *= 1.2; }
 
-      if (data.length === 0) {
-        fgaAvg *= mod_fga;
-        tpaAvg *= mod_tpa;
-        ftaAvg *= mod_fta;
-        tovAvg *= mod_tov;
-      }
+      fgaAvg *= mod_fga;
+      tpaAvg *= mod_tpa;
+      ftaAvg *= mod_fta;
+      tovAvg *= mod_tov;
 
       let fga = Math.round(fgaAvg + ranZ() * fgaVar);
       let tpa = Math.round(tpaAvg + ranZ() * tpaVar);
@@ -1726,9 +1723,7 @@ class BMetricsApp {
         if (['rpg', 'bpg'].includes(key)) modAvg *= Math.max(0.5, 1 + (heightDiff * 0.05));
         if (['apg', 'spg'].includes(key)) modAvg *= Math.max(0.5, 1 - (heightDiff * 0.03));
 
-        if (data.length === 0) {
-          pAvg *= modAvg;
-        }
+        pAvg *= modAvg;
 
         let pVal = Math.round(pAvg + ranZ() * pVar);
         if (pVal < 0) pVal = 0;
