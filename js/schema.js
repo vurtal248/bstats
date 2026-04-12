@@ -15,7 +15,8 @@ export const METRICS_SCHEMA = Object.freeze([
   { key: 'tpPct', label: '3P%', computed: true, isPct: true },
   { key: 'ftm', label: 'FTM' },
   { key: 'fta', label: 'FTA' },
-  { key: 'ftPct', label: 'FT%', computed: true, isPct: true }
+  { key: 'ftPct', label: 'FT%', computed: true, isPct: true },
+  { key: 'tsPct', label: 'TS%', computed: true, isPct: true }
 ]);
 
 export const EDITABLE_KEYS = new Set(
