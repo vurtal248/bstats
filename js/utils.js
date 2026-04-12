@@ -20,6 +20,9 @@ export function computeDerived(row) {
 
   // PPG = 2pt FG * 2 + 3PM * 3 + FTM
   row.ppg = (Math.max(0, fgm - tpm) * 2) + (tpm * 3) + ftm;
+
+  const tsDenom = 2 * (fga + 0.44 * fta);
+  row.tsPct = tsDenom > 0 ? (row.ppg / tsDenom) * 100 : 0;
 }
 
 export function ranZ() {
