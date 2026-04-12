@@ -1037,6 +1037,102 @@ class BMetricsApp {
 
 
 
+  /* ——— Advanced Stats —————————————————————— */
+
+  renderAdvancedStats() {
+    this.#renderAdvancedStats();
+  }
+
+  #renderAdvancedStats() {
+    const advContent = document.getElementById('advanced-content');
+    const advEmpty = document.getElementById('advanced-empty');
+    if (!advContent || !advEmpty) return;
+
+    const data = this.#state.data;
+    if (data.length < 3) {
+      advContent.style.display = 'none';
+      advEmpty.style.display = '';
+      return;
+    }
+
+    advContent.style.display = 'grid';
+    advEmpty.style.display = 'none';
+
+    const len = data.length;
+    let sumPts=0, sumReb=0, sumAst=0, sumStl=0, sumBlk=0;
+    let sumFgm=0, sumFga=0, sumFtm=0, sumFta=0, sumTov=0;
+
+    data.forEach(r => {
+      sumPts += Number(r.ppg) || 0;
+      sumReb += Number(r.rpg) || 0;
+      sumAst += Number(r.apg) || 0;
+      sumStl += Number(r.spg) || 0;
+      sumBlk += Number(r.bpg) || 0;
+      sumFgm += Number(r.fgm) || 0;
+      sumFga += Number(r.fga) || 0;
+      sumFtm += Number(r.ftm) || 0;
+      sumFta += Number(r.fta) || 0;
+      sumTov += Number(r.topg) || 0;
+    });
+
+    const totalGameScore = sumPts + 0.4 * sumFgm - 0.7 * sumFga - 0.4 * (sumFta - sumFtm) + 0.5 * sumReb + sumStl + 0.7 * sumAst + 0.7 * sumBlk - sumTov;
+    const perProxy = (totalGameScore / len).toFixed(1);
+
+    const totalLoad = sumFga + sumTov + 0.44 * sumFta;
+    const avgLoad = (totalLoad / len).toFixed(1);
+
+    const tsDenom = 2 * (sumFga + 0.44 * sumFta);
+    const tsPct = tsDenom > 0 ? ((sumPts / tsDenom) * 100).toFixed(1) : '0';
+
+    const astTo = sumTov > 0 ? (sumAst / sumTov).toFixed(2) : (sumAst > 0 ? '∞' : '0');
+
+    const perEl = document.getElementById('adv-per');
+    if(perEl) perEl.textContent = perProxy;
+    
+    const loadEl = document.getElementById('adv-load');
+    if(loadEl) loadEl.textContent = avgLoad;
+
+    const tsEl = document.getElementById('adv-ts');
+    if(tsEl) tsEl.textContent = tsPct + '%';
+
+    const astToEl = document.getElementById('adv-ast-to');
+    if(astToEl) astToEl.textContent = astTo;
+
+    const sparkline = document.getElementById('adv-sparkline');
+    if (sparkline) {
+      sparkline.innerHTML = '';
+      const sorted = [...data].sort((a,b) => b.id - a.id);
+      const last5 = sorted.slice(0, 5).reverse();
+      const maxPts = Math.max(...last5.map(r => r.ppg || 0), 1);
+      
+      last5.forEach(r => {
+        const bar = document.createElement('div');
+        bar.className = 'spark-bar';
+        const heightPct = Math.max(((r.ppg || 0) / maxPts) * 100, 2);
+        bar.style.height = heightPct + '%';
+        bar.setAttribute('data-val', Math.round(r.ppg || 0));
+        sparkline.appendChild(bar);
+      });
+
+      anime({
+        targets: sparkline.querySelectorAll('.spark-bar'),
+        height: (el) => [0, el.style.height],
+        delay: anime.stagger(100),
+        duration: 800,
+        easing: 'easeOutExpo'
+      });
+    }
+
+    anime({
+      targets: '#advanced-content .adv-card-value',
+      opacity: [0, 1],
+      translateY: [10, 0],
+      delay: anime.stagger(50),
+      duration: 600,
+      easing: 'easeOutExpo'
+    });
+  }
+
   /* ——— DOM Construction ———————————————————— */
 
   #buildStructure() {
