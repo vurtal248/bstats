@@ -538,7 +538,41 @@
     <!-- Advanced Stats Panel -->
     <section class="advanced-panel data-container" id="advanced-panel" style="display: none;"
       aria-label="Advanced Statistics">
-      <div class="empty-state">
+      <div id="advanced-content" style="display: none; height: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; padding: 24px; align-content: start; overflow-y: auto;">
+        
+        <div class="adv-card">
+          <div class="adv-card-header">Performance Index (PER)</div>
+          <div class="adv-card-value" id="adv-per">-</div>
+          <div class="adv-card-sub" id="adv-per-sub">League Average is roughly 15.0</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-card-header">Offensive Load</div>
+          <div class="adv-card-value" id="adv-load">-</div>
+          <div class="adv-card-sub" id="adv-load-sub">Estimated Usage based on attempts</div>
+        </div>
+
+        <div class="adv-card" style="grid-column: 1 / -1; min-height: 120px;">
+          <div class="adv-card-header">Recent Form (Last 5 Games PTS)</div>
+          <div class="adv-sparkline-container" id="adv-sparkline" style="height: 80px; width: 100%; display: flex; align-items: flex-end; gap: 4px; margin-top: 10px;">
+          </div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-card-header">True Shooting Efficiency</div>
+          <div class="adv-card-value" id="adv-ts">-</div>
+          <div class="adv-card-sub">League Baseline: 55.0%</div>
+        </div>
+        
+        <div class="adv-card">
+          <div class="adv-card-header">Pace & Flow (AST/TO)</div>
+          <div class="adv-card-value" id="adv-ast-to">-</div>
+          <div class="adv-card-sub">Playmaking Efficiency Ratio</div>
+        </div>
+        
+      </div>
+
+      <div class="empty-state" id="advanced-empty">
         <div class="calibration-grid">
           <div class="radar-sweep"></div>
           <div class="crosshair-h"></div>
@@ -550,7 +584,7 @@
         </div>
         <div class="empty-text-wrap">
           <p class="empty-message">Advanced Telemetry</p>
-          <p class="empty-hint">Metrics calculation sequence [+]</p>
+          <p class="empty-hint">Awaiting sufficient dataset to compile advanced analytics (>3 games).</p>
         </div>
       </div>
     </section>
@@ -698,6 +732,9 @@
         } else if (viewMode === 'advanced') {
           sections.advanced.style.display = '';
           targetToFlash = sections.advanced;
+          if (window.app && typeof window.app.renderAdvancedStats === 'function') {
+            window.app.renderAdvancedStats();
+          }
         } else if (viewMode === 'bio') {
           cluster.style.display = '';
           sections.bio.style.display = '';
