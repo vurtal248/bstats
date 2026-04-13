@@ -3,6 +3,7 @@ import { STORAGE_KEY_PROFILES, STORAGE_KEY_ACTIVE, STORAGE_KEY_PREFIX, LEGACY_ST
 import { formatValue, computeDerived, ranZ, getThemeColors } from './utils.js';
 import { choreographEntrance, playRowConfirmFlash, playAggregateFlash, playCareerHighsFlash } from './animation.js';
 import { initOnboarding } from './onboarding.js';
+import { MILESTONES } from './milestones.js';
 
 /**
      * @file BMetrics — Interactive Logic & State Management
@@ -1131,6 +1132,112 @@ class BMetricsApp {
       duration: 600,
       easing: 'easeOutExpo'
     });
+
+    this.#renderMilestones();
+  }
+
+  /* ——— Gamification & Milestones ——————————— */
+
+  #renderMilestones() {
+    const container = document.getElementById('milestones-container');
+    if (!container) return;
+
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    const achievements = activeProfile.achievements || [];
+
+    container.innerHTML = MILESTONES.map(m => {
+      const isUnlocked = achievements.includes(m.id);
+      return `
+        <div class="milestone-badge ${isUnlocked ? 'is-unlocked' : ''}">
+          <div class="milestone-icon">${m.icon}</div>
+          <p class="milestone-title">${m.title}</p>
+          <p class="milestone-desc">${isUnlocked ? 'Unlocked!' : m.description}</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  #checkMilestones() {
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (!activeProfile.achievements) {
+      activeProfile.achievements = [];
+    }
+
+    const newlyUnlocked = [];
+
+    // Collect all data for this profile across all seasons for true career milestones
+    const allData = [];
+    if (activeProfile.seasons) {
+      activeProfile.seasons.forEach(s => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + '_' + s.id);
+          if (raw) {
+            const seasonData = JSON.parse(raw);
+            if (Array.isArray(seasonData)) {
+              allData.push(...seasonData);
+            }
+          }
+        } catch { }
+      });
+    }
+
+    if (allData.length === 0) return;
+
+    MILESTONES.forEach(m => {
+      if (!activeProfile.achievements.includes(m.id)) {
+        if (m.evaluate(allData)) {
+          activeProfile.achievements.push(m.id);
+          newlyUnlocked.push(m);
+        }
+      }
+    });
+
+    if (newlyUnlocked.length > 0) {
+      this.#saveProfiles();
+      
+      // Update UI if in advanced tab
+      const advContent = document.getElementById('advanced-content');
+      if (advContent && advContent.style.display !== 'none') {
+        this.#renderMilestones();
+      }
+
+      newlyUnlocked.forEach(m => this.#showAchievementToast(m));
+    }
+  }
+
+  #showAchievementToast(milestone) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+      <div class="toast-icon">${milestone.icon}</div>
+      <div class="toast-content">
+        <p class="toast-title">Achievement Unlocked</p>
+        <p class="toast-desc">${milestone.title}</p>
+      </div>
+    `;
+
+    container.appendChild(toast);
+
+    anime.timeline()
+      .add({
+        targets: toast,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 400,
+        easing: 'easeOutExpo'
+      })
+      .add({
+        targets: toast,
+        opacity: 0,
+        translateY: -10,
+        delay: 3500,
+        duration: 300,
+        easing: 'easeInExpo',
+        complete: () => toast.remove()
+      });
   }
 
   /* ——— DOM Construction ———————————————————— */
@@ -1426,6 +1533,7 @@ class BMetricsApp {
 
     this.#renderCareerHighs();
     this.#renderCareerTotals();
+    this.#checkMilestones();
   }
 
   /* ——— Inline Edit ————————————————————————— */
