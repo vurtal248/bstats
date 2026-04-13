@@ -1476,6 +1476,108 @@ select.input-modern option {
   cursor: not-allowed;
 }
 
+/* ─── Gamification & Toast ────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast-notification {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 280px;
+  max-width: 400px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+:root[data-theme="dark"] .toast-notification {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.toast-icon {
+  font-size: 1.8rem;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+
+.toast-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.milestone-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-mid);
+  padding: 16px 12px;
+  gap: 8px;
+  width: 140px;
+  opacity: 0.5;
+  filter: grayscale(1);
+  transition: all 0.3s;
+}
+
+.milestone-badge.is-unlocked {
+  opacity: 1;
+  filter: grayscale(0);
+  border-color: var(--border-strong);
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.milestone-icon {
+  font-size: 2rem;
+}
+
+.milestone-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.milestone-desc {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
 /* ─── Onboarding ──────────────────────────────────────── */
 .onboarding-dialog {
   border: 1px solid var(--border-mid);
