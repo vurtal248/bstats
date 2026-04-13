@@ -80,6 +80,7 @@ class BMetricsApp {
       playerBio: document.getElementById('player-bio'),
       careerHighsContainer: document.getElementById('career-highs'),
       careerTotalsContainer: document.getElementById('career-totals'),
+      seasonTotalsContainer: document.getElementById('season-totals'),
 
       modalPredict: document.getElementById('modal-predict'),
       inputPredictCount: document.getElementById('input-predict-count'),
@@ -620,6 +621,7 @@ class BMetricsApp {
     this.#renderSeasonMenu();
     this.#renderCareerHighs();
     this.#renderCareerTotals();
+    this.#renderSeasonTotals();
   }
 
   #handleRenameSeason(id, nameSpan) {
@@ -859,6 +861,57 @@ class BMetricsApp {
       const el = this.refs.careerTotalsContainer.querySelector(`[data-total-key="${key}"]`);
       if (!el) return;
       // Round to 1 decimal for per-game stats, whole for GP
+      let displayVal;
+      if (!hasGames) {
+        displayVal = '-';
+      } else if (key === 'gp') {
+        displayVal = totals.gp;
+      } else {
+        displayVal = Math.round(totals[key]);
+      }
+      if (el.textContent !== String(displayVal)) {
+        el.textContent = displayVal;
+        updatedNodes.push(el);
+      }
+    });
+
+    if (updatedNodes.length > 0) {
+      anime({
+        targets: updatedNodes,
+        color: ['rgba(212,151,26,0.4)', '#D4971A', 'var(--clr-text-primary)'],
+        scale: [0.92, 1],
+        duration: 900,
+        delay: anime.stagger(40),
+        easing: 'easeOutExpo'
+      });
+    }
+  }
+
+  #renderSeasonTotals() {
+    if (!this.refs.seasonTotalsContainer) return;
+
+    const totals = { gp: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, '3pm': 0 };
+    
+    // Use the active loaded season data state safely
+    if (this.#state && Array.isArray(this.#state.data)) {
+      this.#state.data.forEach(row => {
+        totals.gp++;
+        totals.pts += Number(row.ppg) || 0;
+        totals.reb += Number(row.rpg) || 0;
+        totals.ast += Number(row.apg) || 0;
+        totals.stl += Number(row.spg) || 0;
+        totals.blk += Number(row.bpg) || 0;
+        totals['3pm'] += Number(row.tpm) || 0;
+      });
+    }
+
+    const hasGames = totals.gp > 0;
+    const updatedNodes = [];
+
+    Object.keys(totals).forEach(key => {
+      const el = this.refs.seasonTotalsContainer.querySelector(`[data-season-total-key="${key}"]`);
+      if (!el) return;
+      
       let displayVal;
       if (!hasGames) {
         displayVal = '-';
@@ -1535,6 +1588,7 @@ class BMetricsApp {
 
     this.#renderCareerHighs();
     this.#renderCareerTotals();
+    this.#renderSeasonTotals();
     this.#checkMilestones();
   }
 
