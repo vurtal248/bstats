@@ -419,6 +419,24 @@
         </div>
       </div>
 
+      <div class="career-totals-container" id="season-totals" aria-label="Season Totals">
+        <div class="container-badge container-badge--totals" style="background: var(--text-dim);">Season Totals</div>
+        <div class="total-item"><span class="total-label">GP</span><span class="total-value"
+            data-season-total-key="gp">-</span></div>
+        <div class="total-item"><span class="total-label">PTS</span><span class="total-value"
+            data-season-total-key="pts">-</span></div>
+        <div class="total-item"><span class="total-label">REB</span><span class="total-value"
+            data-season-total-key="reb">-</span></div>
+        <div class="total-item"><span class="total-label">AST</span><span class="total-value"
+            data-season-total-key="ast">-</span></div>
+        <div class="total-item"><span class="total-label">STL</span><span class="total-value"
+            data-season-total-key="stl">-</span></div>
+        <div class="total-item"><span class="total-label">BLK</span><span class="total-value"
+            data-season-total-key="blk">-</span></div>
+        <div class="total-item"><span class="total-label">3PM</span><span class="total-value"
+            data-season-total-key="3pm">-</span></div>
+      </div>
+
       <div class="career-totals-container" id="career-totals" aria-label="Career Totals">
         <div class="container-badge container-badge--totals">Career Totals</div>
         <div class="total-item"><span class="total-label">GP</span><span class="total-value"
@@ -713,6 +731,7 @@
         bio: document.getElementById('player-bio'),
         highs: document.getElementById('career-highs'),
         totals: document.getElementById('career-totals'),
+        seasonTotals: document.getElementById('season-totals'),
         games: document.getElementById('games-container'), // the games stats table
         advanced: document.getElementById('advanced-panel')
       };
@@ -724,6 +743,7 @@
         sections.bio.style.display = 'none';
         sections.highs.style.display = 'none';
         sections.totals.style.display = 'none';
+        if (sections.seasonTotals) sections.seasonTotals.style.display = 'none';
         sections.games.style.display = 'none';
         sections.advanced.style.display = 'none';
 
@@ -734,6 +754,7 @@
           sections.bio.style.display = '';
           sections.highs.style.display = '';
           sections.totals.style.display = '';
+          if (sections.seasonTotals) sections.seasonTotals.style.display = '';
           sections.games.style.display = '';
         } else if (viewMode === 'season' || viewMode === 'games') {
           sections.games.style.display = '';
@@ -755,6 +776,7 @@
         } else if (viewMode === 'totals') {
           cluster.style.display = '';
           sections.totals.style.display = '';
+          if (sections.seasonTotals) sections.seasonTotals.style.display = '';
           targetToFlash = sections.totals;
         }
 
