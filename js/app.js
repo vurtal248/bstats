@@ -1151,7 +1151,9 @@ class BMetricsApp {
         <div class="milestone-badge ${isUnlocked ? 'is-unlocked' : ''}">
           <div class="milestone-icon">${m.icon}</div>
           <p class="milestone-title">${m.title}</p>
-          <p class="milestone-desc">${isUnlocked ? 'Unlocked!' : m.description}</p>
+          <div class="milestone-desc">
+            ${isUnlocked ? `<span class="milestone-desc-status">Unlocked!</span><span class="milestone-desc-req">${m.description}</span>` : `<span>${m.description}</span>`}
+          </div>
         </div>
       `;
     }).join('');
