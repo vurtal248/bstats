@@ -1546,6 +1546,8 @@ select.input-modern option {
   opacity: 0.5;
   filter: grayscale(1);
   transition: all 0.3s;
+  flex-shrink: 0;
+  scroll-snap-align: start;
 }
 
 .milestone-badge.is-unlocked {
@@ -1576,6 +1578,22 @@ select.input-modern option {
   color: var(--text-secondary);
   line-height: 1.4;
   margin: 0;
+}
+
+.milestone-desc-status {
+  display: block;
+}
+
+.milestone-desc-req {
+  display: none;
+}
+
+.milestone-badge.is-unlocked:hover .milestone-desc-status {
+  display: none;
+}
+
+.milestone-badge.is-unlocked:hover .milestone-desc-req {
+  display: block;
 }
 
 /* ─── Onboarding ──────────────────────────────────────── */
