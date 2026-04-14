@@ -707,7 +707,7 @@ body {
 }
 
 .career-totals-container {
-  flex: 1 1 calc(50% - 6px);
+  flex: 1 1 220px;
 }
 
 .container-badge {
