@@ -4,19 +4,24 @@ export const METRICS_SCHEMA = Object.freeze([
   { key: 'ppg', label: 'PPG', computed: true },
   { key: 'apg', label: 'APG' },
   { key: 'rpg', label: 'RPG' },
+  { key: 'orb', label: 'ORB', advanced: true },
+  { key: 'drb', label: 'DRB', advanced: true },
   { key: 'spg', label: 'SPG' },
   { key: 'bpg', label: 'BPG' },
   { key: 'topg', label: 'TOPG' },
+  { key: 'pf', label: 'PF', advanced: true },
   { key: 'fgm', label: 'FGM' },
   { key: 'fga', label: 'FGA' },
   { key: 'fgPct', label: 'FG%', computed: true, isPct: true },
   { key: 'tpm', label: '3PM' },
   { key: 'tpa', label: '3PA' },
   { key: 'tpPct', label: '3P%', computed: true, isPct: true },
+  { key: 'efgPct', label: 'eFG%', computed: true, isPct: true, advanced: true },
   { key: 'ftm', label: 'FTM' },
   { key: 'fta', label: 'FTA' },
   { key: 'ftPct', label: 'FT%', computed: true, isPct: true },
-  { key: 'tsPct', label: 'TS%', computed: true, isPct: true }
+  { key: 'tsPct', label: 'TS%', computed: true, isPct: true },
+  { key: 'gameScore', label: 'GmSc', computed: true, advanced: true }
 ]);
 
 export const EDITABLE_KEYS = new Set(
