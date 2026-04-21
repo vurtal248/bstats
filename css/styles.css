@@ -880,6 +880,15 @@ body {
   position: relative;
 }
 
+.stats-grid .is-advanced {
+  display: none !important;
+}
+
+table.show-advanced .stats-grid .is-advanced,
+.stats-grid.show-advanced .is-advanced {
+  display: table-cell !important;
+}
+
 .stats-grid th:first-child,
 .stats-grid td:first-child {
   text-align: center;
@@ -1532,6 +1541,11 @@ select.input-modern option {
   margin: 0;
 }
 
+.toast-tier-bronze .toast-icon { filter: drop-shadow(0 0 4px rgba(205, 127, 50, 0.5)); }
+.toast-tier-silver .toast-icon { filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.5)); }
+.toast-tier-gold .toast-icon { filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6)); }
+.toast-tier-hof .toast-icon { filter: drop-shadow(0 0 8px rgba(229, 228, 226, 0.8)); }
+
 .milestone-badge {
   display: flex;
   flex-direction: column;
@@ -1556,6 +1570,26 @@ select.input-modern option {
   border-color: var(--border-strong);
   background: var(--surface);
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.milestone-badge.tier-bronze {
+  border-color: #CD7F32;
+}
+
+.milestone-badge.tier-silver {
+  border-color: #C0C0C0;
+}
+
+.milestone-badge.tier-gold {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, var(--surface) 70%, rgba(255, 215, 0, 0.08));
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.15);
+}
+
+.milestone-badge.tier-hof {
+  border-color: #E5E4E2;
+  background: linear-gradient(135deg, var(--surface) 50%, rgba(229, 228, 226, 0.15));
+  box-shadow: 0 0 15px rgba(229, 228, 226, 0.2);
 }
 
 .milestone-icon {
