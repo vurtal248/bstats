@@ -13,6 +13,19 @@ export function computeDerived(row) {
   const tpm = row.tpm || 0;
   const fta = row.fta || 0;
   const ftm = row.ftm || 0;
+  const ast = row.apg || 0;
+  const stl = row.spg || 0;
+  const blk = row.bpg || 0;
+  const tov = row.topg || 0;
+  
+  // If orb and drb are provided, optionally auto-update rpg
+  const orb = row.orb || 0;
+  const drb = row.drb || 0;
+  if(orb > 0 || drb > 0) {
+     row.rpg = orb + drb;
+  }
+  const reb = row.rpg || 0;
+  const pf = row.pf || 0;
 
   row.fgPct = fga > 0 ? (fgm / fga) * 100 : 0;
   row.tpPct = tpa > 0 ? (tpm / tpa) * 100 : 0;
@@ -23,6 +36,15 @@ export function computeDerived(row) {
 
   const tsDenom = 2 * (fga + 0.44 * fta);
   row.tsPct = tsDenom > 0 ? (row.ppg / tsDenom) * 100 : 0;
+  
+  // Effective Field Goal Percentage = (FGM + 0.5 * 3PM) / FGA
+  row.efgPct = fga > 0 ? ((fgm + 0.5 * tpm) / fga) * 100 : 0;
+  
+  // Game Score = PTS + 0.4 * FG - 0.7 * FGA - 0.4*(FTA - FT) + 0.7 * ORB + 0.3 * DRB + STL + 0.7 * AST + 0.7 * BLK - 0.4 * PF - TOV.
+  // We use rpg if orb/drb are missing
+  const o_reb = orb > 0 ? orb : reb * 0.25; // proxy if none provided
+  const d_reb = drb > 0 ? drb : reb * 0.75;
+  row.gameScore = row.ppg + 0.4 * fgm - 0.7 * fga - 0.4 * (fta - ftm) + 0.7 * o_reb + 0.3 * d_reb + stl + 0.7 * ast + 0.7 * blk - 0.4 * pf - tov;
 }
 
 export function ranZ() {
