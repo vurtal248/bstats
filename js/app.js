@@ -129,7 +129,6 @@ class BMetricsApp {
 
   #initProfiles() {
     try {
-      // 🚨 AGGRESSIVE LEGACY RECOVERY 🚨
       // Run once per device if V1 data exists to prevent data stranding if they caught a bad intermediate commit
       const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyData && !localStorage.getItem('bstats_v1_migration_done')) {
