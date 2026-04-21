@@ -1257,7 +1257,7 @@ class BMetricsApp {
     const valA = selectA.value;
     const valB = selectB.value;
     if (!valA || !valB) {
-      this.#showFeedback('Please select two distinct profiles/seasons to compare.', 'error');
+      alert('Please select two distinct profiles/seasons to compare.');
       return;
     }
 
@@ -1265,7 +1265,7 @@ class BMetricsApp {
     const statsB = this.#getAggregatedStats(valB);
 
     if (!statsA || !statsB) {
-      this.#showFeedback('Insufficient data for one or both selections.', 'error');
+      alert('Insufficient data for one or both selections.');
       return;
     }
 
