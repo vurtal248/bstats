@@ -129,6 +129,35 @@ class BMetricsApp {
 
   #initProfiles() {
     try {
+      // 🚨 AGGRESSIVE LEGACY RECOVERY 🚨
+      // Run once per device if V1 data exists to prevent data stranding if they caught a bad intermediate commit
+      const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyData && !localStorage.getItem('bstats_v1_migration_done')) {
+        let tempProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY_PROFILES) || '[]');
+        if (tempProfiles.length === 0) {
+          tempProfiles = [{
+            id: 'legacy_recovery',
+            name: 'Recovered Athlete (V1)',
+            seasons: [{ id: 's_1', name: 'Original Data' }],
+            activeSeasonId: 's_1'
+          }];
+          localStorage.setItem(STORAGE_KEY_ACTIVE, 'legacy_recovery');
+        } else {
+          if (!tempProfiles.find(p => p.id === 'legacy_recovery')) {
+            tempProfiles.push({
+              id: 'legacy_recovery',
+              name: 'Recovered Athlete (V1)',
+              seasons: [{ id: 's_1', name: 'Original Data' }],
+              activeSeasonId: 's_1'
+            });
+            localStorage.setItem(STORAGE_KEY_ACTIVE, 'legacy_recovery');
+          }
+        }
+        localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(tempProfiles));
+        localStorage.setItem(STORAGE_KEY_PREFIX + 'legacy_recovery_s_1', legacyData);
+        localStorage.setItem('bstats_v1_migration_done', 'true');
+      }
+
       const rawProfiles = localStorage.getItem(STORAGE_KEY_PROFILES);
       if (rawProfiles) {
         this.#profiles = JSON.parse(rawProfiles);
@@ -891,7 +920,7 @@ class BMetricsApp {
     if (!this.refs.seasonTotalsContainer) return;
 
     const totals = { gp: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, '3pm': 0 };
-    
+
     // Use the active loaded season data state safely
     if (this.#state && Array.isArray(this.#state.data)) {
       this.#state.data.forEach(row => {
@@ -911,7 +940,7 @@ class BMetricsApp {
     Object.keys(totals).forEach(key => {
       const el = this.refs.seasonTotalsContainer.querySelector(`[data-season-total-key="${key}"]`);
       if (!el) return;
-      
+
       let displayVal;
       if (!hasGames) {
         displayVal = '-';
@@ -1113,8 +1142,8 @@ class BMetricsApp {
     advEmpty.style.display = 'none';
 
     const len = data.length;
-    let sumPts=0, sumReb=0, sumAst=0, sumStl=0, sumBlk=0;
-    let sumFgm=0, sumFga=0, sumFtm=0, sumFta=0, sumTov=0;
+    let sumPts = 0, sumReb = 0, sumAst = 0, sumStl = 0, sumBlk = 0;
+    let sumFgm = 0, sumFga = 0, sumFtm = 0, sumFta = 0, sumTov = 0;
 
     data.forEach(r => {
       sumPts += Number(r.ppg) || 0;
@@ -1141,24 +1170,24 @@ class BMetricsApp {
     const astTo = sumTov > 0 ? (sumAst / sumTov).toFixed(2) : (sumAst > 0 ? '∞' : '0');
 
     const perEl = document.getElementById('adv-per');
-    if(perEl) perEl.textContent = perProxy;
-    
+    if (perEl) perEl.textContent = perProxy;
+
     const loadEl = document.getElementById('adv-load');
-    if(loadEl) loadEl.textContent = avgLoad;
+    if (loadEl) loadEl.textContent = avgLoad;
 
     const tsEl = document.getElementById('adv-ts');
-    if(tsEl) tsEl.textContent = tsPct + '%';
+    if (tsEl) tsEl.textContent = tsPct + '%';
 
     const astToEl = document.getElementById('adv-ast-to');
-    if(astToEl) astToEl.textContent = astTo;
+    if (astToEl) astToEl.textContent = astTo;
 
     const sparkline = document.getElementById('adv-sparkline');
     if (sparkline) {
       sparkline.innerHTML = '';
-      const sorted = [...data].sort((a,b) => b.id - a.id);
+      const sorted = [...data].sort((a, b) => b.id - a.id);
       const last5 = sorted.slice(0, 5).reverse();
       const maxPts = Math.max(...last5.map(r => r.ppg || 0), 1);
-      
+
       last5.forEach(r => {
         const bar = document.createElement('div');
         bar.className = 'spark-bar';
@@ -1213,7 +1242,7 @@ class BMetricsApp {
     const valB = selectB.value;
     selectA.innerHTML = optionsHTML;
     selectB.innerHTML = optionsHTML;
-    
+
     if (valA) selectA.value = valA;
     if (valB) selectB.value = valB;
   }
@@ -1253,11 +1282,11 @@ class BMetricsApp {
       const vA = Number(statsA[key]) || 0;
       const vB = Number(statsB[key]) || 0;
       const isPct = col.isPct;
-      
+
       const max = Math.max(vA, vB, Math.abs(vA), Math.abs(vB), 1);
       const wA = (vA / max) * 100;
       const wB = (vB / max) * 100;
-      
+
       const fA = isPct ? vA.toFixed(1) + '%' : vA.toFixed(1);
       const fB = isPct ? vB.toFixed(1) + '%' : vB.toFixed(1);
 
@@ -1275,9 +1304,9 @@ class BMetricsApp {
         </div>
       `;
     });
-    
+
     grid.innerHTML = html;
-    
+
     requestAnimationFrame(() => {
       setTimeout(() => {
         grid.querySelectorAll('.compare-bar-a, .compare-bar-b').forEach(bar => {
@@ -1317,12 +1346,12 @@ class BMetricsApp {
         if (k !== 'id') totals[k] = (totals[k] || 0) + (Number(r[k]) || 0);
       });
     });
-    
+
     const avg = {};
     Object.keys(totals).forEach(k => {
       avg[k] = totals[k] / count;
     });
-    
+
     computeDerived(avg);
     return avg;
   }
@@ -1340,11 +1369,11 @@ class BMetricsApp {
       // achievements is an object mapping string ids to result objects
       let ach = null;
       if (Array.isArray(achievements)) {
-         ach = achievements.includes(m.id) ? { tier: 'bronze', count: 1 } : { tier: 'none', count: 0 };
+        ach = achievements.includes(m.id) ? { tier: 'bronze', count: 1 } : { tier: 'none', count: 0 };
       } else {
-         ach = achievements[m.id] || { tier: 'none', count: 0 };
+        ach = achievements[m.id] || { tier: 'none', count: 0 };
       }
-      
+
       const isUnlocked = ach.tier !== 'none';
       return `
         <div class="milestone-badge ${isUnlocked ? 'is-unlocked tier-' + ach.tier : ''}">
@@ -1399,7 +1428,7 @@ class BMetricsApp {
 
     if (newlyUnlocked.length > 0) {
       this.#saveProfiles();
-      
+
       // Update UI if in advanced tab
       const advContent = document.getElementById('advanced-content');
       if (advContent && advContent.style.display !== 'none') {
