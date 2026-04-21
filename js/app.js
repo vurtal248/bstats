@@ -1189,6 +1189,144 @@ class BMetricsApp {
     this.#renderMilestones();
   }
 
+  /* ——— Compare View ——————————————— */
+  renderCompareView() {
+    this.#renderCompareView();
+  }
+
+  #renderCompareView() {
+    const selectA = document.getElementById('compare-profile-a');
+    const selectB = document.getElementById('compare-profile-b');
+    if (!selectA || !selectB) return;
+
+    let optionsHTML = '<option value="">Select Profile</option>';
+    this.#profiles.forEach(p => {
+      optionsHTML += `<option value="c_${p.id}">${p.name} (Career)</option>`;
+      if (p.seasons) {
+        p.seasons.forEach(s => {
+          optionsHTML += `<option value="s_${p.id}_${s.id}">${p.name} - ${s.name}</option>`;
+        });
+      }
+    });
+
+    const valA = selectA.value;
+    const valB = selectB.value;
+    selectA.innerHTML = optionsHTML;
+    selectB.innerHTML = optionsHTML;
+    
+    if (valA) selectA.value = valA;
+    if (valB) selectB.value = valB;
+  }
+
+  #handleCompareRun() {
+    const selectA = document.getElementById('compare-profile-a');
+    const selectB = document.getElementById('compare-profile-b');
+    const content = document.getElementById('compare-content');
+    const empty = document.getElementById('compare-empty');
+    const grid = document.getElementById('compare-grid');
+    if (!selectA || !selectB || !content || !empty || !grid) return;
+
+    const valA = selectA.value;
+    const valB = selectB.value;
+    if (!valA || !valB) {
+      this.#showFeedback('Please select two distinct profiles/seasons to compare.', 'error');
+      return;
+    }
+
+    const statsA = this.#getAggregatedStats(valA);
+    const statsB = this.#getAggregatedStats(valB);
+
+    if (!statsA || !statsB) {
+      this.#showFeedback('Insufficient data for one or both selections.', 'error');
+      return;
+    }
+
+    content.style.display = 'block';
+    empty.style.display = 'none';
+
+    const keys = ['ppg', 'rpg', 'apg', 'spg', 'bpg', 'fgPct', 'tpPct', 'efgPct', 'gameScore'];
+
+    let html = '';
+    keys.forEach(key => {
+      const col = METRICS_SCHEMA.find(c => c.key === key);
+      if (!col) return;
+      const vA = Number(statsA[key]) || 0;
+      const vB = Number(statsB[key]) || 0;
+      const isPct = col.isPct;
+      
+      const max = Math.max(vA, vB, Math.abs(vA), Math.abs(vB), 1);
+      const wA = (vA / max) * 100;
+      const wB = (vB / max) * 100;
+      
+      const fA = isPct ? vA.toFixed(1) + '%' : vA.toFixed(1);
+      const fB = isPct ? vB.toFixed(1) + '%' : vB.toFixed(1);
+
+      html += `
+        <div class="compare-row" style="display:grid; grid-template-columns: 1fr 80px 1fr; align-items:center; gap: 12px; font-family: var(--font-data);">
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+            <span style="font-weight: 600; font-size: 0.9rem; color: ${vA >= vB ? 'var(--text-primary)' : 'var(--text-dim)'}">${fA}</span>
+            <div style="height: 6px; width: 0%; background: ${vA >= vB ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 3px 0 0 3px;" data-target-width="${wA}%" class="compare-bar-a"></div>
+          </div>
+          <div style="text-align:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase;">${col.label}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="height: 6px; width: 0%; background: ${vB >= vA ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 0 3px 3px 0;" data-target-width="${wB}%" class="compare-bar-b"></div>
+            <span style="font-weight: 600; font-size: 0.9rem; color: ${vB >= vA ? 'var(--text-primary)' : 'var(--text-dim)'}">${fB}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    grid.innerHTML = html;
+    
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        grid.querySelectorAll('.compare-bar-a, .compare-bar-b').forEach(bar => {
+          bar.style.width = bar.dataset.targetWidth;
+        });
+      }, 50);
+    });
+  }
+
+  #getAggregatedStats(selectionId) {
+    const parts = selectionId.split('_');
+    const type = parts[0];
+    const profileId = parseInt(parts[1], 10);
+    const profile = this.#profiles.find(p => p.id === profileId);
+    if (!profile) return null;
+
+    let allData = [];
+    if (type === 'c') {
+      if (profile.seasons) {
+        profile.seasons.forEach(s => {
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profile.id + '_' + s.id);
+          if (raw) allData.push(...JSON.parse(raw));
+        });
+      }
+    } else {
+      const seasonId = parseInt(parts[2], 10);
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profileId + '_' + seasonId);
+      if (raw) allData.push(...JSON.parse(raw));
+    }
+
+    if (allData.length === 0) return null;
+
+    const count = allData.length;
+    const totals = {};
+    allData.forEach(r => {
+      Object.keys(r).forEach(k => {
+        if (k !== 'id') totals[k] = (totals[k] || 0) + (Number(r[k]) || 0);
+      });
+    });
+    
+    const avg = {};
+    Object.keys(totals).forEach(k => {
+      avg[k] = totals[k] / count;
+    });
+    
+    computeDerived(avg);
+    return avg;
+  }
+
   /* ——— Gamification & Milestones ——————————— */
 
   #renderMilestones() {
@@ -1196,16 +1334,24 @@ class BMetricsApp {
     if (!container) return;
 
     const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
-    const achievements = activeProfile.achievements || [];
+    const achievements = activeProfile.achievements || {};
 
     container.innerHTML = MILESTONES.map(m => {
-      const isUnlocked = achievements.includes(m.id);
+      // achievements is an object mapping string ids to result objects
+      let ach = null;
+      if (Array.isArray(achievements)) {
+         ach = achievements.includes(m.id) ? { tier: 'bronze', count: 1 } : { tier: 'none', count: 0 };
+      } else {
+         ach = achievements[m.id] || { tier: 'none', count: 0 };
+      }
+      
+      const isUnlocked = ach.tier !== 'none';
       return `
-        <div class="milestone-badge ${isUnlocked ? 'is-unlocked' : ''}">
+        <div class="milestone-badge ${isUnlocked ? 'is-unlocked tier-' + ach.tier : ''}">
           <div class="milestone-icon">${m.icon}</div>
           <p class="milestone-title">${m.title}</p>
           <div class="milestone-desc">
-            ${isUnlocked ? `<span class="milestone-desc-status">Unlocked!</span><span class="milestone-desc-req">${m.description}</span>` : `<span>${m.description}</span>`}
+            ${isUnlocked ? `<span class="milestone-desc-status">${ach.tier.toUpperCase()} (${ach.count})</span><span class="milestone-desc-req">${ach.next ? `Next at ${ach.next}` : 'Max Tier'}</span>` : `<span>${m.description}</span>`}
           </div>
         </div>
       `;
@@ -1214,11 +1360,9 @@ class BMetricsApp {
 
   #checkMilestones() {
     const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
-    if (!activeProfile.achievements) {
-      activeProfile.achievements = [];
+    if (!activeProfile.achievements || Array.isArray(activeProfile.achievements)) {
+      activeProfile.achievements = {};
     }
-
-    const newlyUnlocked = [];
 
     // Collect all data for this profile across all seasons for true career milestones
     const allData = [];
@@ -1238,12 +1382,18 @@ class BMetricsApp {
 
     if (allData.length === 0) return;
 
+    const newlyUnlocked = [];
+
     MILESTONES.forEach(m => {
-      if (!activeProfile.achievements.includes(m.id)) {
-        if (m.evaluate(allData)) {
-          activeProfile.achievements.push(m.id);
-          newlyUnlocked.push(m);
-        }
+      const result = m.evaluate(allData);
+      const currentTier = activeProfile.achievements[m.id]?.tier || 'none';
+      if (result.tier !== 'none' && result.tier !== currentTier) {
+        // Upgrade or new unlock
+        activeProfile.achievements[m.id] = result;
+        newlyUnlocked.push({ milestone: m, result });
+      } else if (result.tier !== 'none') {
+        // Just update counts etc.
+        activeProfile.achievements[m.id] = result;
       }
     });
 
@@ -1256,20 +1406,20 @@ class BMetricsApp {
         this.#renderMilestones();
       }
 
-      newlyUnlocked.forEach(m => this.#showAchievementToast(m));
+      newlyUnlocked.forEach(({ milestone, result }) => this.#showAchievementToast(milestone, result));
     }
   }
 
-  #showAchievementToast(milestone) {
+  #showAchievementToast(milestone, result) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = 'toast-notification';
+    toast.className = `toast-notification toast-tier-${result?.tier || 'bronze'}`;
     toast.innerHTML = `
       <div class="toast-icon">${milestone.icon}</div>
       <div class="toast-content">
-        <p class="toast-title">Achievement Unlocked</p>
+        <p class="toast-title">${result?.tier?.toUpperCase() || 'ACHIEVEMENT'} UNLOCKED</p>
         <p class="toast-desc">${milestone.title}</p>
       </div>
     `;
@@ -1303,7 +1453,8 @@ class BMetricsApp {
       const isSortable = col.key !== 'id';
       return `
             <th data-key="${col.key}" scope="col" aria-sort="none"
-                ${isSortable ? 'tabindex="0" role="columnheader"' : 'role="columnheader"'}>
+                ${isSortable ? 'tabindex="0" role="columnheader"' : 'role="columnheader"'}
+                class="${col.advanced ? 'is-advanced' : ''}">
               ${col.label}
               ${isSortable ? '<span class="sort-indicator"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>' : ''}
             </th>`;
@@ -1311,7 +1462,7 @@ class BMetricsApp {
 
     // --- Table footer ---
     this.refs.tfoot.innerHTML = METRICS_SCHEMA.map(col =>
-      `<td id="avg-${col.key}" data-key="${col.key}">0</td>`
+      `<td id="avg-${col.key}" data-key="${col.key}" class="${col.advanced ? 'is-advanced' : ''}">0</td>`
     ).join('');
 
     // --- Header sort handlers ---
@@ -1329,8 +1480,24 @@ class BMetricsApp {
   }
 
   #bindGlobalEvents() {
+    this.refs.toggleAdvColumns = document.getElementById('toggle-adv-columns');
+    if (this.refs.toggleAdvColumns) {
+      this.refs.toggleAdvColumns.addEventListener('change', (e) => {
+        const table = document.getElementById('stats-table');
+        if (table) {
+          if (e.target.checked) table.classList.add('show-advanced');
+          else table.classList.remove('show-advanced');
+        }
+      });
+    }
+
     this.refs.fab.addEventListener('click', () => this.#handleAppendRecord());
     this.refs.predictFab.addEventListener('click', () => this.#openPredictModal());
+
+    const btnRunCompare = document.getElementById('btn-run-compare');
+    if (btnRunCompare) {
+      btnRunCompare.addEventListener('click', () => this.#handleCompareRun());
+    }
 
     this.refs.toggleFabsBtn.addEventListener('click', () => {
       this.refs.fabContainer.classList.toggle('is-collapsed');
@@ -1484,6 +1651,7 @@ class BMetricsApp {
     METRICS_SCHEMA.forEach(col => {
       const td = document.createElement('td');
       td.dataset.key = col.key;
+      if (col.advanced) td.classList.add('is-advanced');
 
       if (col.key === 'id') {
         td.innerHTML = `
