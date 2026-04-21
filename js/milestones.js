@@ -1,107 +1,132 @@
+function getTier(count, thresholds) {
+  if (count >= thresholds[3]) return { tier: 'hof', count, next: null };
+  if (count >= thresholds[2]) return { tier: 'gold', count, next: thresholds[3] };
+  if (count >= thresholds[1]) return { tier: 'silver', count, next: thresholds[2] };
+  if (count >= thresholds[0]) return { tier: 'bronze', count, next: thresholds[1] };
+  return { tier: 'none', count, next: thresholds[0] };
+}
+
 export const MILESTONES = [
   {
     id: 'triple-double',
     title: 'Triple-Double',
-    description: 'Record double digits in three statistical categories in a single game.',
+    description: 'Record triple-doubles.',
     icon: '🔥',
     evaluate: (data) => {
-      return data.some(game => {
-        let count = 0;
-        if (game.ppg >= 10) count++;
-        if (game.rpg >= 10) count++;
-        if (game.apg >= 10) count++;
-        if (game.spg >= 10) count++;
-        if (game.bpg >= 10) count++;
-        return count >= 3;
-      });
+      const count = data.filter(game => {
+        let c = 0;
+        if (game.ppg >= 10) c++;
+        if (game.rpg >= 10) c++;
+        if (game.apg >= 10) c++;
+        if (game.spg >= 10) c++;
+        if (game.bpg >= 10) c++;
+        return c >= 3;
+      }).length;
+      return getTier(count, [1, 5, 10, 25]);
     }
   },
   {
     id: 'volume-scorer',
     title: 'Volume Scorer',
-    description: 'Score 40 or more points in a single game.',
+    description: 'Score 40+ points in games.',
     icon: '🏀',
-    evaluate: (data) => data.some(game => game.ppg >= 40)
+    evaluate: (data) => {
+      const count = data.filter(game => game.ppg >= 40).length;
+      return getTier(count, [1, 3, 10, 20]);
+    }
   },
   {
     id: 'club-50-40-90',
     title: '50-40-90 Club',
-    description: 'Maintain 50% FG, 40% 3PT, and 90% FT averages over 5+ games.',
+    description: 'Games meeting 50/40/90 efficiency (min 10 FGA).',
     icon: '🎯',
     evaluate: (data) => {
-      if (data.length < 5) return false;
-      let sumFgm=0, sumFga=0, sumTpm=0, sumTpa=0, sumFtm=0, sumFta=0;
-      data.forEach(game => {
-        sumFgm += Number(game.fgm) || 0;
-        sumFga += Number(game.fga) || 0;
-        sumTpm += Number(game.tpm) || 0;
-        sumTpa += Number(game.tpa) || 0;
-        sumFtm += Number(game.ftm) || 0;
-        sumFta += Number(game.fta) || 0;
-      });
-      const fg = sumFga > 0 ? (sumFgm/sumFga)*100 : 0;
-      const tp = sumTpa > 0 ? (sumTpm/sumTpa)*100 : 0;
-      const ft = sumFta > 0 ? (sumFtm/sumFta)*100 : 0;
-      return fg >= 50 && tp >= 40 && ft >= 90;
+      const count = data.filter(game => {
+        if (game.fga < 10) return false;
+        const fg = game.fga > 0 ? (game.fgm / game.fga) * 100 : 0;
+        const tp = game.tpa > 0 ? (game.tpm / game.tpa) * 100 : 0;
+        const ft = game.fta > 0 ? (game.ftm / game.fta) * 100 : 0;
+        return fg >= 50 && tp >= 40 && ft >= 90;
+      }).length;
+      return getTier(count, [1, 5, 15, 30]);
     }
   },
   {
     id: 'lockdown',
     title: 'Lock Guard',
-    description: 'Record at least 5 steals and 5 blocks in a single game.',
+    description: 'Record 5+ steals and 5+ blocks.',
     icon: '🔒',
-    evaluate: (data) => data.some(game => game.spg >= 5 && game.bpg >= 5)
+    evaluate: (data) => {
+      const count = data.filter(game => game.spg >= 5 && game.bpg >= 5).length;
+      return getTier(count, [1, 2, 5, 10]);
+    }
   },
   {
     id: 'playmaker',
     title: 'Floor General',
-    description: 'Record 15 or more assists in a single game.',
+    description: 'Record 15+ assists.',
     icon: '👁️',
-    evaluate: (data) => data.some(game => game.apg >= 15)
+    evaluate: (data) => {
+      const count = data.filter(game => game.apg >= 15).length;
+      return getTier(count, [1, 5, 15, 30]);
+    }
   },
   {
     id: 'sharpshooter',
     title: 'Sharpshooter',
-    description: 'Make 10 or more 3-pointers in a single game.',
+    description: 'Make 10+ 3-pointers.',
     icon: '☄️',
-    evaluate: (data) => data.some(game => game.tpm >= 10)
+    evaluate: (data) => {
+      const count = data.filter(game => game.tpm >= 10).length;
+      return getTier(count, [1, 3, 10, 20]);
+    }
   },
   {
     id: 'glass-cleaner',
     title: 'Glass Cleaner',
-    description: 'Record 20 or more rebounds in a single game.',
+    description: 'Record 20+ rebounds.',
     icon: '🧹',
-    evaluate: (data) => data.some(game => game.rpg >= 20)
+    evaluate: (data) => {
+      const count = data.filter(game => game.rpg >= 20).length;
+      return getTier(count, [1, 5, 15, 30]);
+    }
   },
   {
     id: 'perfect-game',
     title: 'Perfect Game',
-    description: 'Shoot 100% from the field with at least 10 attempts.',
+    description: 'Shoot 100% from field (min 10 attempts).',
     icon: '💯',
-    evaluate: (data) => data.some(game => game.fgm >= 10 && game.fga > 0 && game.fga === game.fgm)
+    evaluate: (data) => {
+      const count = data.filter(game => game.fgm >= 10 && game.fga > 0 && game.fga === game.fgm).length;
+      return getTier(count, [1, 2, 5, 10]);
+    }
   },
   {
     id: 'iron-man',
     title: 'Iron Man',
-    description: 'Play 48 or more minutes in a single game.',
+    description: 'Play 48+ minutes options.',
     icon: '🔋',
-    evaluate: (data) => data.some(game => game.mpg >= 48)
+    evaluate: (data) => {
+      const count = data.filter(game => game.mpg >= 48).length;
+      return getTier(count, [1, 5, 15, 30]);
+    }
   },
   {
     id: 'quadruple-double',
     title: 'Quadruple-Double',
-    description: 'Record double digits in four statistical categories in a single game.',
+    description: 'Record quadruple-doubles.',
     icon: '👑',
     evaluate: (data) => {
-      return data.some(game => {
-        let count = 0;
-        if (game.ppg >= 10) count++;
-        if (game.rpg >= 10) count++;
-        if (game.apg >= 10) count++;
-        if (game.spg >= 10) count++;
-        if (game.bpg >= 10) count++;
-        return count >= 4;
-      });
+      const count = data.filter(game => {
+        let c = 0;
+        if (game.ppg >= 10) c++;
+        if (game.rpg >= 10) c++;
+        if (game.apg >= 10) c++;
+        if (game.spg >= 10) c++;
+        if (game.bpg >= 10) c++;
+        return c >= 4;
+      }).length;
+      return getTier(count, [1, 2, 5, 10]);
     }
   }
 ];
