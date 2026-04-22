@@ -1694,10 +1694,10 @@ class BMetricsApp {
           this.#handleDeleteRecord(tr, rowData.id);
         });
       } else if (col.computed) {
-        td.className = 'cell-computed';
+        td.classList.add('cell-computed');
         td.innerHTML = `<span class="cell-val">${formatValue(rowData[col.key], col.isPct)}</span>`;
       } else {
-        td.className = 'cell-interactive';
+        td.classList.add('cell-interactive');
         td.tabIndex = 0;
         td.innerHTML = `<span class="cell-val">${formatValue(rowData[col.key])}</span>`;
 
