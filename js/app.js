@@ -1379,7 +1379,7 @@ class BMetricsApp {
           <div class="milestone-icon">${m.icon}</div>
           <p class="milestone-title">${m.title}</p>
           <div class="milestone-desc">
-            ${isUnlocked ? `<span class="milestone-desc-status">${ach.tier.toUpperCase()} (${ach.count})</span><span class="milestone-desc-req">${ach.next ? `Next at ${ach.next}` : 'Max Tier'}</span>` : `<span>${m.description}</span>`}
+            ${isUnlocked ? `<span class="milestone-desc-status">${ach.tier.toUpperCase()} (${ach.count})</span><span class="milestone-desc-req"><span style="display:block; margin-bottom:4px; color:var(--text-primary); font-weight:600;">${ach.next ? `Next at ${ach.next}` : 'Max Tier'}</span><span style="display:block; opacity:0.8; font-size:0.95em; line-height:1.3;">${m.description}</span></span>` : `<span>${m.description}</span>`}
           </div>
         </div>
       `;
