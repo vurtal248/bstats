@@ -1229,10 +1229,10 @@ class BMetricsApp {
 
     let optionsHTML = '<option value="">Select Profile</option>';
     this.#profiles.forEach(p => {
-      optionsHTML += `<option value="c_${p.id}">${p.name} (Career)</option>`;
+      optionsHTML += `<option value="c|${p.id}">${p.name} (Career)</option>`;
       if (p.seasons) {
         p.seasons.forEach(s => {
-          optionsHTML += `<option value="s_${p.id}_${s.id}">${p.name} - ${s.name}</option>`;
+          optionsHTML += `<option value="s|${p.id}|${s.id}">${p.name} - ${s.name}</option>`;
         });
       }
     });
@@ -1316,10 +1316,10 @@ class BMetricsApp {
   }
 
   #getAggregatedStats(selectionId) {
-    const parts = selectionId.split('_');
+    const parts = selectionId.split('|');
     const type = parts[0];
-    const profileId = parseInt(parts[1], 10);
-    const profile = this.#profiles.find(p => p.id === profileId);
+    const profileId = parts[1];
+    const profile = this.#profiles.find(p => String(p.id) === String(profileId));
     if (!profile) return null;
 
     let allData = [];
@@ -1331,8 +1331,8 @@ class BMetricsApp {
         });
       }
     } else {
-      const seasonId = parseInt(parts[2], 10);
-      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profileId + '_' + seasonId);
+      const seasonId = parts[2];
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profile.id + '_' + seasonId);
       if (raw) allData.push(...JSON.parse(raw));
     }
 
