@@ -234,7 +234,7 @@ class BMetricsApp {
     this.refs.profileList.innerHTML = this.#profiles.map(p => `
           <div class="profile-item ${p.id === this.#activeProfileId ? 'is-active' : ''}" data-id="${p.id}" tabindex="0" role="menuitem">
             <span class="profile-item-name">${p.name}</span>
-            <div style="display:flex; gap:4px; margin-left: 8px;">
+            <div class="profile-item-actions">
               <button class="btn-profile-action btn-rename-profile" aria-label="Rename ${p.name}" data-action="rename" data-id="${p.id}">
                 <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
               </button>
@@ -529,7 +529,7 @@ class BMetricsApp {
     this.refs.seasonList.innerHTML = activeProfile.seasons.map((s, index) => `
           <div class="profile-item ${s.id === this.#activeSeasonId ? 'is-active' : ''}" data-id="${s.id}" tabindex="0" role="menuitem">
             <span class="profile-item-name">${s.name}</span>
-            <div style="display:flex; gap:4px; margin-left: 8px;">
+            <div class="profile-item-actions">
               ${index > 0 ? `
               <button class="btn-profile-action btn-move-up-season" aria-label="Move Up" data-action="move-up" data-id="${s.id}">
                 <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
