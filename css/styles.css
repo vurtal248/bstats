@@ -283,6 +283,17 @@ body {
   white-space: nowrap;
 }
 
+.profile-item-actions {
+  display: none;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.profile-item:hover .profile-item-actions,
+.profile-item:focus-within .profile-item-actions {
+  display: flex;
+}
+
 .btn-profile-action {
   background: none;
   border: none;
