@@ -526,10 +526,20 @@ class BMetricsApp {
     const activeSeason = activeProfile.seasons.find(s => s.id === this.#activeSeasonId);
     this.refs.activeSeasonName.textContent = activeSeason ? activeSeason.name : 'Unknown';
 
-    this.refs.seasonList.innerHTML = activeProfile.seasons.map(s => `
+    this.refs.seasonList.innerHTML = activeProfile.seasons.map((s, index) => `
           <div class="profile-item ${s.id === this.#activeSeasonId ? 'is-active' : ''}" data-id="${s.id}" tabindex="0" role="menuitem">
             <span class="profile-item-name">${s.name}</span>
             <div style="display:flex; gap:4px; margin-left: 8px;">
+              ${index > 0 ? `
+              <button class="btn-profile-action btn-move-up-season" aria-label="Move Up" data-action="move-up" data-id="${s.id}">
+                <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+              </button>
+              ` : ''}
+              ${index < activeProfile.seasons.length - 1 ? `
+              <button class="btn-profile-action btn-move-down-season" aria-label="Move Down" data-action="move-down" data-id="${s.id}">
+                <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              ` : ''}
               <button class="btn-profile-action btn-rename-profile" aria-label="Rename ${s.name}" data-action="rename" data-id="${s.id}">
                 <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
               </button>
@@ -547,12 +557,20 @@ class BMetricsApp {
         if (e.target.tagName === 'INPUT') return;
         const deleteBtn = e.target.closest('.btn-delete-profile');
         const renameBtn = e.target.closest('.btn-rename-profile');
+        const upBtn = e.target.closest('.btn-move-up-season');
+        const downBtn = e.target.closest('.btn-move-down-season');
         if (deleteBtn) {
           e.stopPropagation();
           this.#handleDeleteSeason(item.dataset.id);
         } else if (renameBtn) {
           e.stopPropagation();
           this.#handleRenameSeason(item.dataset.id, item.querySelector('.profile-item-name'));
+        } else if (upBtn) {
+          e.stopPropagation();
+          this.#handleReorderSeason(item.dataset.id, -1);
+        } else if (downBtn) {
+          e.stopPropagation();
+          this.#handleReorderSeason(item.dataset.id, 1);
         } else {
           this.#handleSwitchSeason(item.dataset.id);
         }
@@ -620,6 +638,25 @@ class BMetricsApp {
 
     this.#renderSeasonMenu();
     this.#render();
+  }
+
+  #handleReorderSeason(id, direction) {
+    const activeProfile = this.#profiles.find(p => p.id === this.#activeProfileId);
+    if (!activeProfile || !activeProfile.seasons) return;
+
+    const index = activeProfile.seasons.findIndex(s => s.id === id);
+    if (index === -1) return;
+
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= activeProfile.seasons.length) return;
+
+    // Swap
+    const temp = activeProfile.seasons[index];
+    activeProfile.seasons[index] = activeProfile.seasons[newIndex];
+    activeProfile.seasons[newIndex] = temp;
+
+    this.#saveProfiles();
+    this.#renderSeasonMenu();
   }
 
   #handleDeleteSeason(id) {
