@@ -1309,39 +1309,136 @@ class BMetricsApp {
     content.style.display = 'block';
     empty.style.display = 'none';
 
-    const keys = ['ppg', 'rpg', 'apg', 'spg', 'bpg', 'fgPct', 'tpPct', 'efgPct', 'gameScore'];
+    // Stat groups — lowerIsBetter inverts the "winner" highlight
+    const STAT_GROUPS = [
+      {
+        label: 'Per-Game',
+        keys: [
+          { key: 'ppg' },
+          { key: 'rpg' },
+          { key: 'apg' },
+          { key: 'spg' },
+          { key: 'bpg' },
+          { key: 'mpg' },
+          { key: 'topg', lowerIsBetter: true },
+        ]
+      },
+      {
+        label: 'Shooting',
+        keys: [
+          { key: 'fgm' },
+          { key: 'fga' },
+          { key: 'fgPct' },
+          { key: 'tpm' },
+          { key: 'tpPct' },
+          { key: 'ftm' },
+          { key: 'ftPct' },
+          { key: 'efgPct' },
+          { key: 'tsPct' },
+        ]
+      },
+      {
+        label: 'Advanced',
+        keys: [
+          { key: 'gameScore' },
+        ]
+      }
+    ];
 
-    let html = '';
-    keys.forEach(key => {
+    // Count edge wins per player for scoreboard
+    let edgesA = 0, edgesB = 0;
+    STAT_GROUPS.forEach(group => {
+      group.keys.forEach(({ key, lowerIsBetter }) => {
+        const vA = Number(statsA[key]) || 0;
+        const vB = Number(statsB[key]) || 0;
+        if (vA === vB) return;
+        const aWins = lowerIsBetter ? vA < vB : vA > vB;
+        if (aWins) edgesA++; else edgesB++;
+      });
+    });
+
+    // Section divider helper
+    const buildSectionHeading = (label) => `
+      <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px; margin-top: 10px; margin-bottom: 2px;">
+        <span style="font-family:var(--font-mono); font-size:0.55rem; letter-spacing:0.12em; color:var(--text-dim); text-transform:uppercase; white-space:nowrap;">${label}</span>
+        <div style="flex:1; height:1px; background:var(--border-mid);"></div>
+      </div>
+    `;
+
+    // Single stat row
+    const buildRow = (key, lowerIsBetter) => {
       const col = METRICS_SCHEMA.find(c => c.key === key);
-      if (!col) return;
+      if (!col) return '';
       const vA = Number(statsA[key]) || 0;
       const vB = Number(statsB[key]) || 0;
       const isPct = col.isPct;
 
-      const max = Math.max(vA, vB, Math.abs(vA), Math.abs(vB), 1);
+      const max = Math.max(vA, vB, 0.001);
       const wA = (vA / max) * 100;
       const wB = (vB / max) * 100;
 
       const fA = isPct ? vA.toFixed(1) + '%' : vA.toFixed(1);
       const fB = isPct ? vB.toFixed(1) + '%' : vB.toFixed(1);
 
-      html += `
-        <div class="compare-row" style="display:grid; grid-template-columns: 1fr 80px 1fr; align-items:center; gap: 12px; font-family: var(--font-data);">
+      // Edge: lower is better inverts winner
+      const aLeads = lowerIsBetter ? vA <= vB : vA >= vB;
+      const bLeads = lowerIsBetter ? vB <= vA : vB >= vA;
+
+      return `
+        <div class="compare-row" style="display:grid; grid-template-columns: 1fr 72px 1fr; align-items:center; gap: 12px; font-family: var(--font-data);">
           <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
-            <span style="font-weight: 600; font-size: 0.9rem; color: ${vA >= vB ? 'var(--text-primary)' : 'var(--text-dim)'}">${fA}</span>
-            <div style="height: 6px; width: 0%; background: ${vA >= vB ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 3px 0 0 3px;" data-target-width="${wA}%" class="compare-bar-a"></div>
+            <span style="font-weight: 600; font-size: 0.9rem; color: ${aLeads ? 'var(--text-primary)' : 'var(--text-dim)'}">${fA}</span>
+            <div style="height: 6px; width: 0%; background: ${aLeads ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 3px 0 0 3px;" data-target-width="${wA}%" class="compare-bar-a"></div>
           </div>
-          <div style="text-align:center; font-family:var(--font-mono); font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase;">${col.label}</div>
+          <div style="text-align:center; font-family:var(--font-mono); font-size:0.58rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em;">${col.label}${lowerIsBetter ? '<span style="color:var(--text-dim);font-size:0.5rem;"> ↓</span>' : ''}</div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <div style="height: 6px; width: 0%; background: ${vB >= vA ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 0 3px 3px 0;" data-target-width="${wB}%" class="compare-bar-b"></div>
-            <span style="font-weight: 600; font-size: 0.9rem; color: ${vB >= vA ? 'var(--text-primary)' : 'var(--text-dim)'}">${fB}</span>
+            <div style="height: 6px; width: 0%; background: ${bLeads ? 'var(--text-primary)' : 'var(--border-strong)'}; transition: width 1s ease-out; border-radius: 0 3px 3px 0;" data-target-width="${wB}%" class="compare-bar-b"></div>
+            <span style="font-weight: 600; font-size: 0.9rem; color: ${bLeads ? 'var(--text-primary)' : 'var(--text-dim)'}">${fB}</span>
           </div>
         </div>
       `;
+    };
+
+    // Scoreboard header
+    const nameA = statsA._label || 'Player A';
+    const nameB = statsB._label || 'Player B';
+    const gpA = statsA._gp || 0;
+    const gpB = statsB._gp || 0;
+
+    const scoreboard = `
+      <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;
+                  padding: 16px 0 20px; border-bottom: 1px solid var(--border-mid); margin-bottom:4px;">
+        <div style="text-align:right;">
+          <div style="font-family:var(--font-sans); font-size:clamp(0.85rem,1.5vw,1.05rem); font-weight:700;
+                      color:var(--text-primary); line-height:1.2;">${nameA}</div>
+          <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--text-dim); margin-top:3px;">${gpA} GP</div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-secondary); margin-top:5px;">
+            <span style="font-size:1.1rem; font-weight:700; color:var(--text-primary);">${edgesA}</span> edges
+          </div>
+        </div>
+        <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-dim); text-align:center;
+                    padding: 0 8px; line-height:1; text-transform:uppercase; letter-spacing:0.1em;">VS</div>
+        <div style="text-align:left;">
+          <div style="font-family:var(--font-sans); font-size:clamp(0.85rem,1.5vw,1.05rem); font-weight:700;
+                      color:var(--text-primary); line-height:1.2;">${nameB}</div>
+          <div style="font-family:var(--font-mono); font-size:0.58rem; color:var(--text-dim); margin-top:3px;">${gpB} GP</div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-secondary); margin-top:5px;">
+            <span style="font-size:1.1rem; font-weight:700; color:var(--text-primary);">${edgesB}</span> edges
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Build all grouped rows
+    let rowsHTML = '';
+    STAT_GROUPS.forEach(group => {
+      rowsHTML += buildSectionHeading(group.label);
+      group.keys.forEach(({ key, lowerIsBetter }) => {
+        rowsHTML += buildRow(key, lowerIsBetter);
+      });
     });
 
-    grid.innerHTML = html;
+    grid.innerHTML = scoreboard + rowsHTML;
 
     requestAnimationFrame(() => {
       setTimeout(() => {
@@ -1360,7 +1457,10 @@ class BMetricsApp {
     if (!profile) return null;
 
     let allData = [];
+    // Build a human-readable label for the scoreboard
+    let selectionLabel = profile.name;
     if (type === 'c') {
+      selectionLabel = `${profile.name} (Career)`;
       if (profile.seasons) {
         profile.seasons.forEach(s => {
           const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profile.id + '_' + s.id);
@@ -1369,6 +1469,8 @@ class BMetricsApp {
       }
     } else {
       const seasonId = parts[2];
+      const season = profile.seasons?.find(s => String(s.id) === String(seasonId));
+      selectionLabel = season ? `${profile.name} — ${season.name}` : profile.name;
       const raw = localStorage.getItem(STORAGE_KEY_PREFIX + profile.id + '_' + seasonId);
       if (raw) allData.push(...JSON.parse(raw));
     }
@@ -1389,6 +1491,9 @@ class BMetricsApp {
     });
 
     computeDerived(avg);
+    // Attach meta for the scoreboard header
+    avg._gp = count;
+    avg._label = selectionLabel;
     return avg;
   }
 
