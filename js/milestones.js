@@ -1,9 +1,12 @@
 function getTier(count, thresholds) {
-  if (count >= thresholds[3]) return { tier: 'hof', count, next: null };
-  if (count >= thresholds[2]) return { tier: 'gold', count, next: thresholds[3] };
-  if (count >= thresholds[1]) return { tier: 'silver', count, next: thresholds[2] };
-  if (count >= thresholds[0]) return { tier: 'bronze', count, next: thresholds[1] };
-  return { tier: 'none', count, next: thresholds[0] };
+  if (count >= thresholds[3]) return { tier: "hof", count, next: null };
+  if (count >= thresholds[2])
+    return { tier: "gold", count, next: thresholds[3] };
+  if (count >= thresholds[1])
+    return { tier: "silver", count, next: thresholds[2] };
+  if (count >= thresholds[0])
+    return { tier: "bronze", count, next: thresholds[1] };
+  return { tier: "none", count, next: thresholds[0] };
 }
 
 // Inline SVG icons — no emoji, renders cleanly at any size/theme
@@ -22,12 +25,12 @@ const ICONS = {
 
 export const MILESTONES = [
   {
-    id: 'triple-double',
-    title: 'Triple-Double',
-    description: 'Record triple-doubles.',
+    id: "triple-double",
+    title: "Triple-Double",
+    description: "Record triple-doubles.",
     icon: ICONS.flame,
     evaluate: (data) => {
-      const count = data.filter(game => {
+      const count = data.filter((game) => {
         let c = 0;
         if (game.ppg >= 10) c++;
         if (game.rpg >= 10) c++;
@@ -37,28 +40,33 @@ export const MILESTONES = [
         return c >= 3;
       }).length;
       return getTier(count, [1, 5, 10, 25]);
-    }
+    },
   },
   {
-    id: 'volume-scorer',
-    title: 'Volume Scorer',
-    description: 'Score 40+ points in games.',
+    id: "volume-scorer",
+    title: "Volume Scorer",
+    description: "Score 40+ points in games.",
     icon: ICONS.basketball,
     evaluate: (data) => {
-      const count = data.filter(game => game.ppg >= 40).length;
+      const count = data.filter((game) => game.ppg >= 40).length;
       return getTier(count, [1, 3, 10, 20]);
-    }
+    },
   },
   {
-    id: 'club-50-40-90',
-    title: '50-40-90 Club',
+    id: "club-50-40-90",
+    title: "50-40-90 Club",
     // Season averages: 50% FG, 40% 3P, 90% FT across the entire dataset
-    description: 'Average 50/40/90 efficiency across the whole season.',
+    description: "Average 50/40/90 efficiency across the whole season.",
     icon: ICONS.target,
     evaluate: (data) => {
       // Accumulate totals across all games (true season efficiency)
-      let sumFgm = 0, sumFga = 0, sumTpm = 0, sumTpa = 0, sumFtm = 0, sumFta = 0;
-      data.forEach(g => {
+      let sumFgm = 0,
+        sumFga = 0,
+        sumTpm = 0,
+        sumTpa = 0,
+        sumFtm = 0,
+        sumFta = 0;
+      data.forEach((g) => {
         sumFgm += Number(g.fgm) || 0;
         sumFga += Number(g.fga) || 0;
         sumTpm += Number(g.tpm) || 0;
@@ -67,84 +75,89 @@ export const MILESTONES = [
         sumFta += Number(g.fta) || 0;
       });
       // Need meaningful attempt totals (at least 5 FGA/game equivalent)
-      if (sumFga < data.length * 5) return { tier: 'none', count: 0, next: null };
-      const fgPct  = sumFga > 0 ? (sumFgm / sumFga) * 100 : 0;
-      const tpPct  = sumTpa > 0 ? (sumTpm / sumTpa) * 100 : 0;
-      const ftPct  = sumFta > 0 ? (sumFtm / sumFta) * 100 : 0;
+      if (sumFga < data.length * 5)
+        return { tier: "none", count: 0, next: null };
+      const fgPct = sumFga > 0 ? (sumFgm / sumFga) * 100 : 0;
+      const tpPct = sumTpa > 0 ? (sumTpm / sumTpa) * 100 : 0;
+      const ftPct = sumFta > 0 ? (sumFtm / sumFta) * 100 : 0;
       const qualifies = fgPct >= 50 && tpPct >= 40 && ftPct >= 90;
       // Single binary achievement — season either qualifies or doesn't
       return qualifies
-        ? { tier: 'gold', count: 1, next: null }
-        : { tier: 'none', count: 0, next: null };
-    }
+        ? { tier: "gold", count: 1, next: null }
+        : { tier: "none", count: 0, next: null };
+    },
   },
   {
-    id: 'lockdown',
-    title: 'Lock Guard',
-    description: 'Record 5+ steals and 5+ blocks.',
+    id: "lockdown",
+    title: "Lock Guard",
+    description: "Record 5+ steals and 5+ blocks.",
     icon: ICONS.shield,
     evaluate: (data) => {
-      const count = data.filter(game => game.spg >= 5 && game.bpg >= 5).length;
+      const count = data.filter(
+        (game) => game.spg >= 5 && game.bpg >= 5,
+      ).length;
       return getTier(count, [1, 2, 5, 10]);
-    }
+    },
   },
   {
-    id: 'playmaker',
-    title: 'Floor General',
-    description: 'Record 15+ assists.',
+    id: "playmaker",
+    title: "Floor General",
+    description: "Record 15+ assists.",
     icon: ICONS.eye,
     evaluate: (data) => {
-      const count = data.filter(game => game.apg >= 15).length;
+      const count = data.filter((game) => game.apg >= 15).length;
       return getTier(count, [1, 5, 15, 30]);
-    }
+    },
   },
   {
-    id: 'sharpshooter',
-    title: 'Sharpshooter',
-    description: 'Make 10+ 3-pointers.',
+    id: "sharpshooter",
+    title: "Sharpshooter",
+    description: "Make 10+ 3-pointers.",
     icon: ICONS.crosshair,
     evaluate: (data) => {
-      const count = data.filter(game => game.tpm >= 10).length;
+      const count = data.filter((game) => game.tpm >= 10).length;
       return getTier(count, [1, 3, 10, 20]);
-    }
+    },
   },
   {
-    id: 'glass-cleaner',
-    title: 'Glass Cleaner',
-    description: 'Record 20+ rebounds.',
+    id: "glass-cleaner",
+    title: "Glass Cleaner",
+    description: "Record 20+ rebounds.",
     icon: ICONS.layers,
     evaluate: (data) => {
-      const count = data.filter(game => game.rpg >= 20).length;
+      const count = data.filter((game) => game.rpg >= 20).length;
       return getTier(count, [1, 5, 15, 30]);
-    }
+    },
   },
   {
-    id: 'perfect-game',
-    title: 'Perfect Game',
-    description: 'Shoot 100% from field (min 10 attempts).',
+    id: "perfect-game",
+    title: "Perfect Game",
+    description: "Shoot 100% from field (min 10 attempts).",
     icon: ICONS.checkCircle,
     evaluate: (data) => {
-      const count = data.filter(game => game.fgm >= 10 && game.fga > 0 && game.fga === game.fgm).length;
+      const count = data.filter(
+        (game) => game.fgm >= 10 && game.fga > 0 && game.fga === game.fgm,
+      ).length;
       return getTier(count, [1, 2, 5, 10]);
-    }
+    },
   },
   {
-    id: 'iron-man',
-    title: 'Iron Man',
-    description: 'Play 48+ minutes.',
+    id: "iron-man",
+    title: "Iron Man",
+    description: "Play 48+ minutes.",
     icon: ICONS.zap,
     evaluate: (data) => {
-      const count = data.filter(game => game.mpg >= 48).length;
+      const count = data.filter((game) => game.mpg >= 48).length;
       return getTier(count, [1, 5, 15, 30]);
-    }
+    },
   },
   {
-    id: 'quadruple-double',
-    title: 'Quadruple-Double',
-    description: 'Record quadruple-doubles.',
+    id: "quadruple-double",
+    title: "Quadruple-Double",
+    description: "Record quadruple-doubles.",
     icon: ICONS.crown,
     evaluate: (data) => {
-      const count = data.filter(game => {
+      const count = data.filter((game) => {
         let c = 0;
         if (game.ppg >= 10) c++;
         if (game.rpg >= 10) c++;
@@ -154,6 +167,6 @@ export const MILESTONES = [
         return c >= 4;
       }).length;
       return getTier(count, [1, 2, 5, 10]);
-    }
-  }
+    },
+  },
 ];
