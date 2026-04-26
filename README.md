@@ -4,11 +4,11 @@
 
 🔗 **[Link](https://vurtal248.github.io/bstats/)**
 
-##  Core Features
+## Core Features
 
 - **Multiple Profiles**: Maintain separate database instances for different players or entire seasons. Seamlessly switch between tracked entities.
 - **Performance Tracking**: Log comprehensive box score statistics including points (PTS), rebounds (REB), assists (AST), steals (STL), blocks (BLK), and shooting splits.
-- **Player Vitals & Biodata**: Track position, height, weight, wingspan, age, and NBA team selection. 
+- **Player Vitals & Biodata**: Track position, height, weight, wingspan, age, and NBA team selection.
 - **Archetypes**: Define up to two playstyle archetypes (e.g., Scorer, Playmaker, Workhorse, Clutch, Erratic) to contextualize the statistical output.
 - **Data Portability**: Full JSON export and import capabilities ensure your metrics are never locked into a single device or session.
 - **Simulation Engine**: Predict future game performances based on recent statistical averages and historical variance.
