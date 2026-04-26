@@ -1,960 +1,1477 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="B-Stats — Basketball Performance Intelligence"
+    />
+    <meta name="theme-color" content="#F5F4F0" />
+    <title>B-Stats</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="B-Stats — Basketball Performance Intelligence">
-  <meta name="theme-color" content="#F5F4F0">
-  <title>B-Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
 
-  <link rel="stylesheet" href="./css/styles.css">
-</head>
+  <body>
+    <!-- Hidden SVG filters (keep for compatibility) -->
+    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0">
+      <filter id="noiseFilter">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.85"
+          numOctaves="3"
+          stitchTiles="stitch"
+        />
+        <feColorMatrix
+          type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.4 0"
+        />
+      </filter>
+    </svg>
 
-<body>
-
-  <!-- Hidden SVG filters (keep for compatibility) -->
-  <svg aria-hidden="true" style="position: absolute; width: 0; height: 0;">
-    <filter id="noiseFilter">
-      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
-      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.4 0" />
-    </filter>
-  </svg>
-
-  <!-- Removed decorative layers (kept for JS compatibility) -->
-  <div class="surface-depth-layer" aria-hidden="true">
-    <div class="ambient-bg"></div>
-    <div class="ambient-noise"></div>
-    <div class="scanline-overlay"></div>
-  </div>
-
-  <!-- Sidebar overlay for mobile -->
-  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
-
-  <!-- ── LEFT SIDEBAR ────────────────────────────────── -->
-  <aside class="sidebar" aria-label="Navigation">
-
-    <!-- Brand -->
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-name">B-Stats</span>
-      <span class="sidebar-brand-sub">Performance Engine</span>
+    <!-- Removed decorative layers (kept for JS compatibility) -->
+    <div class="surface-depth-layer" aria-hidden="true">
+      <div class="ambient-bg"></div>
+      <div class="ambient-noise"></div>
+      <div class="scanline-overlay"></div>
     </div>
 
-    <!-- Player / Season Selectors -->
-    <div class="sidebar-selectors">
-      <!-- Player selector -->
-      <div class="profile-container" id="profile-selector">
-        <button class="profile-trigger" id="profile-toggle" aria-expanded="false" aria-controls="profile-menu">
-          <span class="profile-label">Player</span>
-          <span class="profile-active-name" id="active-profile-name">Player 1</span>
-          <svg class="chevron-icon" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- ── LEFT SIDEBAR ────────────────────────────────── -->
+    <aside class="sidebar" aria-label="Navigation">
+      <!-- Brand -->
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">B-Stats</span>
+        <span class="sidebar-brand-sub">Performance Engine</span>
+      </div>
+
+      <!-- Player / Season Selectors -->
+      <div class="sidebar-selectors">
+        <!-- Player selector -->
+        <div class="profile-container" id="profile-selector">
+          <button
+            class="profile-trigger"
+            id="profile-toggle"
+            aria-expanded="false"
+            aria-controls="profile-menu"
+          >
+            <span class="profile-label">Player</span>
+            <span class="profile-active-name" id="active-profile-name"
+              >Player 1</span
+            >
+            <svg class="chevron-icon" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <div class="profile-menu" id="profile-menu" role="menu" hidden>
+            <div class="profile-menu-scroll" id="profile-list">
+              <!-- items generated by JS -->
+            </div>
+            <div class="profile-menu-actions">
+              <button class="btn-new-profile" id="btn-new-profile">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 5v14M5 12h14"
+                  />
+                </svg>
+                New Player
+              </button>
+              <button class="btn-new-profile" id="btn-export-profile">
+                <svg
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  />
+                </svg>
+                Export
+              </button>
+              <button class="btn-new-profile" id="btn-import-profile">
+                <svg
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Import
+              </button>
+              <input type="file" id="input-import-file" accept=".json" hidden />
+            </div>
+          </div>
+        </div>
+
+        <!-- Season Selector -->
+        <div class="profile-container" id="season-selector">
+          <button
+            class="profile-trigger"
+            id="season-toggle"
+            aria-expanded="false"
+            aria-controls="season-menu"
+          >
+            <span class="profile-label">Season</span>
+            <span class="profile-active-name" id="active-season-name"
+              >Season 1</span
+            >
+            <svg class="chevron-icon" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <div class="profile-menu" id="season-menu" role="menu" hidden>
+            <div class="profile-menu-scroll" id="season-list">
+              <!-- items generated by JS -->
+            </div>
+            <div class="profile-menu-actions">
+              <button class="btn-new-profile" id="btn-new-season">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 5v14M5 12h14"
+                  />
+                </svg>
+                New Season
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <div class="sidebar-nav-item is-active" id="nav-overview">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
           </svg>
-        </button>
-
-        <div class="profile-menu" id="profile-menu" role="menu" hidden>
-          <div class="profile-menu-scroll" id="profile-list">
-            <!-- items generated by JS -->
-          </div>
-          <div class="profile-menu-actions">
-            <button class="btn-new-profile" id="btn-new-profile">
-              <svg viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
-              </svg>
-              New Player
-            </button>
-            <button class="btn-new-profile" id="btn-export-profile">
-              <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              Export
-            </button>
-            <button class="btn-new-profile" id="btn-import-profile">
-              <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Import
-            </button>
-            <input type="file" id="input-import-file" accept=".json" hidden>
-          </div>
+          Overview
         </div>
-      </div>
-
-      <!-- Season Selector -->
-      <div class="profile-container" id="season-selector">
-        <button class="profile-trigger" id="season-toggle" aria-expanded="false" aria-controls="season-menu">
-          <span class="profile-label">Season</span>
-          <span class="profile-active-name" id="active-season-name">Season 1</span>
-          <svg class="chevron-icon" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        <div class="sidebar-nav-item" id="nav-games">
+          <svg viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 12h18M3 6h18M3 18h18"
+            />
           </svg>
-        </button>
-
-        <div class="profile-menu" id="season-menu" role="menu" hidden>
-          <div class="profile-menu-scroll" id="season-list">
-            <!-- items generated by JS -->
-          </div>
-          <div class="profile-menu-actions">
-            <button class="btn-new-profile" id="btn-new-season">
-              <svg viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
-              </svg>
-              New Season
-            </button>
-          </div>
+          Games
         </div>
-      </div>
-    </div>
-
-    <!-- Nav Items -->
-    <nav class="sidebar-nav" aria-label="Main navigation">
-      <div class="sidebar-nav-item is-active" id="nav-overview">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-        </svg>
-        Overview
-      </div>
-      <div class="sidebar-nav-item" id="nav-games">
-        <svg viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M3 6h18M3 18h18" />
-        </svg>
-        Games
-      </div>
-      <div class="sidebar-nav-item" id="nav-bio">
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4" />
-          <path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
-        Player Bio
-      </div>
-      <div class="sidebar-nav-item" id="nav-highs">
-        <svg viewBox="0 0 24 24">
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-          <polyline points="17 6 23 6 23 12" />
-        </svg>
-        Career Highs
-      </div>
-      <div class="sidebar-nav-item" id="nav-totals">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <path d="M3 9h18M9 21V9" />
-        </svg>
-        Career Totals
-      </div>
-      <div class="sidebar-nav-item" id="nav-compare">
-        <svg viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 21l6-6M9 8l-5 5 5 5" />
-        </svg>
-        Head-to-Head
-      </div>
-    </nav>
-
-    <!-- Archetypes -->
-    <div class="sidebar-archetypes">
-      <span class="archetype-label">Archetypes (Max 2)</span>
-      <div class="archetype-grid" id="archetype-grid" role="group" aria-label="Player archetypes">
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-balanced" value="balanced" checked>
-          <label for="arch-balanced">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-                <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-                <path d="M7 21h10" />
-                <path d="M12 3v18" />
-                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
-              </svg></span>
-            <span class="archetype-name">Balanced</span>
-            <span class="archetype-tag">Trends</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-scorer" value="scorer">
-          <label for="arch-scorer">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <path
-                  d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-              </svg></span>
-            <span class="archetype-name">Scorer</span>
-            <span class="archetype-tag">FG/FT+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-playmaker" value="playmaker">
-          <label for="arch-playmaker">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="6" />
-                <circle cx="12" cy="12" r="2" />
-              </svg></span>
-            <span class="archetype-name">Playmkr</span>
-            <span class="archetype-tag">AST/TO-</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-sharp" value="sharp">
-          <label for="arch-sharp">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="22" x2="18" y1="12" y2="12" />
-                <line x1="6" x2="2" y1="12" y2="12" />
-                <line x1="12" x2="12" y1="6" y2="2" />
-                <line x1="12" x2="12" y1="22" y2="18" />
-              </svg></span>
-            <span class="archetype-name">Shooter</span>
-            <span class="archetype-tag">3PM/A+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-defender" value="defender">
-          <label for="arch-defender">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg></span>
-            <span class="archetype-name">Defender</span>
-            <span class="archetype-tag">STL/BLK+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-glass" value="glass">
-          <label for="arch-glass">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 12 12 17 22 12" />
-                <polyline points="2 17 12 22 22 17" />
-              </svg></span>
-            <span class="archetype-name">Big</span>
-            <span class="archetype-tag">REB/BLK+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-facilitator" value="facilitator">
-          <label for="arch-facilitator">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-                <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-              </svg></span>
-            <span class="archetype-name">Facil.</span>
-            <span class="archetype-tag">AST+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-slasher" value="slasher">
-          <label for="arch-slasher">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg></span>
-            <span class="archetype-name">Slasher</span>
-            <span class="archetype-tag">FTM+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-workhorse" value="workhorse">
-          <label for="arch-workhorse">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg></span>
-            <span class="archetype-name">Horse</span>
-            <span class="archetype-tag">MIN+</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-erratic" value="erratic">
-          <label for="arch-erratic">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                <path d="M8 8h.01" />
-                <path d="M16 8h.01" />
-                <path d="M8 16h.01" />
-                <path d="M16 16h.01" />
-                <path d="M12 12h.01" />
-              </svg></span>
-            <span class="archetype-name">Erratic</span>
-            <span class="archetype-tag">Variance</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-clutch" value="clutch">
-          <label for="arch-clutch">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg></span>
-            <span class="archetype-name">Clutch</span>
-            <span class="archetype-tag">FT/LowTO</span>
-          </label>
-        </div>
-        <div class="archetype-card">
-          <input type="checkbox" name="archetype" id="arch-fringe" value="fringe">
-          <label for="arch-fringe">
-            <span class="archetype-icon"><svg viewBox="0 0 24 24">
-                <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
-                <polyline points="16 17 22 17 22 11" />
-              </svg></span>
-            <span class="archetype-name">Slump</span>
-            <span class="archetype-tag">Below Avg</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom utilities -->
-    <div class="sidebar-bottom">
-      <div class="theme-toggle-container">
-        <button class="btn-theme" id="help-toggle-btn" aria-label="Replay Onboarding">
-          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"
-            stroke="currentColor">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        <div class="sidebar-nav-item" id="nav-bio">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4" />
+            <path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
           </svg>
-        </button>
-        <button class="btn-theme" id="theme-toggle-btn" aria-label="Toggle light/dark mode">
-          <svg class="icon-sun" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-  </aside>
-
-  <!-- ── MAIN CONTENT ─────────────────────────────────── -->
-  <main class="layout-main">
-
-    <!-- Top Bar -->
-    <div class="top-bar" role="banner">
-      <span class="top-bar-title">B-STATS</span>
-      <div class="top-bar-tabs" role="tablist">
-        <span class="top-bar-tab is-active" id="tab-overview" role="tab">Overview</span>
-        <span class="top-bar-tab" id="tab-season" role="tab">Season</span>
-        <span class="top-bar-tab" id="tab-advanced" role="tab">Advanced</span>
-      </div>
-      <div class="top-bar-spacer"></div>
-      <label id="toggle-adv-columns-wrap" style="display:flex; align-items:center; gap:6px; margin-right: 16px; font-family:var(--font-mono); font-size:0.6rem; color:var(--text-dim); text-transform:uppercase; cursor:pointer; user-select:none;">
-        <input type="checkbox" id="toggle-adv-columns" style="accent-color: var(--text-primary);"> Unfold Input
-      </label>
-      <button class="top-bar-profile-btn" id="mobile-profile-btn" aria-label="Open Roster Profile">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
-          <circle cx="12" cy="8" r="4" />
-          <path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Editorial Header -->
-    <header class="editorial-header">
-      <p class="header-command">Seasonal Command</p>
-      <h1 class="header-title" id="active-profile-name-display">Player Stats</h1>
-      <p class="header-meta" id="season-description">Track every game. Quantify every performance. Build your archive.
-      </p>
-    </header>
-
-    <!-- HUD: Bio + Highs + Totals -->
-    <div class="hud-dashboard-cluster" id="player-bio-cluster">
-
-      <div class="player-bio-container" id="player-bio" aria-label="Player Biodata">
-        <div class="container-badge">Player Vitals</div>
-        <div class="bio-item">
-          <span class="bio-label">POS</span>
-          <span class="bio-value" data-bio-key="position" tabindex="0" role="textbox"
-            aria-label="Edit Position">-</span>
+          Player Bio
         </div>
-        <div class="bio-item">
-          <span class="bio-label">HGT</span>
-          <div style="display: flex; gap: 4px; align-items: baseline;">
-            <span class="bio-value" data-bio-key="heightFt" tabindex="0" role="textbox" aria-label="Edit Feet">-</span>
-            <span style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem;">'</span>
-            <span class="bio-value" data-bio-key="heightIn" tabindex="0" role="textbox"
-              aria-label="Edit Inches">-</span>
-            <span style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem;">"</span>
-          </div>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">WGT</span>
-          <span class="bio-value" data-bio-key="weight" tabindex="0" role="textbox" aria-label="Edit Weight">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">WING</span>
-          <span class="bio-value" data-bio-key="wingspan" tabindex="0" role="textbox"
-            aria-label="Edit Wingspan">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">AGE</span>
-          <span class="bio-value" data-bio-key="age" tabindex="0" role="textbox" aria-label="Edit Age">-</span>
-        </div>
-        <div class="bio-item">
-          <span class="bio-label">TEAM</span>
-          <span class="bio-value bio-value--team" data-bio-key="team" tabindex="0" role="textbox"
-            aria-label="Edit Team">-</span>
-        </div>
-      </div>
-
-      <div class="career-highs-container" id="career-highs">
-        <div class="container-badge">Career Highs</div>
-        <div class="high-item"><span class="high-label">PTS</span><span class="high-value" data-high-key="pts">-</span>
-        </div>
-        <div class="high-item"><span class="high-label">REB</span><span class="high-value" data-high-key="reb">-</span>
-        </div>
-        <div class="high-item"><span class="high-label">AST</span><span class="high-value" data-high-key="ast">-</span>
-        </div>
-        <div class="high-item"><span class="high-label">STL</span><span class="high-value" data-high-key="stl">-</span>
-        </div>
-        <div class="high-item"><span class="high-label">BLK</span><span class="high-value" data-high-key="blk">-</span>
-        </div>
-        <div class="high-item"><span class="high-label">3PM</span><span class="high-value" data-high-key="3pm">-</span>
-        </div>
-      </div>
-
-      <div class="career-totals-container" id="season-totals" aria-label="Season Totals">
-        <div class="container-badge container-badge--totals" style="background: var(--text-dim);">Season Totals</div>
-        <div class="total-item"><span class="total-label">GP</span><span class="total-value"
-            data-season-total-key="gp">-</span></div>
-        <div class="total-item"><span class="total-label">PTS</span><span class="total-value"
-            data-season-total-key="pts">-</span></div>
-        <div class="total-item"><span class="total-label">REB</span><span class="total-value"
-            data-season-total-key="reb">-</span></div>
-        <div class="total-item"><span class="total-label">AST</span><span class="total-value"
-            data-season-total-key="ast">-</span></div>
-        <div class="total-item"><span class="total-label">STL</span><span class="total-value"
-            data-season-total-key="stl">-</span></div>
-        <div class="total-item"><span class="total-label">BLK</span><span class="total-value"
-            data-season-total-key="blk">-</span></div>
-        <div class="total-item"><span class="total-label">3PM</span><span class="total-value"
-            data-season-total-key="3pm">-</span></div>
-      </div>
-
-      <div class="career-totals-container" id="career-totals" aria-label="Career Totals">
-        <div class="container-badge container-badge--totals">Career Totals</div>
-        <div class="total-item"><span class="total-label">GP</span><span class="total-value"
-            data-total-key="gp">-</span></div>
-        <div class="total-item"><span class="total-label">PTS</span><span class="total-value"
-            data-total-key="pts">-</span></div>
-        <div class="total-item"><span class="total-label">REB</span><span class="total-value"
-            data-total-key="reb">-</span></div>
-        <div class="total-item"><span class="total-label">AST</span><span class="total-value"
-            data-total-key="ast">-</span></div>
-        <div class="total-item"><span class="total-label">STL</span><span class="total-value"
-            data-total-key="stl">-</span></div>
-        <div class="total-item"><span class="total-label">BLK</span><span class="total-value"
-            data-total-key="blk">-</span></div>
-        <div class="total-item"><span class="total-label">3PM</span><span class="total-value"
-            data-total-key="3pm">-</span></div>
-      </div>
-
-    </div>
-
-    <!-- Data Table -->
-    <section id="games-container" class="data-container" aria-label="Statistics Data Grid">
-      <div class="empty-state" id="empty-state" role="status" aria-hidden="true">
-        <div class="calibration-grid">
-          <div class="radar-sweep"></div>
-          <div class="crosshair-h"></div>
-          <div class="crosshair-v"></div>
-          <div class="target-bracket tb-tl"></div>
-          <div class="target-bracket tb-tr"></div>
-          <div class="target-bracket tb-bl"></div>
-          <div class="target-bracket tb-br"></div>
-        </div>
-        <div class="empty-text-wrap">
-          <p class="empty-message">Awaiting Telemetry</p>
-          <p class="empty-hint">Init record sequence [+]</p>
-        </div>
-      </div>
-
-      <div class="scroll-context" tabindex="0" role="region" aria-label="Scrollable statistics table">
-        <table class="stats-grid" id="stats-table">
-          <thead id="table-head">
-            <tr id="table-head-row">
-              <!-- Rendered via JS -->
-            </tr>
-          </thead>
-          <tbody id="table-body" aria-live="polite" aria-relevant="additions removals">
-            <tr class="skeleton-row">
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-            </tr>
-            <tr class="skeleton-row">
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-            </tr>
-            <tr class="skeleton-row">
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-              <td><span></span></td>
-            </tr>
-          </tbody>
-          <tfoot id="table-footer">
-            <tr class="row-average" id="footer-row">
-              <!-- Rendered via JS -->
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </section>
-
-    <!-- Advanced Stats Panel -->
-    <section class="advanced-panel data-container" id="advanced-panel" style="display: none;"
-      aria-label="Advanced Statistics">
-      <div id="advanced-content" style="display: none; height: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; padding: 24px; align-content: start; overflow-y: auto;">
-        
-        <div class="adv-card">
-          <div class="adv-card-header">Performance Index (PER)</div>
-          <div class="adv-card-value" id="adv-per">-</div>
-          <div class="adv-card-sub" id="adv-per-sub">League Average is roughly 15.0</div>
-        </div>
-
-        <div class="adv-card">
-          <div class="adv-card-header">Offensive Load</div>
-          <div class="adv-card-value" id="adv-load">-</div>
-          <div class="adv-card-sub" id="adv-load-sub">Estimated Usage based on attempts</div>
-        </div>
-
-        <div class="adv-card" style="grid-column: 1 / -1; min-height: 120px;">
-          <div class="adv-card-header">Recent Form (Last 5 Games PTS)</div>
-          <div class="adv-sparkline-container" id="adv-sparkline" style="height: 80px; width: 100%; display: flex; align-items: flex-end; gap: 4px; margin-top: 10px;">
-          </div>
-        </div>
-
-        <div class="adv-card">
-          <div class="adv-card-header">True Shooting Efficiency</div>
-          <div class="adv-card-value" id="adv-ts">-</div>
-          <div class="adv-card-sub">League Baseline: 55.0%</div>
-        </div>
-        
-        <div class="adv-card">
-          <div class="adv-card-header">Pace & Flow (AST/TO)</div>
-          <div class="adv-card-value" id="adv-ast-to">-</div>
-          <div class="adv-card-sub">Playmaking Efficiency Ratio</div>
-        </div>
-        
-        <div class="adv-card" style="grid-column: 1 / -1; min-height: 140px;">
-          <div class="adv-card-header">Career Milestones</div>
-          <div class="milestones-grid" id="milestones-container" style="display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x mandatory; flex-wrap: nowrap;">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-        
-      </div>
-
-      <div class="empty-state" id="advanced-empty">
-        <div class="calibration-grid">
-          <div class="radar-sweep"></div>
-          <div class="crosshair-h"></div>
-          <div class="crosshair-v"></div>
-          <div class="target-bracket tb-tl"></div>
-          <div class="target-bracket tb-tr"></div>
-          <div class="target-bracket tb-bl"></div>
-          <div class="target-bracket tb-br"></div>
-        </div>
-        <div class="empty-text-wrap">
-          <p class="empty-message">Advanced Telemetry</p>
-          <p class="empty-hint">Awaiting sufficient dataset to compile advanced analytics (>3 games).</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Compare Panel -->
-    <section class="compare-panel data-container" id="compare-panel" style="display: none;" aria-label="Head-to-Head Comparison">
-      <div class="compare-controls" style="padding: 24px; border-bottom: 1px solid var(--border-mid); display: flex; gap: 16px; flex-wrap: wrap;">
-        <select id="compare-profile-a" class="input-modern" style="width: auto; min-width: 200px; padding: 8px;">
-          <option value="">Select Profile A</option>
-        </select>
-        <div style="display:flex; align-items:center; color: var(--text-dim); font-family: var(--font-mono); font-size: 0.8rem;">VS</div>
-        <select id="compare-profile-b" class="input-modern" style="width: auto; min-width: 200px; padding: 8px;">
-          <option value="">Select Profile B</option>
-        </select>
-        <button id="btn-run-compare" class="btn-primary" style="margin-left: auto;">Compare Profiles</button>
-      </div>
-      <div id="compare-content" style="display: none; padding: 24px; overflow-y: auto;">
-        <div class="compare-grid" id="compare-grid" style="display: flex; flex-direction: column; gap: 12px; max-width: 800px; margin: 0 auto;">
-          <!-- Diff UI rows generated by JS -->
-        </div>
-      </div>
-      <div class="empty-state" id="compare-empty">
-        <div class="calibration-grid">
-          <div class="radar-sweep"></div>
-          <div class="crosshair-h"></div>
-          <div class="crosshair-v"></div>
-          <div class="target-bracket tb-tl"></div>
-          <div class="target-bracket tb-tr"></div>
-          <div class="target-bracket tb-bl"></div>
-          <div class="target-bracket tb-br"></div>
-        </div>
-        <div class="empty-text-wrap">
-          <p class="empty-message">Comparison Engine</p>
-          <p class="empty-hint">Select two distinct records to construct a visual diff analysis.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAB Actions -->
-    <div class="fab-container" id="main-fab-container">
-      <div class="fab-actions" id="fab-actions">
-        <button class="btn-fab" id="predict-games-fab" aria-label="Predict future games">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <div class="sidebar-nav-item" id="nav-highs">
+          <svg viewBox="0 0 24 24">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
             <polyline points="17 6 23 6 23 12" />
           </svg>
-          Predict
-        </button>
-        <button class="btn-fab" id="add-game-fab" aria-label="Add new game record">
-          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14M5 12h14" />
+          Career Highs
+        </div>
+        <div class="sidebar-nav-item" id="nav-totals">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M3 9h18M9 21V9" />
           </svg>
-          Add Game
+          Career Totals
+        </div>
+        <div class="sidebar-nav-item" id="nav-compare">
+          <svg viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 21l6-6M9 8l-5 5 5 5"
+            />
+          </svg>
+          Head-to-Head
+        </div>
+      </nav>
+
+      <!-- Archetypes -->
+      <div class="sidebar-archetypes">
+        <span class="archetype-label">Archetypes (Max 2)</span>
+        <div
+          class="archetype-grid"
+          id="archetype-grid"
+          role="group"
+          aria-label="Player archetypes"
+        >
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-balanced"
+              value="balanced"
+              checked
+            />
+            <label for="arch-balanced">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                  <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                  <path d="M7 21h10" />
+                  <path d="M12 3v18" />
+                  <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></svg
+              ></span>
+              <span class="archetype-name">Balanced</span>
+              <span class="archetype-tag">Trends</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-scorer"
+              value="scorer"
+            />
+            <label for="arch-scorer">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                  /></svg
+              ></span>
+              <span class="archetype-name">Scorer</span>
+              <span class="archetype-tag">FG/FT+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-playmaker"
+              value="playmaker"
+            />
+            <label for="arch-playmaker">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" /></svg
+              ></span>
+              <span class="archetype-name">Playmkr</span>
+              <span class="archetype-tag">AST/TO-</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-sharp"
+              value="sharp"
+            />
+            <label for="arch-sharp">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="22" x2="18" y1="12" y2="12" />
+                  <line x1="6" x2="2" y1="12" y2="12" />
+                  <line x1="12" x2="12" y1="6" y2="2" />
+                  <line x1="12" x2="12" y1="22" y2="18" /></svg
+              ></span>
+              <span class="archetype-name">Shooter</span>
+              <span class="archetype-tag">3PM/A+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-defender"
+              value="defender"
+            />
+            <label for="arch-defender">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
+              ></span>
+              <span class="archetype-name">Defender</span>
+              <span class="archetype-tag">STL/BLK+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-glass"
+              value="glass"
+            />
+            <label for="arch-glass">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 12 12 17 22 12" />
+                  <polyline points="2 17 12 22 22 17" /></svg
+              ></span>
+              <span class="archetype-name">Big</span>
+              <span class="archetype-tag">REB/BLK+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-facilitator"
+              value="facilitator"
+            />
+            <label for="arch-facilitator">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+                  <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></svg
+              ></span>
+              <span class="archetype-name">Facil.</span>
+              <span class="archetype-tag">AST+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-slasher"
+              value="slasher"
+            />
+            <label for="arch-slasher">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <polygon
+                    points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                  /></svg
+              ></span>
+              <span class="archetype-name">Slasher</span>
+              <span class="archetype-tag">FTM+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-workhorse"
+              value="workhorse"
+            />
+            <label for="arch-workhorse">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" /></svg
+              ></span>
+              <span class="archetype-name">Horse</span>
+              <span class="archetype-tag">MIN+</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-erratic"
+              value="erratic"
+            />
+            <label for="arch-erratic">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                  <path d="M8 8h.01" />
+                  <path d="M16 8h.01" />
+                  <path d="M8 16h.01" />
+                  <path d="M16 16h.01" />
+                  <path d="M12 12h.01" /></svg
+              ></span>
+              <span class="archetype-name">Erratic</span>
+              <span class="archetype-tag">Variance</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-clutch"
+              value="clutch"
+            />
+            <label for="arch-clutch">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  /></svg
+              ></span>
+              <span class="archetype-name">Clutch</span>
+              <span class="archetype-tag">FT/LowTO</span>
+            </label>
+          </div>
+          <div class="archetype-card">
+            <input
+              type="checkbox"
+              name="archetype"
+              id="arch-fringe"
+              value="fringe"
+            />
+            <label for="arch-fringe">
+              <span class="archetype-icon"
+                ><svg viewBox="0 0 24 24">
+                  <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                  <polyline points="16 17 22 17 22 11" /></svg
+              ></span>
+              <span class="archetype-name">Slump</span>
+              <span class="archetype-tag">Below Avg</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom utilities -->
+      <div class="sidebar-bottom">
+        <div class="theme-toggle-container">
+          <button
+            class="btn-theme"
+            id="help-toggle-btn"
+            aria-label="Replay Onboarding"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </button>
+          <button
+            class="btn-theme"
+            id="theme-toggle-btn"
+            aria-label="Toggle light/dark mode"
+          >
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ─────────────────────────────────── -->
+    <main class="layout-main">
+      <!-- Top Bar -->
+      <div class="top-bar" role="banner">
+        <span class="top-bar-title">B-STATS</span>
+        <div class="top-bar-tabs" role="tablist">
+          <span class="top-bar-tab is-active" id="tab-overview" role="tab"
+            >Overview</span
+          >
+          <span class="top-bar-tab" id="tab-season" role="tab">Season</span>
+          <span class="top-bar-tab" id="tab-advanced" role="tab">Advanced</span>
+        </div>
+        <div class="top-bar-spacer"></div>
+        <label
+          id="toggle-adv-columns-wrap"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+          "
+        >
+          <input
+            type="checkbox"
+            id="toggle-adv-columns"
+            style="accent-color: var(--text-primary)"
+          />
+          Unfold Input
+        </label>
+        <button
+          class="top-bar-profile-btn"
+          id="mobile-profile-btn"
+          aria-label="Open Roster Profile"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
         </button>
       </div>
-      <button class="btn-fab-mini" id="toggle-fabs-btn" aria-label="Toggle actions visibility">
-        <svg class="icon-collapse" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-    </div>
 
-    <!-- Mobile Nav Bar -->
-    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-      <button class="mobile-nav-item" id="mobile-nav-games">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        <span>Games</span>
-      </button>
-      <button class="mobile-nav-item" id="mobile-nav-roster">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <span>Menu</span>
-      </button>
-      <button class="mobile-nav-item is-active" id="mobile-nav-stats">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
-          <line x1="18" y1="20" x2="18" y2="10"/>
-          <line x1="12" y1="20" x2="12" y2="4"/>
-          <line x1="6" y1="20" x2="6" y2="14"/>
-        </svg>
-        <span>Stats</span>
-      </button>
-    </nav>
+      <!-- Editorial Header -->
+      <header class="editorial-header">
+        <p class="header-command">Seasonal Command</p>
+        <h1 class="header-title" id="active-profile-name-display">
+          Player Stats
+        </h1>
+        <p class="header-meta" id="season-description">
+          Track every game. Quantify every performance. Build your archive.
+        </p>
+      </header>
 
-  </main>
+      <!-- HUD: Bio + Highs + Totals -->
+      <div class="hud-dashboard-cluster" id="player-bio-cluster">
+        <div
+          class="player-bio-container"
+          id="player-bio"
+          aria-label="Player Biodata"
+        >
+          <div class="container-badge">Player Vitals</div>
+          <div class="bio-item">
+            <span class="bio-label">POS</span>
+            <span
+              class="bio-value"
+              data-bio-key="position"
+              tabindex="0"
+              role="textbox"
+              aria-label="Edit Position"
+              >-</span
+            >
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">HGT</span>
+            <div style="display: flex; gap: 4px; align-items: baseline">
+              <span
+                class="bio-value"
+                data-bio-key="heightFt"
+                tabindex="0"
+                role="textbox"
+                aria-label="Edit Feet"
+                >-</span
+              >
+              <span
+                style="
+                  color: var(--text-secondary);
+                  font-family: var(--font-mono);
+                  font-size: 0.75rem;
+                "
+                >'</span
+              >
+              <span
+                class="bio-value"
+                data-bio-key="heightIn"
+                tabindex="0"
+                role="textbox"
+                aria-label="Edit Inches"
+                >-</span
+              >
+              <span
+                style="
+                  color: var(--text-secondary);
+                  font-family: var(--font-mono);
+                  font-size: 0.75rem;
+                "
+                >"</span
+              >
+            </div>
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WGT</span>
+            <span
+              class="bio-value"
+              data-bio-key="weight"
+              tabindex="0"
+              role="textbox"
+              aria-label="Edit Weight"
+              >-</span
+            >
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">WING</span>
+            <span
+              class="bio-value"
+              data-bio-key="wingspan"
+              tabindex="0"
+              role="textbox"
+              aria-label="Edit Wingspan"
+              >-</span
+            >
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">AGE</span>
+            <span
+              class="bio-value"
+              data-bio-key="age"
+              tabindex="0"
+              role="textbox"
+              aria-label="Edit Age"
+              >-</span
+            >
+          </div>
+          <div class="bio-item">
+            <span class="bio-label">TEAM</span>
+            <span
+              class="bio-value bio-value--team"
+              data-bio-key="team"
+              tabindex="0"
+              role="textbox"
+              aria-label="Edit Team"
+              >-</span
+            >
+          </div>
+        </div>
 
-  <!-- ── MODALS ───────────────────────────────────────── -->
-  <dialog class="modal-dialog" id="modal-new-profile">
-    <div class="modal-content">
-      <h2 class="modal-title">Initialize Player</h2>
-      <p class="modal-desc">Create a new metrics instance for a player.</p>
-      <div class="modal-body">
-        <input type="text" id="input-profile-name" class="input-modern" placeholder="E.g., LeBron James"
-          autocomplete="off" spellcheck="false" />
+        <div class="career-highs-container" id="career-highs">
+          <div class="container-badge">Career Highs</div>
+          <div class="high-item">
+            <span class="high-label">PTS</span
+            ><span class="high-value" data-high-key="pts">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">REB</span
+            ><span class="high-value" data-high-key="reb">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">AST</span
+            ><span class="high-value" data-high-key="ast">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">STL</span
+            ><span class="high-value" data-high-key="stl">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">BLK</span
+            ><span class="high-value" data-high-key="blk">-</span>
+          </div>
+          <div class="high-item">
+            <span class="high-label">3PM</span
+            ><span class="high-value" data-high-key="3pm">-</span>
+          </div>
+        </div>
+
+        <div
+          class="career-totals-container"
+          id="season-totals"
+          aria-label="Season Totals"
+        >
+          <div
+            class="container-badge container-badge--totals"
+            style="background: var(--text-dim)"
+          >
+            Season Totals
+          </div>
+          <div class="total-item">
+            <span class="total-label">GP</span
+            ><span class="total-value" data-season-total-key="gp">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">PTS</span
+            ><span class="total-value" data-season-total-key="pts">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">REB</span
+            ><span class="total-value" data-season-total-key="reb">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">AST</span
+            ><span class="total-value" data-season-total-key="ast">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">STL</span
+            ><span class="total-value" data-season-total-key="stl">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">BLK</span
+            ><span class="total-value" data-season-total-key="blk">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">3PM</span
+            ><span class="total-value" data-season-total-key="3pm">-</span>
+          </div>
+        </div>
+
+        <div
+          class="career-totals-container"
+          id="career-totals"
+          aria-label="Career Totals"
+        >
+          <div class="container-badge container-badge--totals">
+            Career Totals
+          </div>
+          <div class="total-item">
+            <span class="total-label">GP</span
+            ><span class="total-value" data-total-key="gp">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">PTS</span
+            ><span class="total-value" data-total-key="pts">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">REB</span
+            ><span class="total-value" data-total-key="reb">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">AST</span
+            ><span class="total-value" data-total-key="ast">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">STL</span
+            ><span class="total-value" data-total-key="stl">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">BLK</span
+            ><span class="total-value" data-total-key="blk">-</span>
+          </div>
+          <div class="total-item">
+            <span class="total-label">3PM</span
+            ><span class="total-value" data-total-key="3pm">-</span>
+          </div>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-ghost" id="btn-cancel-profile">Cancel</button>
-        <button class="btn-primary" id="btn-confirm-profile">Initialize</button>
+
+      <!-- Data Table -->
+      <section
+        id="games-container"
+        class="data-container"
+        aria-label="Statistics Data Grid"
+      >
+        <div
+          class="empty-state"
+          id="empty-state"
+          role="status"
+          aria-hidden="true"
+        >
+          <div class="calibration-grid">
+            <div class="radar-sweep"></div>
+            <div class="crosshair-h"></div>
+            <div class="crosshair-v"></div>
+            <div class="target-bracket tb-tl"></div>
+            <div class="target-bracket tb-tr"></div>
+            <div class="target-bracket tb-bl"></div>
+            <div class="target-bracket tb-br"></div>
+          </div>
+          <div class="empty-text-wrap">
+            <p class="empty-message">Awaiting Telemetry</p>
+            <p class="empty-hint">Init record sequence [+]</p>
+          </div>
+        </div>
+
+        <div
+          class="scroll-context"
+          tabindex="0"
+          role="region"
+          aria-label="Scrollable statistics table"
+        >
+          <table class="stats-grid" id="stats-table">
+            <thead id="table-head">
+              <tr id="table-head-row">
+                <!-- Rendered via JS -->
+              </tr>
+            </thead>
+            <tbody
+              id="table-body"
+              aria-live="polite"
+              aria-relevant="additions removals"
+            >
+              <tr class="skeleton-row">
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+              </tr>
+              <tr class="skeleton-row">
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+              </tr>
+              <tr class="skeleton-row">
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+                <td><span></span></td>
+              </tr>
+            </tbody>
+            <tfoot id="table-footer">
+              <tr class="row-average" id="footer-row">
+                <!-- Rendered via JS -->
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- Advanced Stats Panel -->
+      <section
+        class="advanced-panel data-container"
+        id="advanced-panel"
+        style="display: none"
+        aria-label="Advanced Statistics"
+      >
+        <div
+          id="advanced-content"
+          style="
+            display: none;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            padding: 24px;
+            align-content: start;
+            overflow-y: auto;
+          "
+        >
+          <div class="adv-card">
+            <div class="adv-card-header">Performance Index (PER)</div>
+            <div class="adv-card-value" id="adv-per">-</div>
+            <div class="adv-card-sub" id="adv-per-sub">
+              League Average is roughly 15.0
+            </div>
+          </div>
+
+          <div class="adv-card">
+            <div class="adv-card-header">Offensive Load</div>
+            <div class="adv-card-value" id="adv-load">-</div>
+            <div class="adv-card-sub" id="adv-load-sub">
+              Estimated Usage based on attempts
+            </div>
+          </div>
+
+          <div class="adv-card" style="grid-column: 1 / -1; min-height: 120px">
+            <div class="adv-card-header">Recent Form (Last 5 Games PTS)</div>
+            <div
+              class="adv-sparkline-container"
+              id="adv-sparkline"
+              style="
+                height: 80px;
+                width: 100%;
+                display: flex;
+                align-items: flex-end;
+                gap: 4px;
+                margin-top: 10px;
+              "
+            ></div>
+          </div>
+
+          <div class="adv-card">
+            <div class="adv-card-header">True Shooting Efficiency</div>
+            <div class="adv-card-value" id="adv-ts">-</div>
+            <div class="adv-card-sub">League Baseline: 55.0%</div>
+          </div>
+
+          <div class="adv-card">
+            <div class="adv-card-header">Pace & Flow (AST/TO)</div>
+            <div class="adv-card-value" id="adv-ast-to">-</div>
+            <div class="adv-card-sub">Playmaking Efficiency Ratio</div>
+          </div>
+
+          <div class="adv-card" style="grid-column: 1 / -1; min-height: 140px">
+            <div class="adv-card-header">Career Milestones</div>
+            <div
+              class="milestones-grid"
+              id="milestones-container"
+              style="
+                display: flex;
+                gap: 12px;
+                margin-top: 16px;
+                overflow-x: auto;
+                padding-bottom: 12px;
+                scroll-snap-type: x mandatory;
+                flex-wrap: nowrap;
+              "
+            >
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" id="advanced-empty">
+          <div class="calibration-grid">
+            <div class="radar-sweep"></div>
+            <div class="crosshair-h"></div>
+            <div class="crosshair-v"></div>
+            <div class="target-bracket tb-tl"></div>
+            <div class="target-bracket tb-tr"></div>
+            <div class="target-bracket tb-bl"></div>
+            <div class="target-bracket tb-br"></div>
+          </div>
+          <div class="empty-text-wrap">
+            <p class="empty-message">Advanced Telemetry</p>
+            <p class="empty-hint">
+              Awaiting sufficient dataset to compile advanced analytics (>3
+              games).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Compare Panel -->
+      <section
+        class="compare-panel data-container"
+        id="compare-panel"
+        style="display: none"
+        aria-label="Head-to-Head Comparison"
+      >
+        <div
+          class="compare-controls"
+          style="
+            padding: 24px;
+            border-bottom: 1px solid var(--border-mid);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+          "
+        >
+          <select
+            id="compare-profile-a"
+            class="input-modern"
+            style="width: auto; min-width: 200px; padding: 8px"
+          >
+            <option value="">Select Profile A</option>
+          </select>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              color: var(--text-dim);
+              font-family: var(--font-mono);
+              font-size: 0.8rem;
+            "
+          >
+            VS
+          </div>
+          <select
+            id="compare-profile-b"
+            class="input-modern"
+            style="width: auto; min-width: 200px; padding: 8px"
+          >
+            <option value="">Select Profile B</option>
+          </select>
+          <button
+            id="btn-run-compare"
+            class="btn-primary"
+            style="margin-left: auto"
+          >
+            Compare Profiles
+          </button>
+        </div>
+        <div
+          id="compare-content"
+          style="display: none; padding: 24px; overflow-y: auto"
+        >
+          <div
+            class="compare-grid"
+            id="compare-grid"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 12px;
+              max-width: 800px;
+              margin: 0 auto;
+            "
+          >
+            <!-- Diff UI rows generated by JS -->
+          </div>
+        </div>
+        <div class="empty-state" id="compare-empty">
+          <div class="calibration-grid">
+            <div class="radar-sweep"></div>
+            <div class="crosshair-h"></div>
+            <div class="crosshair-v"></div>
+            <div class="target-bracket tb-tl"></div>
+            <div class="target-bracket tb-tr"></div>
+            <div class="target-bracket tb-bl"></div>
+            <div class="target-bracket tb-br"></div>
+          </div>
+          <div class="empty-text-wrap">
+            <p class="empty-message">Comparison Engine</p>
+            <p class="empty-hint">
+              Select two distinct records to construct a visual diff analysis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAB Actions -->
+      <div class="fab-container" id="main-fab-container">
+        <div class="fab-actions" id="fab-actions">
+          <button
+            class="btn-fab"
+            id="predict-games-fab"
+            aria-label="Predict future games"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+            Predict
+          </button>
+          <button
+            class="btn-fab"
+            id="add-game-fab"
+            aria-label="Add new game record"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add Game
+          </button>
+        </div>
+        <button
+          class="btn-fab-mini"
+          id="toggle-fabs-btn"
+          aria-label="Toggle actions visibility"
+        >
+          <svg
+            class="icon-collapse"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
-    </div>
-  </dialog>
 
-  <dialog class="modal-dialog" id="modal-new-season">
-    <div class="modal-content">
-      <h2 class="modal-title">New Season</h2>
-      <p class="modal-desc">Create a new dataset for this player's season.</p>
-      <div class="modal-body">
-        <input type="text" id="input-season-name" class="input-modern" placeholder="E.g., 2024-2025" autocomplete="off"
-          spellcheck="false" />
+      <!-- Mobile Nav Bar -->
+      <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+        <button class="mobile-nav-item" id="mobile-nav-games">
+          <svg
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span>Games</span>
+        </button>
+        <button class="mobile-nav-item" id="mobile-nav-roster">
+          <svg
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+          >
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span>Menu</span>
+        </button>
+        <button class="mobile-nav-item is-active" id="mobile-nav-stats">
+          <svg
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+          >
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          <span>Stats</span>
+        </button>
+      </nav>
+    </main>
+
+    <!-- ── MODALS ───────────────────────────────────────── -->
+    <dialog class="modal-dialog" id="modal-new-profile">
+      <div class="modal-content">
+        <h2 class="modal-title">Initialize Player</h2>
+        <p class="modal-desc">Create a new metrics instance for a player.</p>
+        <div class="modal-body">
+          <input
+            type="text"
+            id="input-profile-name"
+            class="input-modern"
+            placeholder="E.g., LeBron James"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" id="btn-cancel-profile">Cancel</button>
+          <button class="btn-primary" id="btn-confirm-profile">
+            Initialize
+          </button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-ghost" id="btn-cancel-season">Cancel</button>
-        <button class="btn-primary" id="btn-confirm-season">Initialize</button>
+    </dialog>
+
+    <dialog class="modal-dialog" id="modal-new-season">
+      <div class="modal-content">
+        <h2 class="modal-title">New Season</h2>
+        <p class="modal-desc">Create a new dataset for this player's season.</p>
+        <div class="modal-body">
+          <input
+            type="text"
+            id="input-season-name"
+            class="input-modern"
+            placeholder="E.g., 2024-2025"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" id="btn-cancel-season">Cancel</button>
+          <button class="btn-primary" id="btn-confirm-season">
+            Initialize
+          </button>
+        </div>
       </div>
-    </div>
-  </dialog>
+    </dialog>
 
-  <dialog class="modal-dialog" id="modal-predict" style="max-width:520px;">
-    <div class="modal-content">
-      <h2 class="modal-title">Predict Future</h2>
-      <p class="modal-desc">Generate upcoming game stats based on recent averages and performance variance.</p>
-      <div class="modal-body">
-        <input type="number" id="input-predict-count" class="input-modern" placeholder="Number of games (e.g. 5)"
-          min="1" max="82" autocomplete="off" />
+    <dialog class="modal-dialog" id="modal-predict" style="max-width: 520px">
+      <div class="modal-content">
+        <h2 class="modal-title">Predict Future</h2>
+        <p class="modal-desc">
+          Generate upcoming game stats based on recent averages and performance
+          variance.
+        </p>
+        <div class="modal-body">
+          <input
+            type="number"
+            id="input-predict-count"
+            class="input-modern"
+            placeholder="Number of games (e.g. 5)"
+            min="1"
+            max="82"
+            autocomplete="off"
+          />
+        </div>
+        <div class="modal-footer">
+          <button class="btn-ghost" id="btn-cancel-predict">Cancel</button>
+          <button class="btn-primary" id="btn-confirm-predict">Simulate</button>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-ghost" id="btn-cancel-predict">Cancel</button>
-        <button class="btn-primary" id="btn-confirm-predict">Simulate</button>
-      </div>
-    </div>
-  </dialog>
+    </dialog>
 
-  <dialog class="modal-dialog onboarding-dialog" id="modal-onboarding" style="max-width: 600px;">
-    <!-- ... -->
-  </dialog>
+    <dialog
+      class="modal-dialog onboarding-dialog"
+      id="modal-onboarding"
+      style="max-width: 600px"
+    >
+      <!-- ... -->
+    </dialog>
 
-  <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container"></div>
 
-  <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/app.js"></script>
 
-  <!-- Sidebar nav + top-bar tab handlers -->
-  <script>
-    window.addEventListener('load', () => {
-      /* ── View Controller ───────────────────────── */
-      const sections = {
-        bio: document.getElementById('player-bio'),
-        highs: document.getElementById('career-highs'),
-        totals: document.getElementById('career-totals'),
-        seasonTotals: document.getElementById('season-totals'),
-        games: document.getElementById('games-container'), // the games stats table
-        advanced: document.getElementById('advanced-panel'),
-        compare: document.getElementById('compare-panel')
-      };
-      const cluster = document.getElementById('player-bio-cluster');
+    <!-- Sidebar nav + top-bar tab handlers -->
+    <script>
+      window.addEventListener("load", () => {
+        /* ── View Controller ───────────────────────── */
+        const sections = {
+          bio: document.getElementById("player-bio"),
+          highs: document.getElementById("career-highs"),
+          totals: document.getElementById("career-totals"),
+          seasonTotals: document.getElementById("season-totals"),
+          games: document.getElementById("games-container"), // the games stats table
+          advanced: document.getElementById("advanced-panel"),
+          compare: document.getElementById("compare-panel"),
+        };
+        const cluster = document.getElementById("player-bio-cluster");
 
-      function updateView(viewMode) {
-        // Hide all initially
-        cluster.style.display = 'none';
-        sections.bio.style.display = 'none';
-        sections.highs.style.display = 'none';
-        sections.totals.style.display = 'none';
-        if (sections.seasonTotals) sections.seasonTotals.style.display = 'none';
-        sections.games.style.display = 'none';
-        sections.advanced.style.display = 'none';
-        if (sections.compare) sections.compare.style.display = 'none';
+        function updateView(viewMode) {
+          // Hide all initially
+          cluster.style.display = "none";
+          sections.bio.style.display = "none";
+          sections.highs.style.display = "none";
+          sections.totals.style.display = "none";
+          if (sections.seasonTotals)
+            sections.seasonTotals.style.display = "none";
+          sections.games.style.display = "none";
+          sections.advanced.style.display = "none";
+          if (sections.compare) sections.compare.style.display = "none";
 
-        let targetToFlash = null;
+          let targetToFlash = null;
 
-        if (viewMode === 'overview') {
-          cluster.style.display = '';
-          sections.bio.style.display = '';
-          sections.highs.style.display = '';
-          sections.totals.style.display = '';
-          if (sections.seasonTotals) sections.seasonTotals.style.display = '';
-          sections.games.style.display = '';
-        } else if (viewMode === 'season' || viewMode === 'games') {
-          sections.games.style.display = '';
-          targetToFlash = sections.games;
-        } else if (viewMode === 'advanced') {
-          sections.advanced.style.display = '';
-          targetToFlash = sections.advanced;
-          if (window.app && typeof window.app.renderAdvancedStats === 'function') {
-            window.app.renderAdvancedStats();
+          if (viewMode === "overview") {
+            cluster.style.display = "";
+            sections.bio.style.display = "";
+            sections.highs.style.display = "";
+            sections.totals.style.display = "";
+            if (sections.seasonTotals) sections.seasonTotals.style.display = "";
+            sections.games.style.display = "";
+          } else if (viewMode === "season" || viewMode === "games") {
+            sections.games.style.display = "";
+            targetToFlash = sections.games;
+          } else if (viewMode === "advanced") {
+            sections.advanced.style.display = "";
+            targetToFlash = sections.advanced;
+            if (
+              window.app &&
+              typeof window.app.renderAdvancedStats === "function"
+            ) {
+              window.app.renderAdvancedStats();
+            }
+          } else if (viewMode === "compare") {
+            sections.compare.style.display = "";
+            targetToFlash = sections.compare;
+            if (
+              window.app &&
+              typeof window.app.renderCompareView === "function"
+            ) {
+              window.app.renderCompareView();
+            }
+          } else if (viewMode === "bio") {
+            cluster.style.display = "";
+            sections.bio.style.display = "";
+            targetToFlash = sections.bio;
+          } else if (viewMode === "highs") {
+            cluster.style.display = "";
+            sections.highs.style.display = "";
+            targetToFlash = sections.highs;
+          } else if (viewMode === "totals") {
+            cluster.style.display = "";
+            sections.totals.style.display = "";
+            if (sections.seasonTotals) sections.seasonTotals.style.display = "";
+            targetToFlash = sections.totals;
           }
-        } else if (viewMode === 'compare') {
-          sections.compare.style.display = '';
-          targetToFlash = sections.compare;
-          if (window.app && typeof window.app.renderCompareView === 'function') {
-            window.app.renderCompareView();
-          }
-        } else if (viewMode === 'bio') {
-          cluster.style.display = '';
-          sections.bio.style.display = '';
-          targetToFlash = sections.bio;
-        } else if (viewMode === 'highs') {
-          cluster.style.display = '';
-          sections.highs.style.display = '';
-          targetToFlash = sections.highs;
-        } else if (viewMode === 'totals') {
-          cluster.style.display = '';
-          sections.totals.style.display = '';
-          if (sections.seasonTotals) sections.seasonTotals.style.display = '';
-          targetToFlash = sections.totals;
+
+          if (targetToFlash) flashEl(targetToFlash);
+
+          // Also adjust main layout to animate out/in safely if needed
+          // but hiding/showing is standard without layout breaking
         }
 
-        if (targetToFlash) flashEl(targetToFlash);
-
-        // Also adjust main layout to animate out/in safely if needed
-        // but hiding/showing is standard without layout breaking
-      }
-
-      /* ── Sidebar nav ───────────────────────────── */
-      const navItems = document.querySelectorAll('.sidebar-nav-item');
-      const sideNavMap = {
-        'nav-overview': 'overview',
-        'nav-games': 'games',
-        'nav-bio': 'bio',
-        'nav-highs': 'highs',
-        'nav-totals': 'totals',
-        'nav-compare': 'compare'
-      };
-
-      function flashEl(el) {
-        if (!el) return;
-        el.style.outline = '2px solid var(--text-primary)';
-        el.style.outlineOffset = '0px';
-        el.style.transition = 'outline 0s';
-        requestAnimationFrame(() => {
-          el.style.transition = 'outline 0.7s ease, outline-offset 0.7s ease';
-          el.style.outline = '2px solid transparent';
-          el.style.outlineOffset = '8px';
-          setTimeout(() => {
-            el.style.outline = '';
-            el.style.outlineOffset = '';
-            el.style.transition = '';
-          }, 800);
-        });
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      navItems.forEach(item => {
-        item.setAttribute('tabindex', '0');
-        item.setAttribute('role', 'button');
-
-        const activate = () => {
-          navItems.forEach(n => n.classList.remove('is-active'));
-          item.classList.add('is-active');
-          const viewMode = sideNavMap[item.id];
-          if (viewMode) updateView(viewMode);
+        /* ── Sidebar nav ───────────────────────────── */
+        const navItems = document.querySelectorAll(".sidebar-nav-item");
+        const sideNavMap = {
+          "nav-overview": "overview",
+          "nav-games": "games",
+          "nav-bio": "bio",
+          "nav-highs": "highs",
+          "nav-totals": "totals",
+          "nav-compare": "compare",
         };
 
-        item.addEventListener('click', activate);
-        item.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
-        });
-      });
-
-      /* ── Top-bar tabs ──────────────────────────── */
-      const tabs = document.querySelectorAll('.top-bar-tab');
-      const topTabMap = {
-        'tab-overview': 'overview',
-        'tab-season': 'season',
-        'tab-advanced': 'advanced'
-      };
-
-      tabs.forEach(tab => {
-        tab.setAttribute('tabindex', '0');
-        tab.setAttribute('role', 'tab');
-
-        const activate = () => {
-          tabs.forEach(t => t.classList.remove('is-active'));
-          tab.classList.add('is-active');
-          const viewMode = topTabMap[tab.id];
-          if (viewMode) updateView(viewMode);
-        };
-
-        tab.addEventListener('click', activate);
-        tab.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
-        });
-      });
-
-      /* ── Mobile Nav & Sidebar ───────────────────── */
-      const mobileNavGames = document.getElementById('mobile-nav-games');
-      const mobileNavRoster = document.getElementById('mobile-nav-roster');
-      const mobileNavStats = document.getElementById('mobile-nav-stats');
-      const mobileNavItems = [mobileNavGames, mobileNavRoster, mobileNavStats];
-
-      const sidebar = document.querySelector('.sidebar');
-      const sidebarOverlay = document.getElementById('sidebar-overlay');
-      const mobileProfileBtn = document.getElementById('mobile-profile-btn');
-
-      function toggleSidebar() {
-        const isOpen = sidebar.classList.contains('is-open');
-        if (isOpen) {
-          sidebar.classList.remove('is-open');
-          if(sidebarOverlay) sidebarOverlay.classList.remove('is-active');
-        } else {
-          sidebar.classList.add('is-open');
-          if(sidebarOverlay) sidebarOverlay.classList.add('is-active');
+        function flashEl(el) {
+          if (!el) return;
+          el.style.outline = "2px solid var(--text-primary)";
+          el.style.outlineOffset = "0px";
+          el.style.transition = "outline 0s";
+          requestAnimationFrame(() => {
+            el.style.transition = "outline 0.7s ease, outline-offset 0.7s ease";
+            el.style.outline = "2px solid transparent";
+            el.style.outlineOffset = "8px";
+            setTimeout(() => {
+              el.style.outline = "";
+              el.style.outlineOffset = "";
+              el.style.transition = "";
+            }, 800);
+          });
+          el.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
-      }
 
-      if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
-      if (mobileProfileBtn) mobileProfileBtn.addEventListener('click', toggleSidebar);
-      if (mobileNavRoster) mobileNavRoster.addEventListener('click', () => {
-        toggleSidebar();
+        navItems.forEach((item) => {
+          item.setAttribute("tabindex", "0");
+          item.setAttribute("role", "button");
+
+          const activate = () => {
+            navItems.forEach((n) => n.classList.remove("is-active"));
+            item.classList.add("is-active");
+            const viewMode = sideNavMap[item.id];
+            if (viewMode) updateView(viewMode);
+          };
+
+          item.addEventListener("click", activate);
+          item.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              activate();
+            }
+          });
+        });
+
+        /* ── Top-bar tabs ──────────────────────────── */
+        const tabs = document.querySelectorAll(".top-bar-tab");
+        const topTabMap = {
+          "tab-overview": "overview",
+          "tab-season": "season",
+          "tab-advanced": "advanced",
+        };
+
+        tabs.forEach((tab) => {
+          tab.setAttribute("tabindex", "0");
+          tab.setAttribute("role", "tab");
+
+          const activate = () => {
+            tabs.forEach((t) => t.classList.remove("is-active"));
+            tab.classList.add("is-active");
+            const viewMode = topTabMap[tab.id];
+            if (viewMode) updateView(viewMode);
+          };
+
+          tab.addEventListener("click", activate);
+          tab.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              activate();
+            }
+          });
+        });
+
+        /* ── Mobile Nav & Sidebar ───────────────────── */
+        const mobileNavGames = document.getElementById("mobile-nav-games");
+        const mobileNavRoster = document.getElementById("mobile-nav-roster");
+        const mobileNavStats = document.getElementById("mobile-nav-stats");
+        const mobileNavItems = [
+          mobileNavGames,
+          mobileNavRoster,
+          mobileNavStats,
+        ];
+
+        const sidebar = document.querySelector(".sidebar");
+        const sidebarOverlay = document.getElementById("sidebar-overlay");
+        const mobileProfileBtn = document.getElementById("mobile-profile-btn");
+
+        function toggleSidebar() {
+          const isOpen = sidebar.classList.contains("is-open");
+          if (isOpen) {
+            sidebar.classList.remove("is-open");
+            if (sidebarOverlay) sidebarOverlay.classList.remove("is-active");
+          } else {
+            sidebar.classList.add("is-open");
+            if (sidebarOverlay) sidebarOverlay.classList.add("is-active");
+          }
+        }
+
+        if (sidebarOverlay)
+          sidebarOverlay.addEventListener("click", toggleSidebar);
+        if (mobileProfileBtn)
+          mobileProfileBtn.addEventListener("click", toggleSidebar);
+        if (mobileNavRoster)
+          mobileNavRoster.addEventListener("click", () => {
+            toggleSidebar();
+          });
+
+        function activateMobileNav(activeEl) {
+          mobileNavItems.forEach((n) => n && n.classList.remove("is-active"));
+          if (activeEl) activeEl.classList.add("is-active");
+        }
+
+        if (mobileNavGames) {
+          mobileNavGames.addEventListener("click", () => {
+            activateMobileNav(mobileNavGames);
+            updateView("games");
+          });
+        }
+
+        if (mobileNavStats) {
+          mobileNavStats.addEventListener("click", () => {
+            activateMobileNav(mobileNavStats);
+            updateView("overview");
+          });
+        }
       });
-
-      function activateMobileNav(activeEl) {
-        mobileNavItems.forEach(n => n && n.classList.remove('is-active'));
-        if (activeEl) activeEl.classList.add('is-active');
-      }
-
-      if (mobileNavGames) {
-        mobileNavGames.addEventListener('click', () => {
-          activateMobileNav(mobileNavGames);
-          updateView('games');
-        });
-      }
-
-      if (mobileNavStats) {
-        mobileNavStats.addEventListener('click', () => {
-          activateMobileNav(mobileNavStats);
-          updateView('overview');
-        });
-      }
-    });
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>
