@@ -343,7 +343,7 @@ class BMetricsApp {
         translateX: [-10, 0],
         delay: anime.stagger(20),
         duration: 400,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
   }
@@ -707,7 +707,7 @@ class BMetricsApp {
         translateX: [-10, 0],
         delay: anime.stagger(20),
         duration: 400,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
   }
@@ -1016,7 +1016,7 @@ class BMetricsApp {
         scale: [0.95, 1],
         duration: 800,
         delay: anime.stagger(50),
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
   }
@@ -1083,7 +1083,7 @@ class BMetricsApp {
         scale: [0.92, 1],
         duration: 900,
         delay: anime.stagger(40),
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
   }
@@ -1136,7 +1136,7 @@ class BMetricsApp {
         scale: [0.92, 1],
         duration: 900,
         delay: anime.stagger(40),
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
   }
@@ -1281,7 +1281,7 @@ class BMetricsApp {
         targets: spanNode,
         color: [tc.accent, tc.textSecondary, tc.textPrimary],
         duration: 600,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     };
 
@@ -1435,7 +1435,7 @@ class BMetricsApp {
         height: (el) => [0, el.style.height],
         delay: anime.stagger(100),
         duration: 800,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
 
@@ -1445,7 +1445,7 @@ class BMetricsApp {
       translateY: [10, 0],
       delay: anime.stagger(50),
       duration: 600,
-      easing: "easeOutExpo",
+      easing: "spring(1, 100, 20, 0)",
     });
 
     this.#renderMilestones();
@@ -1825,7 +1825,7 @@ class BMetricsApp {
         opacity: [0, 1],
         translateY: [20, 0],
         duration: 400,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       })
       .add({
         targets: toast,
@@ -2189,7 +2189,7 @@ class BMetricsApp {
         color: [tc.textSecondary, tc.textPrimary],
         textShadow: [`0 0 16px ${shadowColor}`, "none"],
         duration: 600,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
 
@@ -2270,7 +2270,7 @@ class BMetricsApp {
         targets: tdNode,
         backgroundColor: [getThemeColors().bgFlashStrong, "transparent"],
         duration: 500,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
 
       this.#updateAggregates(true);
@@ -2352,7 +2352,7 @@ class BMetricsApp {
               targets: r,
               translateY: 0,
               duration: 600,
-              easing: "easeOutExpo",
+              easing: "spring(1, 100, 20, 0)",
             });
           }
         }
@@ -2364,7 +2364,7 @@ class BMetricsApp {
         opacity: [0, 1],
         backgroundColor: [getThemeColors().bgFlash, "transparent"],
         duration: 600,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
 
@@ -2816,7 +2816,7 @@ class BMetricsApp {
             targets: r,
             translateY: 0,
             duration: 600,
-            easing: "easeOutExpo",
+            easing: "spring(1, 100, 20, 0)",
           });
         }
       }
@@ -2832,7 +2832,7 @@ class BMetricsApp {
         backgroundColor: [getThemeColors().bgFlash, "transparent"],
         delay: anime.stagger(30),
         duration: 600,
-        easing: "easeOutExpo",
+        easing: "spring(1, 100, 20, 0)",
       });
     }
 
@@ -2909,7 +2909,7 @@ class BMetricsApp {
             targets: r,
             translateY: 0,
             duration: 500,
-            easing: "easeOutExpo",
+            easing: "spring(1, 100, 20, 0)",
             delay: i * 20,
           });
         }
@@ -2921,7 +2921,7 @@ class BMetricsApp {
 
   #choreographEntrance() {
     /* Cinematic: terminal boot sequence feel */
-    const tl = anime.timeline({ easing: "easeOutExpo" });
+    const tl = anime.timeline({ easing: "spring(1, 100, 20, 0)" });
 
     /* Phase 1: Title materializes with vertical clip reveal */
     tl.add({
@@ -2952,7 +2952,7 @@ class BMetricsApp {
           translateY: [-10, 0],
           delay: anime.stagger(25),
           duration: 500,
-          easing: "easeOutQuad",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=900",
       )
@@ -2965,7 +2965,7 @@ class BMetricsApp {
           translateX: (el, i) => [i % 2 === 0 ? -20 : 20, 0],
           delay: anime.stagger(45),
           duration: 700,
-          easing: "easeOutCubic",
+          easing: "spring(1, 100, 20, 0)",
           begin: (anim) => {
             /* Flash each row with a scan pulse as it appears */
             const tc = getThemeColors();
@@ -2975,7 +2975,7 @@ class BMetricsApp {
                   targets: a.target,
                   backgroundColor: [tc.bgFlash, "transparent"],
                   duration: 600,
-                  easing: "easeOutExpo",
+                  easing: "spring(1, 100, 20, 0)",
                 });
               }, idx * 45);
             });
@@ -3003,7 +3003,7 @@ class BMetricsApp {
       opacity: [0, 1],
       delay: anime.stagger(120, { start: 1000 }),
       duration: 1100,
-      easing: "easeOutElastic(1, .5)",
+      easing: "spring(1, 100, 20, 0)",
     });
 
     /* Scanline overlay fades in subtly */
@@ -3012,7 +3012,7 @@ class BMetricsApp {
       opacity: [0, 0.4],
       duration: 2000,
       delay: 500,
-      easing: "easeOutQuad",
+      easing: "spring(1, 100, 20, 0)",
     });
   }
 }
