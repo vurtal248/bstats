@@ -26,6 +26,9 @@ self.onmessage = function (e) {
 
   const minRatio = 1.0; 
 
+  const action = e.data.action || "project";
+  const fullRecords = [];
+
   for (let i = 0; i < iterations; i++) {
     // Phase 1: MPG
     let baseMpgAvg = avg["mpg"] !== undefined && dataLength > 0 ? avg["mpg"] : 24;
@@ -135,7 +138,7 @@ self.onmessage = function (e) {
     const periphKeys = ["rpg", "apg", "spg", "bpg"];
     const defaults = { rpg: 4, apg: 2, spg: 0.8, bpg: 0.4 };
     
-    let rec = { fga, tpa, fta, topg, fgm, tpm, ftm };
+    let rec = { mpg: genMpg, fga, tpa, fta, topg, fgm, tpm, ftm };
 
     periphKeys.forEach(key => {
       let baseAvg = dataLength > 0 ? avg[key] || 0 : defaults[key];
@@ -217,36 +220,44 @@ self.onmessage = function (e) {
     // Points
     let pts = (rec.fgm - rec.tpm) * 2 + rec.tpm * 3 + rec.ftm;
 
-    results.pts.push(pts);
-    results.reb.push(rec.rpg);
-    results.ast.push(rec.apg);
-    results.stl.push(rec.spg);
-    results.blk.push(rec.bpg);
-    results.fgm.push(rec.fgm);
-    results.fga.push(rec.fga);
-    results.tpm.push(rec.tpm);
-    results.tpa.push(rec.tpa);
-    results.ftm.push(rec.ftm);
-    results.fta.push(rec.fta);
-    results.topg.push(rec.topg);
+    if (action === "project") {
+      results.pts.push(pts);
+      results.reb.push(rec.rpg);
+      results.ast.push(rec.apg);
+      results.stl.push(rec.spg);
+      results.blk.push(rec.bpg);
+      results.fgm.push(rec.fgm);
+      results.fga.push(rec.fga);
+      results.tpm.push(rec.tpm);
+      results.tpa.push(rec.tpa);
+      results.ftm.push(rec.ftm);
+      results.fta.push(rec.fta);
+      results.topg.push(rec.topg);
+    } else {
+      fullRecords.push(rec);
+    }
   }
 
-  // Calculate percentiles
-  const getPercentile = (arr, p) => {
-    arr.sort((a, b) => a - b);
-    const index = Math.max(0, Math.floor(p * arr.length) - 1);
-    return arr[index];
-  };
-
-  const projections = {};
-  for (const key in results) {
-    projections[key] = {
-      floor: getPercentile(results[key], 0.1),
-      expected: getPercentile(results[key], 0.5),
-      ceiling: getPercentile(results[key], 0.9),
-      avg: results[key].reduce((a, b) => a + b, 0) / iterations
+  if (action === "project") {
+    // Calculate percentiles
+    const getPercentile = (arr, p) => {
+      arr.sort((a, b) => a - b);
+      const index = Math.max(0, Math.floor(p * arr.length) - 1);
+      return arr[index];
     };
-  }
 
-  self.postMessage(projections);
+    const projections = {};
+    for (const key in results) {
+      projections[key] = {
+        floor: getPercentile(results[key], 0.1),
+        expected: getPercentile(results[key], 0.5),
+        ceiling: getPercentile(results[key], 0.9),
+        avg: results[key].reduce((a, b) => a + b, 0) / iterations
+      };
+    }
+
+    self.postMessage({ type: "projection", projections });
+  } else {
+    self.postMessage({ type: "generation", records: fullRecords });
+  }
 };
