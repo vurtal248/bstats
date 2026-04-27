@@ -87,10 +87,7 @@ class BMetricsApp {
       seasonTotalsContainer: document.getElementById("season-totals"),
 
       modalPredict: document.getElementById("modal-predict"),
-      inputPredictCount: document.getElementById("input-predict-count"),
       archetypeGrid: document.getElementById("archetype-grid"),
-      btnCancelPredict: document.getElementById("btn-cancel-predict"),
-      btnConfirmPredict: document.getElementById("btn-confirm-predict"),
     };
 
     this.#init();
@@ -913,11 +910,15 @@ class BMetricsApp {
   }
 
   #openPredictModal() {
-    this.refs.inputPredictCount.value = "";
-    // Archetypes persist in header, no need to reset unless we really want to
+    const setupEl = document.getElementById("predict-setup");
+    const loadingEl = document.getElementById("predict-loading");
+    const resultsEl = document.getElementById("predict-results");
+    
+    if (setupEl) setupEl.style.display = "block";
+    if (loadingEl) loadingEl.style.display = "none";
+    if (resultsEl) resultsEl.style.display = "none";
 
     this.refs.modalPredict.showModal();
-    this.refs.btnConfirmPredict.disabled = true;
   }
 
   #closePredictModal() {
@@ -1955,22 +1956,14 @@ class BMetricsApp {
       this.refs.fabContainer.classList.toggle("is-collapsed");
     });
 
-    this.refs.btnCancelPredict.addEventListener("click", () =>
-      this.#closePredictModal(),
-    );
-    this.refs.btnConfirmPredict.addEventListener("click", () =>
-      this.#handlePredictGames(),
-    );
-    this.refs.inputPredictCount.addEventListener("input", (e) => {
-      const val = parseInt(e.target.value, 10);
-      this.refs.btnConfirmPredict.disabled =
-        isNaN(val) || val <= 0 || val > 1000;
-    });
-    this.refs.inputPredictCount.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !this.refs.btnConfirmPredict.disabled) {
-        this.#handlePredictGames();
-      }
-    });
+    const btnRunSim = document.getElementById("btn-run-simulation");
+    if (btnRunSim) {
+      btnRunSim.addEventListener("click", () => this.#handleRunSimulation());
+    }
+    const btnCloseSim = document.getElementById("btn-close-predict");
+    if (btnCloseSim) {
+      btnCloseSim.addEventListener("click", () => this.#closePredictModal());
+    }
 
     // Profile events
     this.refs.profileToggle.addEventListener("click", () =>
@@ -2431,9 +2424,16 @@ class BMetricsApp {
     if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  #handlePredictGames() {
-    const count = parseInt(this.refs.inputPredictCount.value, 10);
-    if (isNaN(count) || count <= 0) return;
+  #handleRunSimulation() {
+    const setupEl = document.getElementById("predict-setup");
+    const loadingEl = document.getElementById("predict-loading");
+    const resultsEl = document.getElementById("predict-results");
+    const btnClose = document.getElementById("btn-close-predict");
+
+    if (setupEl) setupEl.style.display = "none";
+    if (loadingEl) loadingEl.style.display = "block";
+    if (resultsEl) resultsEl.style.display = "none";
+    if (btnClose) btnClose.disabled = true;
 
     const archetypeInputs = Array.from(
       this.refs.archetypeGrid.querySelectorAll(
@@ -2484,417 +2484,61 @@ class BMetricsApp {
       }
     });
 
-    const newRecords = [];
-    const ids = data.map((d) => d.id);
-    let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    // Initialize Web Worker
+    const worker = new Worker("./js/simWorker.js");
 
-    for (let i = 0; i < count; i++) {
-      const rec = { id: nextId++ };
+    worker.onmessage = (e) => {
+      const projections = e.data;
+      this.#renderSimulationResults(projections);
+      if (loadingEl) loadingEl.style.display = "none";
+      if (resultsEl) resultsEl.style.display = "flex";
+      if (btnClose) btnClose.disabled = false;
+      worker.terminate();
+    };
 
-      // Box-Muller generator helper (bounded)
-      const ranZ = () => {
-        let u = 0,
-          v = 0;
-        while (u === 0) u = Math.random();
-        while (v === 0) v = Math.random();
-        const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-        return Math.max(-3, Math.min(3, z)); // Clamp extreme outliers
-      };
+    worker.postMessage({
+      iterations: 10000,
+      avg,
+      variance,
+      archetypes,
+      ageNum,
+      heightInches,
+      pos,
+      dataLength: data.length
+    });
+  }
 
-      // --- Phase 1: MPG ---
-      let baseMpgAvg =
-        avg["mpg"] !== undefined && data.length > 0 ? avg["mpg"] : 24;
-      let baseMpgVar =
-        variance["mpg"] !== undefined && data.length > 0 ? variance["mpg"] : 5;
+  #renderSimulationResults(projections) {
+    const listEl = document.getElementById("predict-results-list");
+    if (!listEl) return;
+    listEl.innerHTML = "";
 
-      let mpgMod = 1.0;
-      let mpgVarMod = 1.0;
-      for (const archetype of archetypes) {
-        if (archetype === "facilitator") mpgMod *= 1.1;
-        else if (archetype === "workhorse") mpgMod *= 1.15;
-        else if (archetype === "fringe") {
-          mpgMod *= 0.7;
-          mpgVarMod *= 1.2;
-        }
-      }
+    const formatNum = (val) => Number(val).toFixed(1);
+    
+    // Order of importance
+    const order = ["pts", "reb", "ast", "stl", "blk", "fgm", "fga", "tpm", "tpa", "ftm", "fta", "topg"];
+    const labels = {
+      pts: "Points", reb: "Rebounds", ast: "Assists", stl: "Steals", blk: "Blocks",
+      fgm: "FGM", fga: "FGA", tpm: "3PM", tpa: "3PA", ftm: "FTM", fta: "FTA", topg: "Turnovers"
+    };
 
-      baseMpgAvg *= mpgMod;
-      if (archetypes.includes("facilitator"))
-        baseMpgAvg = Math.min(baseMpgAvg, 42);
-      if (archetypes.includes("workhorse"))
-        baseMpgAvg = Math.min(baseMpgAvg, 44);
-
-      baseMpgVar *= mpgVarMod;
-
-      let genMpg = Math.round(baseMpgAvg + ranZ() * baseMpgVar);
-      if (genMpg < 0) genMpg = 0;
-      if (genMpg > 48) genMpg = 48 + Math.floor(Math.random() * 10);
-      rec["mpg"] = genMpg;
-
-      const minRatio =
-        baseMpgAvg > 0 ? genMpg / baseMpgAvg : genMpg > 0 ? 1 : 0;
-
-      // --- Phase 2: Volume (Attempts) & Usage ---
-      let fgaAvg = (data.length > 0 ? avg["fga"] || 0 : 10) * minRatio;
-      let fgaVar =
-        (data.length > 0 ? variance["fga"] || 3 : 3) * Math.sqrt(minRatio);
-      let tpaAvg = (data.length > 0 ? avg["tpa"] || 0 : 3) * minRatio;
-      let tpaVar =
-        (data.length > 0 ? variance["tpa"] || 1 : 1) * Math.sqrt(minRatio);
-      let ftaAvg = (data.length > 0 ? avg["fta"] || 0 : 2) * minRatio;
-      let ftaVar =
-        (data.length > 0 ? variance["fta"] || 1 : 1) * Math.sqrt(minRatio);
-
-      let tovAvg = (data.length > 0 ? avg["topg"] || 0 : 1.5) * minRatio;
-      let tovVar =
-        (data.length > 0 ? variance["topg"] || 1 : 1) * Math.sqrt(minRatio);
-
-      let mod_fga = 1.0,
-        mod_tpa = 1.0,
-        mod_fta = 1.0,
-        mod_tov = 1.0;
-
-      for (const arch of archetypes) {
-        if (arch === "scorer") {
-          mod_fga *= 1.35;
-          fgaVar *= 1.15;
-          mod_fta *= 1.2;
-          mod_tov *= 1.1;
-        } else if (arch === "playmaker") {
-          mod_fga *= 0.85;
-          mod_tov *= 0.75;
-        } else if (arch === "sharp") {
-          mod_tpa *= 1.6;
-          tpaVar *= 1.25;
-          mod_fga *= 1.15;
-        } else if (arch === "defender") {
-          mod_fga *= 0.8;
-        } else if (arch === "glass") {
-          mod_tpa *= 0.4;
-          mod_fta *= 1.2;
-        } else if (arch === "slasher") {
-          mod_fta *= 1.5;
-          ftaVar *= 1.2;
-          mod_fga *= 1.2;
-          fgaVar *= 1.1;
-          mod_tpa *= 0.6;
-        } else if (arch === "erratic") {
-          fgaVar *= 2.5;
-          tpaVar *= 2.5;
-          ftaVar *= 2.5;
-          tovVar *= 2.5;
-        } else if (arch === "clutch") {
-          mod_fta *= 1.3;
-          mod_tov *= 0.65;
-          fgaVar *= 0.75;
-          tovVar *= 0.75;
-        } else if (arch === "fringe") {
-          mod_fga *= 0.7;
-          mod_tpa *= 0.7;
-          mod_fta *= 0.7;
-          fgaVar *= 1.2;
-        }
-      }
-
-      if (pos === "PG") {
-        mod_tpa *= 1.25;
-        mod_fta *= 1.1;
-        mod_tov *= 1.3;
-      } else if (pos === "SG") {
-        mod_tpa *= 1.3;
-      } else if (pos === "G") {
-        mod_tpa *= 1.25;
-        mod_fta *= 1.05;
-        mod_tov *= 1.15;
-      } else if (pos === "SF") {
-        mod_fta *= 1.1;
-      } else if (pos === "F") {
-        mod_tpa *= 0.75;
-        mod_fta *= 1.15;
-      } else if (pos === "PF") {
-        mod_tpa *= 0.5;
-        mod_fta *= 1.2;
-      } else if (pos === "C") {
-        mod_tpa *= 0.1;
-        mod_fta *= 1.4;
-        mod_tov *= 1.2;
-      }
-
-      fgaAvg *= mod_fga;
-      tpaAvg *= mod_tpa;
-      ftaAvg *= mod_fta;
-      tovAvg *= mod_tov;
-
-      let fga = Math.round(fgaAvg + ranZ() * fgaVar);
-      let tpa = Math.round(tpaAvg + ranZ() * tpaVar);
-      let fta = Math.round(ftaAvg + ranZ() * ftaVar);
-      let topg = Math.round(tovAvg + ranZ() * tovVar);
-
-      if (fga < 0) fga = 0;
-      if (tpa < 0) tpa = 0;
-      if (fta < 0) fta = 0;
-      if (topg < 0) topg = 0;
-      if (tpa > fga) tpa = fga; // Cannot shoot more 3s than total FGs
-
-      rec["fga"] = fga;
-      rec["tpa"] = tpa;
-      rec["fta"] = fta;
-      rec["topg"] = topg;
-
-      // --- Phase 3: Efficiencies & Makes ---
-      const histFgPct = acc.fga > 0 ? acc.fgm / acc.fga : 0.45;
-      const histTpPct = acc.tpa > 0 ? acc.tpm / acc.tpa : 0.35;
-      const histFtPct = acc.fta > 0 ? acc.ftm / acc.fta : 0.75;
-
-      let fgPctVar = 0.12,
-        tpPctVar = 0.18,
-        ftPctVar = 0.1;
-
-      for (const arch of archetypes) {
-        if (arch === "erratic") {
-          fgPctVar *= 2.0;
-          tpPctVar *= 2.0;
-          ftPctVar *= 2.0;
-        } else if (arch === "clutch") {
-          ftPctVar *= 0.5;
-        } else if (arch === "scorer") {
-          fgPctVar *= 0.95;
-          tpPctVar *= 0.95;
-          ftPctVar *= 0.95;
-        } // Shoot more but slightly more consistent
-        else if (arch === "sharp") {
-          tpPctVar *= 0.7;
-        }
-      }
-
-      let nightlyFgPct = histFgPct + ranZ() * fgPctVar;
-      let nightlyTpPct = histTpPct + ranZ() * tpPctVar;
-      let nightlyFtPct = histFtPct + ranZ() * ftPctVar;
-
-      // Enforce realistic boundaries for percentages
-      nightlyFgPct = Math.max(0.1, Math.min(1.0, nightlyFgPct));
-      nightlyTpPct = Math.max(0.0, Math.min(1.0, nightlyTpPct));
-      nightlyFtPct = Math.max(0.0, Math.min(1.0, nightlyFtPct));
-
-      let fgm = Math.round(fga * nightlyFgPct);
-      let tpm = Math.round(tpa * nightlyTpPct);
-      let ftm = Math.round(fta * nightlyFtPct);
-
-      if (tpm > fgm) {
-        fgm = Math.min(tpm + Math.floor(Math.random() * 3), fga); // Boost fgm if tpm is high
-        if (tpm > fgm) tpm = fgm;
-      }
-
-      rec["fgm"] = fgm;
-      rec["tpm"] = tpm;
-      rec["ftm"] = ftm;
-
-      // --- Phase 4: Peripherals (REB, AST, STL, BLK) ---
-      const periphKeys = ["rpg", "apg", "spg", "bpg"];
-      const defaults = { rpg: 4, apg: 2, spg: 0.8, bpg: 0.4 };
-
-      periphKeys.forEach((key) => {
-        let baseAvg = data.length > 0 ? avg[key] || 0 : defaults[key];
-        let pAvg = baseAvg * minRatio;
-        let pVar =
-          (data.length > 0
-            ? variance[key] || Math.max(pAvg * 0.3, 1)
-            : Math.max(defaults[key] * 0.3, 1)) * Math.sqrt(minRatio);
-
-        let modAvg = 1.0;
-
-        for (const arch of archetypes) {
-          if (arch === "playmaker" && key === "apg") {
-            modAvg *= 1.5;
-            pVar *= 1.2;
-          }
-          if (arch === "defender") {
-            if (["spg", "bpg"].includes(key)) {
-              modAvg *= 1.7;
-              pVar *= 1.3;
-            }
-            if (key === "rpg") {
-              modAvg *= 1.15;
-            }
-          }
-          if (arch === "glass") {
-            if (key === "rpg") {
-              modAvg *= 1.6;
-              pVar *= 1.2;
-            }
-            if (key === "bpg") {
-              modAvg *= 1.35;
-              pVar *= 1.1;
-            }
-          }
-          if (arch === "facilitator" && key === "apg") {
-            modAvg *= 1.6;
-            pVar *= 1.3;
-          }
-          if (arch === "erratic") {
-            pVar *= 2.5;
-          }
-          if (arch === "fringe") {
-            modAvg *= 0.7;
-            pVar *= 1.2;
-          }
-        }
-
-        if (pos === "PG") {
-          if (key === "apg") {
-            modAvg *= 1.4;
-          }
-          if (key === "rpg") {
-            modAvg *= 0.6;
-          }
-        } else if (pos === "SG") {
-          if (key === "apg") {
-            modAvg *= 1.1;
-          }
-          if (key === "rpg") {
-            modAvg *= 0.8;
-          }
-        } else if (pos === "G") {
-          if (key === "apg") {
-            modAvg *= 1.25;
-          }
-          if (key === "rpg") {
-            modAvg *= 0.7;
-          }
-        } else if (pos === "PF") {
-          if (key === "rpg") {
-            modAvg *= 1.3;
-          }
-          if (key === "bpg") {
-            modAvg *= 1.4;
-          }
-          if (key === "apg") {
-            modAvg *= 0.7;
-          }
-        } else if (pos === "F") {
-          if (key === "rpg") {
-            modAvg *= 1.15;
-          }
-          if (key === "bpg") {
-            modAvg *= 1.2;
-          }
-          if (key === "apg") {
-            modAvg *= 0.85;
-          }
-        } else if (pos === "C") {
-          if (key === "rpg") {
-            modAvg *= 1.6;
-          }
-          if (key === "bpg") {
-            modAvg *= 1.8;
-          }
-          if (key === "apg") {
-            modAvg *= 0.5;
-          }
-          if (key === "spg") {
-            modAvg *= 0.6;
-          }
-        }
-
-        if (ageNum < 23) pVar *= 1.15;
-        else if (ageNum >= 30 && data.length === 0) {
-          const decline = ageNum >= 35 ? 0.9 : 0.95;
-          if (["rpg", "spg", "bpg"].includes(key)) modAvg *= decline;
-        }
-
-        const heightDiff = heightInches - 78;
-        if (["rpg", "bpg"].includes(key))
-          modAvg *= Math.max(0.5, 1 + heightDiff * 0.05);
-        if (["apg", "spg"].includes(key))
-          modAvg *= Math.max(0.5, 1 - heightDiff * 0.03);
-
-        pAvg *= modAvg;
-
-        let pVal = Math.round(pAvg + ranZ() * pVar);
-        if (pVal < 0) pVal = 0;
-
-        // Absolute Constraints vs Minutes
-        if (key === "rpg" && pVal > 0.8 * genMpg)
-          pVal = Math.floor(0.8 * genMpg);
-        if (key === "apg" && pVal > 0.5 * genMpg)
-          pVal = Math.floor(0.5 * genMpg);
-        if (key === "spg" && pVal > 0.25 * genMpg)
-          pVal = Math.floor(0.25 * genMpg);
-        if (key === "bpg" && pVal > 0.3 * genMpg)
-          pVal = Math.floor(0.3 * genMpg);
-
-        rec[key] = pVal;
-      });
-
-      // Ensure logic invariants
-      if (rec.fga < rec.fgm) rec.fga = rec.fgm;
-      if (rec.fta < rec.ftm) rec.fta = rec.ftm;
-      if (rec.tpa < rec.tpm) rec.tpa = rec.tpm;
-      if (rec.fga < rec.tpa) rec.fga = rec.tpa;
-      if (rec.fgm < rec.tpm) rec.fgm = rec.tpm;
-      if (rec.fgm - rec.tpm > rec.fga - rec.tpa) {
-        rec.fgm = rec.tpm + (rec.fga - rec.tpa);
-      }
-
-      computeDerived(rec);
-      newRecords.unshift(rec);
-    }
-
-    // FLIP setup
-    const existingRows = Array.from(
-      this.refs.tbody.querySelectorAll("tr.data-row"),
-    );
-    const rectMap = new Map();
-    existingRows.forEach((r) =>
-      rectMap.set(r.dataset.id, r.getBoundingClientRect().top),
-    );
-
-    // Append new items at top, respect sort if necessary
-    this.#state.sortRef = { key: null, asc: true }; // Reset sort to view newly prepended records simply
-    this.#state.data = [...newRecords, ...this.#state.data];
-    this.#persistState();
-
-    this.#closePredictModal();
-    this.#render();
-
-    // FLIP for existing rows sliding down
-    const currentRows = Array.from(
-      this.refs.tbody.querySelectorAll("tr.data-row"),
-    );
-    currentRows.forEach((r) => {
-      const beforeY = rectMap.get(r.dataset.id);
-      if (beforeY !== undefined) {
-        const afterY = r.getBoundingClientRect().top;
-        const delta = beforeY - afterY;
-        if (Math.abs(delta) > 1) {
-          anime.set(r, { translateY: delta });
-          anime({
-            targets: r,
-            translateY: 0,
-            duration: 600,
-            easing: "spring(1, 100, 20, 0)",
-          });
-        }
-      }
+    let html = "";
+    order.forEach(key => {
+      if (!projections[key]) return;
+      const proj = projections[key];
+      html += `
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 8px; font-family: var(--font-data); font-size: 0.95rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">${labels[key]}</div>
+          <div style="text-align: right; color: var(--text-secondary);">${formatNum(proj.floor)}</div>
+          <div style="text-align: right; color: var(--text-primary); font-weight: 600;">${formatNum(proj.expected)}</div>
+          <div style="text-align: right; color: var(--text-secondary);">${formatNum(proj.ceiling)}</div>
+        </div>
+      `;
     });
 
-    // Entrance animation for new rows
-    const newDoms = currentRows.slice(0, count);
-    if (newDoms.length > 0) {
-      anime({
-        targets: newDoms,
-        translateY: [-40, 0],
-        opacity: [0, 1],
-        backgroundColor: [getThemeColors().bgFlash, "transparent"],
-        delay: anime.stagger(30),
-        duration: 600,
-        easing: "spring(1, 100, 20, 0)",
-      });
-    }
-
-    const scrollCtx = this.refs.tbody.closest(".scroll-context");
-    if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: "smooth" });
+    listEl.innerHTML = html;
   }
+
 
   /* ——— Sorting ————————————————————————————— */
 
