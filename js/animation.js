@@ -46,7 +46,7 @@ export function choreographEntrance() {
        top with blur dissolve → HUD modules ascend separately →
        data grid rises → rows flicker in as telemetry data feed.
     ──────────────────────────────────────────────────────────── */
-    const tl = anime.timeline({ easing: "easeOutExpo" });
+    const tl = anime.timeline({ easing: "spring(1, 100, 20, 0)" });
 
     tl
       /* Phase 1a: Editorial header border rule flashes in */
@@ -55,7 +55,7 @@ export function choreographEntrance() {
         opacity: [0, 1],
         translateY: [-6, 0],
         duration: 600,
-        easing: "easeOutCubic",
+        easing: "spring(1, 100, 20, 0)",
       })
       /* Phase 1b: Title CRASHES in from above — overshoots slightly like a slug */
       .add(
@@ -66,7 +66,7 @@ export function choreographEntrance() {
           scaleY: [1.15, 1] /* vertical squish on impact */,
           filter: ["blur(12px) brightness(0.4)", "blur(0px) brightness(1)"],
           duration: 900,
-          easing: "easeOutBack",
+          easing: "spring(1, 100, 15, 0)",
         },
         "-=200",
       )
@@ -77,7 +77,7 @@ export function choreographEntrance() {
           opacity: [0, 1],
           translateX: [-16, 0],
           duration: 500,
-          easing: "easeOutQuad",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=400",
       )
@@ -105,7 +105,7 @@ export function choreographEntrance() {
           scale: [0.97, 1],
           delay: anime.stagger(100),
           duration: 750,
-          easing: "easeOutExpo",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=350",
       )
@@ -118,7 +118,7 @@ export function choreographEntrance() {
           translateY: [8, 0],
           delay: anime.stagger(30),
           duration: 450,
-          easing: "easeOutBack",
+          easing: "spring(1, 100, 15, 0)",
         },
         "-=500",
       )
@@ -130,7 +130,7 @@ export function choreographEntrance() {
           translateY: [40, 0],
           scale: [0.975, 1],
           duration: 900,
-          easing: "easeOutExpo",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=200",
       )
@@ -142,7 +142,7 @@ export function choreographEntrance() {
           translateY: [-8, 0],
           delay: anime.stagger(18, { from: "first" }),
           duration: 400,
-          easing: "easeOutQuad",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=700",
       )
@@ -154,7 +154,7 @@ export function choreographEntrance() {
           translateX: (el, i) => [i % 2 === 0 ? -16 : 16, 0],
           delay: anime.stagger(35),
           duration: 550,
-          easing: "easeOutCubic",
+          easing: "spring(1, 100, 20, 0)",
           begin: (anim) => {
             /* Scan pulse on each row as it appears */
             const tc = getThemeColors();
@@ -164,7 +164,7 @@ export function choreographEntrance() {
                   targets: a.target,
                   backgroundColor: [tc.bgFlash, "transparent"],
                   duration: 500,
-                  easing: "easeOutExpo",
+                  easing: "spring(1, 100, 20, 0)",
                 });
               }, idx * 35);
             });
@@ -179,7 +179,7 @@ export function choreographEntrance() {
           opacity: [0, 1],
           translateY: [12, 0],
           duration: 700,
-          easing: "easeOutExpo",
+          easing: "spring(1, 100, 20, 0)",
         },
         "-=300",
       )
@@ -202,7 +202,7 @@ export function choreographEntrance() {
       opacity: [0, 1],
       delay: anime.stagger(80, { start: 800 }),
       duration: 900,
-      easing: "easeOutElastic(1, .55)",
+      easing: "spring(1, 100, 15, 0)",
     });
 
     /* Scanline overlay fades in with measured delay */
@@ -211,7 +211,7 @@ export function choreographEntrance() {
       opacity: [0, 0.4],
       duration: 2400,
       delay: 400,
-      easing: "easeOutQuad",
+      easing: "spring(1, 100, 20, 0)",
     });
 
     // Fallback: if the animation stalls for 5s, force visibility.
@@ -231,7 +231,7 @@ export function playRowConfirmFlash(tdNode) {
     targets: tdNode,
     backgroundColor: [tc.bgFlashStrong, "transparent"],
     duration: 500,
-    easing: "easeOutExpo",
+    easing: "spring(1, 100, 20, 0)",
   });
 }
 
@@ -245,7 +245,7 @@ export function playAggregateFlash(updatedNodes) {
     color: [tc.textSecondary, tc.textPrimary],
     textShadow: [`0 0 16px ${shadowColor}`, "none"],
     duration: 600,
-    easing: "easeOutExpo",
+    easing: "spring(1, 100, 20, 0)",
   });
 }
 
@@ -258,6 +258,6 @@ export function playCareerHighsFlash(updatedNodes) {
     scale: [0.95, 1],
     duration: 800,
     delay: anime.stagger(50),
-    easing: "easeOutExpo",
+    easing: "spring(1, 100, 20, 0)",
   });
 }
