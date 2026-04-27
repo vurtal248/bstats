@@ -1457,39 +1457,95 @@ class BMetricsApp {
   }
 
   #renderCompareView() {
-    const selectA = document.getElementById("compare-profile-a");
-    const selectB = document.getElementById("compare-profile-b");
-    if (!selectA || !selectB) return;
+    const listA = document.getElementById("compare-profile-a-list");
+    const listB = document.getElementById("compare-profile-b-list");
+    const containerA = document.getElementById("compare-profile-a-container");
+    const containerB = document.getElementById("compare-profile-b-container");
+    if (!listA || !listB) return;
 
-    let optionsHTML = '<option value="">Select Profile</option>';
+    const options = [{ value: "", label: "Select Profile" }];
     this.#profiles.forEach((p) => {
-      optionsHTML += `<option value="c|${p.id}">${p.name} (Career)</option>`;
+      options.push({ value: `c|${p.id}`, label: `${p.name} (Career)` });
       if (p.seasons) {
         p.seasons.forEach((s) => {
-          optionsHTML += `<option value="s|${p.id}|${s.id}">${p.name} - ${s.name}</option>`;
+          options.push({ value: `s|${p.id}|${s.id}`, label: `${p.name} - ${s.name}` });
         });
       }
     });
 
-    const valA = selectA.value;
-    const valB = selectB.value;
-    selectA.innerHTML = optionsHTML;
-    selectB.innerHTML = optionsHTML;
+    const valA = containerA.dataset.value || "";
+    const valB = containerB.dataset.value || "";
 
-    if (valA) selectA.value = valA;
-    if (valB) selectB.value = valB;
+    const buildHTML = (activeVal) => options.map(opt => 
+      `<button class="profile-menu-item ${opt.value === activeVal ? 'is-active' : ''}" data-value="${opt.value}" data-label="${opt.label}">${opt.label}</button>`
+    ).join("");
+
+    listA.innerHTML = buildHTML(valA);
+    listB.innerHTML = buildHTML(valB);
+
+    // Setup click handlers for options
+    [ { list: listA, container: containerA, activeId: "compare-profile-a-active", menuId: "compare-profile-a-menu", toggleId: "compare-profile-a-toggle" },
+      { list: listB, container: containerB, activeId: "compare-profile-b-active", menuId: "compare-profile-b-menu", toggleId: "compare-profile-b-toggle" }
+    ].forEach(({ list, container, activeId, menuId, toggleId }) => {
+      list.querySelectorAll(".profile-menu-item").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const val = btn.dataset.value;
+          const label = btn.dataset.label;
+          container.dataset.value = val;
+          document.getElementById(activeId).textContent = label;
+          
+          // update active class
+          list.querySelectorAll(".profile-menu-item").forEach(b => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          
+          // hide menu
+          const menu = document.getElementById(menuId);
+          menu.hidden = true;
+          document.getElementById(toggleId).setAttribute("aria-expanded", "false");
+        });
+      });
+      
+      // Setup toggle handler if not already done
+      const toggle = document.getElementById(toggleId);
+      if (!toggle.dataset.bound) {
+        toggle.dataset.bound = "true";
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const menu = document.getElementById(menuId);
+          const isHidden = menu.hidden;
+          
+          // close all other menus
+          document.querySelectorAll('.profile-menu').forEach(m => m.hidden = true);
+          document.querySelectorAll('.profile-trigger').forEach(t => t.setAttribute("aria-expanded", "false"));
+          
+          if (isHidden) {
+            menu.hidden = false;
+            toggle.setAttribute("aria-expanded", "true");
+          }
+        });
+      }
+    });
+    
+    if (valA) {
+      const optA = options.find(o => o.value === valA);
+      if (optA) document.getElementById("compare-profile-a-active").textContent = optA.label;
+    }
+    if (valB) {
+      const optB = options.find(o => o.value === valB);
+      if (optB) document.getElementById("compare-profile-b-active").textContent = optB.label;
+    }
   }
 
   #handleCompareRun() {
-    const selectA = document.getElementById("compare-profile-a");
-    const selectB = document.getElementById("compare-profile-b");
+    const containerA = document.getElementById("compare-profile-a-container");
+    const containerB = document.getElementById("compare-profile-b-container");
     const content = document.getElementById("compare-content");
     const empty = document.getElementById("compare-empty");
     const grid = document.getElementById("compare-grid");
-    if (!selectA || !selectB || !content || !empty || !grid) return;
+    if (!containerA || !containerB || !content || !empty || !grid) return;
 
-    const valA = selectA.value;
-    const valB = selectB.value;
+    const valA = containerA.dataset.value;
+    const valB = containerB.dataset.value;
     if (!valA || !valB) {
       alert("Please select two distinct profiles/seasons to compare.");
       return;
