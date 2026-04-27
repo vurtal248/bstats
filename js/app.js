@@ -2438,15 +2438,13 @@ class BMetricsApp {
     if (resultsEl) resultsEl.style.display = "none";
     if (btnClose) btnClose.disabled = true;
 
-    const archetypeInputs = Array.from(
-      this.refs.archetypeGrid.querySelectorAll(
-        'input[name="archetype"]:checked',
-      ),
-    );
-    const archetypes =
-      archetypeInputs.length > 0
-        ? archetypeInputs.map((inp) => inp.value)
-        : ["balanced"];
+    const archetypeGrid = document.getElementById("archetype-grid");
+    const archetypeInputs = archetypeGrid
+      ? Array.from(archetypeGrid.querySelectorAll('input[name="archetype"]:checked'))
+      : [];
+    const archetypes = archetypeInputs.length > 0
+      ? archetypeInputs.map((inp) => inp.value)
+      : ["balanced"];
 
     const activeProfile =
       this.#profiles.find((p) => p.id === this.#activeProfileId) || {};
@@ -2525,15 +2523,13 @@ class BMetricsApp {
     const btnAdd = document.getElementById("btn-add-sim-games");
     if (btnAdd) btnAdd.disabled = true;
 
-    const archetypeInputs = Array.from(
-      this.refs.archetypeGrid.querySelectorAll(
-        'input[name="archetype"]:checked',
-      ),
-    );
-    const archetypes =
-      archetypeInputs.length > 0
-        ? archetypeInputs.map((inp) => inp.value)
-        : ["balanced"];
+    const archetypeGrid = document.getElementById("archetype-grid");
+    const archetypeInputs = archetypeGrid
+      ? Array.from(archetypeGrid.querySelectorAll('input[name="archetype"]:checked'))
+      : [];
+    const archetypes = archetypeInputs.length > 0
+      ? archetypeInputs.map((inp) => inp.value)
+      : ["balanced"];
 
     const activeProfile =
       this.#profiles.find((p) => p.id === this.#activeProfileId) || {};
@@ -2579,11 +2575,17 @@ class BMetricsApp {
       if (e.data && e.data.type === "generation") {
         const generatedRecords = e.data.records;
         this.#insertGeneratedRecords(generatedRecords);
-        
         if (btnClose) btnClose.disabled = false;
         if (btnAdd) btnAdd.disabled = false;
         worker.terminate();
       }
+    };
+
+    worker.onerror = (err) => {
+      console.error("SimWorker error during generate:", err);
+      if (btnClose) btnClose.disabled = false;
+      if (btnAdd) btnAdd.disabled = false;
+      worker.terminate();
     };
 
     worker.postMessage({
