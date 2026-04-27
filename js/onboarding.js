@@ -187,7 +187,7 @@ export function initOnboarding(force = false) {
 
     // Animations
     const dur = initial ? 0 : 500;
-    const easing = "easeOutExpo";
+    const easing = "spring(1, 100, 20, 0)";
 
     // Top Panel: 0 to hole.top
     anime({
@@ -284,6 +284,6 @@ export function initOnboarding(force = false) {
     targets: container,
     opacity: 1,
     duration: 800,
-    easing: "easeOutExpo",
+    easing: "spring(1, 100, 20, 0)",
   });
 }
