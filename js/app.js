@@ -1964,7 +1964,10 @@ class BMetricsApp {
     if (btnCloseSim) {
       btnCloseSim.addEventListener("click", () => this.#closePredictModal());
     }
-
+    const btnAddSimGames = document.getElementById("btn-add-sim-games");
+    if (btnAddSimGames) {
+      btnAddSimGames.addEventListener("click", () => this.#handleAppendSimGames());
+    }
     // Profile events
     this.refs.profileToggle.addEventListener("click", () =>
       this.#toggleProfileMenu(),
@@ -2488,15 +2491,18 @@ class BMetricsApp {
     const worker = new Worker("./js/simWorker.js");
 
     worker.onmessage = (e) => {
-      const projections = e.data;
-      this.#renderSimulationResults(projections);
-      if (loadingEl) loadingEl.style.display = "none";
-      if (resultsEl) resultsEl.style.display = "flex";
-      if (btnClose) btnClose.disabled = false;
-      worker.terminate();
+      if (e.data && e.data.type === "projection") {
+        const projections = e.data.projections;
+        this.#renderSimulationResults(projections);
+        if (loadingEl) loadingEl.style.display = "none";
+        if (resultsEl) resultsEl.style.display = "flex";
+        if (btnClose) btnClose.disabled = false;
+        worker.terminate();
+      }
     };
 
     worker.postMessage({
+      action: "project",
       iterations: 10000,
       avg,
       variance,
@@ -2506,6 +2512,162 @@ class BMetricsApp {
       pos,
       dataLength: data.length
     });
+  }
+
+  #handleAppendSimGames() {
+    const inputCount = document.getElementById("input-predict-count");
+    if (!inputCount) return;
+    const count = parseInt(inputCount.value, 10);
+    if (isNaN(count) || count <= 0) return;
+
+    const btnClose = document.getElementById("btn-close-predict");
+    if (btnClose) btnClose.disabled = true;
+    const btnAdd = document.getElementById("btn-add-sim-games");
+    if (btnAdd) btnAdd.disabled = true;
+
+    const archetypeInputs = Array.from(
+      this.refs.archetypeGrid.querySelectorAll(
+        'input[name="archetype"]:checked',
+      ),
+    );
+    const archetypes =
+      archetypeInputs.length > 0
+        ? archetypeInputs.map((inp) => inp.value)
+        : ["balanced"];
+
+    const activeProfile =
+      this.#profiles.find((p) => p.id === this.#activeProfileId) || {};
+    const ageNum = parseInt(activeProfile.age, 10) || 26;
+    const ft = parseInt(activeProfile.heightFt, 10) || 6;
+    const inc = parseInt(activeProfile.heightIn, 10) || 6;
+    const heightInches = ft * 12 + inc; 
+    const pos = activeProfile.position || "SG";
+
+    const data = this.#state.data;
+    const len = data.length || 1;
+
+    const acc = {};
+    METRICS_SCHEMA.forEach((c) => {
+      if (!c.computed && c.key !== "id") acc[c.key] = 0;
+    });
+    data.forEach((r) => {
+      METRICS_SCHEMA.forEach((c) => {
+        if (!c.computed && c.key !== "id") acc[c.key] += Number(r[c.key]) || 0;
+      });
+    });
+
+    const avg = {};
+    const variance = {};
+    METRICS_SCHEMA.forEach((c) => {
+      if (!c.computed && c.key !== "id") {
+        avg[c.key] = data.length > 0 ? acc[c.key] / len : 0;
+        let sumSquares = 0;
+        data.forEach((r) => {
+          sumSquares += Math.pow((Number(r[c.key]) || 0) - avg[c.key], 2);
+        });
+        const stdDev =
+          data.length > 1
+            ? Math.sqrt(sumSquares / (len - 1))
+            : Math.max(avg[c.key] * 0.05, 0.5);
+        variance[c.key] = stdDev;
+      }
+    });
+
+    const worker = new Worker("./js/simWorker.js");
+
+    worker.onmessage = (e) => {
+      if (e.data && e.data.type === "generation") {
+        const generatedRecords = e.data.records;
+        this.#insertGeneratedRecords(generatedRecords);
+        
+        if (btnClose) btnClose.disabled = false;
+        if (btnAdd) btnAdd.disabled = false;
+        worker.terminate();
+      }
+    };
+
+    worker.postMessage({
+      action: "generate",
+      iterations: count,
+      avg,
+      variance,
+      archetypes,
+      ageNum,
+      heightInches,
+      pos,
+      dataLength: data.length
+    });
+  }
+
+  #insertGeneratedRecords(records) {
+    if (!records || records.length === 0) return;
+
+    const data = this.#state.data;
+    const ids = data.map((d) => d.id);
+    let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+
+    const newRecords = records.map(rec => {
+      rec.id = nextId++;
+      computeDerived(rec);
+      return rec;
+    });
+
+    // Re-reverse them so they are prepended properly, or just unshift directly
+    newRecords.reverse();
+
+    // FLIP setup
+    const existingRows = Array.from(
+      this.refs.tbody.querySelectorAll("tr.data-row"),
+    );
+    const rectMap = new Map();
+    existingRows.forEach((r) =>
+      rectMap.set(r.dataset.id, r.getBoundingClientRect().top),
+    );
+
+    this.#state.sortRef = { key: null, asc: true }; 
+    this.#state.data = [...newRecords, ...this.#state.data];
+    this.#persistState();
+
+    this.#closePredictModal();
+    this.#render();
+
+    // FLIP for existing rows sliding down
+    const currentRows = Array.from(
+      this.refs.tbody.querySelectorAll("tr.data-row"),
+    );
+    currentRows.forEach((r) => {
+      const beforeY = rectMap.get(r.dataset.id);
+      if (beforeY !== undefined) {
+        const afterY = r.getBoundingClientRect().top;
+        const delta = beforeY - afterY;
+        if (Math.abs(delta) > 1) {
+          anime.set(r, { translateY: delta });
+          anime({
+            targets: r,
+            translateY: 0,
+            duration: 600,
+            easing: "spring(1, 100, 20, 0)",
+          });
+        }
+      }
+    });
+
+    // Entrance animation for new rows
+    const newDoms = currentRows.slice(0, newRecords.length);
+    if (newDoms.length > 0) {
+      anime({
+        targets: newDoms,
+        translateY: [-40, 0],
+        opacity: [0, 1],
+        backgroundColor: [getThemeColors().bgFlash, "transparent"],
+        delay: anime.stagger(30),
+        duration: 600,
+        easing: "spring(1, 100, 20, 0)",
+      });
+    }
+
+    const scrollCtx = this.refs.tbody.closest(".scroll-context");
+    if (scrollCtx) scrollCtx.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   #renderSimulationResults(projections) {
