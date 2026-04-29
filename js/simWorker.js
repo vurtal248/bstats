@@ -49,7 +49,8 @@ self.onmessage = function (e) {
 
     let genMpg = Math.round(baseMpgAvg + ranZ() * baseMpgVar);
     if (genMpg < 0) genMpg = 0;
-    if (genMpg > 48) genMpg = 48 + Math.floor(Math.random() * 10);
+    // Hard cap at 48 — overtime is vanishingly rare; never let this inflate peripheral ceilings
+    if (genMpg > 48) genMpg = 48;
 
     const currentMinRatio = baseMpgAvg > 0 ? genMpg / baseMpgAvg : genMpg > 0 ? 1 : 0;
 
@@ -143,23 +144,28 @@ self.onmessage = function (e) {
     periphKeys.forEach(key => {
       let baseAvg = dataLength > 0 ? avg[key] || 0 : defaults[key];
       let pAvg = baseAvg * currentMinRatio;
-      let pVar = (dataLength > 0 ? variance[key] || Math.max(pAvg * 0.3, 1) : Math.max(defaults[key] * 0.3, 1)) * Math.sqrt(currentMinRatio);
+      // Accumulate pVar *additively* outside the loop — stacking archetypes must not
+      // multiply variance on top of itself, which causes assists to snowball.
+      let baseVar = (dataLength > 0 ? variance[key] || Math.max(pAvg * 0.3, 1) : Math.max(defaults[key] * 0.3, 1)) * Math.sqrt(currentMinRatio);
+      let varBonus = 0;
 
       let modAvg = 1.0;
       for (const arch of archetypes) {
-        if (arch === "playmaker" && key === "apg") { modAvg *= 1.5; pVar *= 1.2; }
+        if (arch === "playmaker" && key === "apg") { modAvg *= 1.5; varBonus += baseVar * 0.2; }
         if (arch === "defender") {
-          if (["spg", "bpg"].includes(key)) { modAvg *= 1.7; pVar *= 1.3; }
+          if (["spg", "bpg"].includes(key)) { modAvg *= 1.7; varBonus += baseVar * 0.3; }
           if (key === "rpg") modAvg *= 1.15;
         }
         if (arch === "glass") {
-          if (key === "rpg") { modAvg *= 1.6; pVar *= 1.2; }
-          if (key === "bpg") { modAvg *= 1.35; pVar *= 1.1; }
+          if (key === "rpg") { modAvg *= 1.6; varBonus += baseVar * 0.2; }
+          if (key === "bpg") { modAvg *= 1.35; varBonus += baseVar * 0.1; }
         }
-        if (arch === "facilitator" && key === "apg") { modAvg *= 1.6; pVar *= 1.3; }
-        if (arch === "erratic") pVar *= 2.5;
-        if (arch === "fringe") { modAvg *= 0.7; pVar *= 1.2; }
+        if (arch === "facilitator" && key === "apg") { modAvg *= 1.6; varBonus += baseVar * 0.3; }
+        if (arch === "erratic") varBonus += baseVar * 1.5;
+        if (arch === "fringe") { modAvg *= 0.7; varBonus += baseVar * 0.2; }
       }
+
+      let pVar = baseVar + varBonus;
 
       if (pos === "PG") {
         if (key === "apg") modAvg *= 1.4;
@@ -201,7 +207,12 @@ self.onmessage = function (e) {
       if (pVal < 0) pVal = 0;
 
       if (key === "rpg" && pVal > 0.8 * genMpg) pVal = Math.floor(0.8 * genMpg);
-      if (key === "apg" && pVal > 0.5 * genMpg) pVal = Math.floor(0.5 * genMpg);
+      // Relative cap + hard absolute ceiling — prevents feedback loops when simulated
+      // games get re-ingested and the next sim reads an inflated apg average.
+      if (key === "apg") {
+        if (pVal > 0.5 * genMpg) pVal = Math.floor(0.5 * genMpg);
+        if (pVal > 15) pVal = 15;
+      }
       if (key === "spg" && pVal > 0.25 * genMpg) pVal = Math.floor(0.25 * genMpg);
       if (key === "bpg" && pVal > 0.3 * genMpg) pVal = Math.floor(0.3 * genMpg);
 
