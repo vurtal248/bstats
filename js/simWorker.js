@@ -21,7 +21,8 @@ self.onmessage = function (e) {
     while (u === 0) u = Math.random();
     while (v === 0) v = Math.random();
     const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-    return Math.max(-3, Math.min(3, z));
+    // Widened bounds slightly (-3.5 to 3.5) to allow for rare, realistic historic outlier games
+    return Math.max(-3.5, Math.min(3.5, z));
   };
 
   const minRatio = 1.0; 
@@ -30,6 +31,10 @@ self.onmessage = function (e) {
   const fullRecords = [];
 
   for (let i = 0; i < iterations; i++) {
+    // Game-level variance to simulate realistic momentum and pace
+    const gameFlow = ranZ(); // Rhythm/Hot Hand modifier
+    const paceFactor = 1.0 + (ranZ() * 0.05); // Game pace ± ~17.5%
+
     // Phase 1: MPG
     let baseMpgAvg = avg["mpg"] !== undefined && dataLength > 0 ? avg["mpg"] : 24;
     let baseMpgVar = variance["mpg"] !== undefined && dataLength > 0 ? variance["mpg"] : 5;
@@ -52,7 +57,8 @@ self.onmessage = function (e) {
     // Hard cap at 48 — overtime is vanishingly rare; never let this inflate peripheral ceilings
     if (genMpg > 48) genMpg = 48;
 
-    const currentMinRatio = baseMpgAvg > 0 ? genMpg / baseMpgAvg : genMpg > 0 ? 1 : 0;
+    // Apply paceFactor so fast-paced games yield higher stat volume per minute
+    const currentMinRatio = (baseMpgAvg > 0 ? genMpg / baseMpgAvg : genMpg > 0 ? 1 : 0) * paceFactor;
 
     // Phase 2: Volume
     let fgaAvg = (dataLength > 0 ? avg["fga"] || 0 : 10) * currentMinRatio;
@@ -64,7 +70,11 @@ self.onmessage = function (e) {
     let tovAvg = (dataLength > 0 ? avg["topg"] || 0 : 1.5) * currentMinRatio;
     let tovVar = (dataLength > 0 ? variance["topg"] || 1 : 1) * Math.sqrt(currentMinRatio);
 
-    let mod_fga = 1.0, mod_tpa = 1.0, mod_fta = 1.0, mod_tov = 1.0;
+    // Apply gameFlow: a player in rhythm shoots more and turns it over slightly less
+    let mod_fga = 1.0 + (gameFlow * 0.06);
+    let mod_tpa = 1.0 + (gameFlow * 0.06);
+    let mod_fta = 1.0 + (gameFlow * 0.04);
+    let mod_tov = 1.0 - (gameFlow * 0.03);
 
     for (const arch of archetypes) {
       if (arch === "scorer") { mod_fga *= 1.35; fgaVar *= 1.15; mod_fta *= 1.2; mod_tov *= 1.1; }
@@ -118,9 +128,10 @@ self.onmessage = function (e) {
       else if (arch === "sharp") { tpPctVar *= 0.7; }
     }
 
-    let nightlyFgPct = histFgPct + ranZ() * fgPctVar;
-    let nightlyTpPct = histTpPct + ranZ() * tpPctVar;
-    let nightlyFtPct = histFtPct + ranZ() * ftPctVar;
+    // Apply gameFlow: a player in rhythm shoots more accurately, creating realistic volume/efficiency correlation
+    let nightlyFgPct = histFgPct + (gameFlow * 0.025) + ranZ() * fgPctVar;
+    let nightlyTpPct = histTpPct + (gameFlow * 0.03) + ranZ() * tpPctVar;
+    let nightlyFtPct = histFtPct + (gameFlow * 0.015) + ranZ() * ftPctVar;
 
     nightlyFgPct = Math.max(0.1, Math.min(1.0, nightlyFgPct));
     nightlyTpPct = Math.max(0.0, Math.min(1.0, nightlyTpPct));
@@ -211,7 +222,9 @@ self.onmessage = function (e) {
       // games get re-ingested and the next sim reads an inflated apg average.
       if (key === "apg") {
         if (pVal > 0.5 * genMpg) pVal = Math.floor(0.5 * genMpg);
-        if (pVal > 15) pVal = 15;
+        // Dynamic ceiling instead of a hard 15, allowing for realistic historic passing games for true point guards
+        const dynamicCeiling = Math.max(18, Math.floor(baseAvg * 2.5));
+        if (pVal > dynamicCeiling) pVal = dynamicCeiling;
       }
       if (key === "spg" && pVal > 0.25 * genMpg) pVal = Math.floor(0.25 * genMpg);
       if (key === "bpg" && pVal > 0.3 * genMpg) pVal = Math.floor(0.3 * genMpg);
