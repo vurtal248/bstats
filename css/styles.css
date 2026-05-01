@@ -132,15 +132,10 @@ body {
   position: relative;
 }
 .sidebar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-bento);
-  border: 1px solid rgba(255,255,255,0.4);
-  pointer-events: none;
+  display: none;
 }
 :root[data-theme="dark"] .sidebar::after {
-  border: 1px solid rgba(255,255,255,0.05);
+  display: none;
 }
 
 .sidebar-brand {
@@ -639,16 +634,10 @@ body {
   position: relative;
 }
 .layout-main::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-bento);
-  border: 1px solid rgba(255,255,255,0.4);
-  pointer-events: none;
-  z-index: 100;
+  display: none;
 }
 :root[data-theme="dark"] .layout-main::after {
-  border: 1px solid rgba(255,255,255,0.05);
+  display: none;
 }
 
 /* ─── Top Bar (inside main) ───────────────────────────── */
@@ -776,18 +765,13 @@ body {
 .player-bio-container::after,
 .career-highs-container::after,
 .career-totals-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-bento-sm);
-  border: 1px solid rgba(255,255,255,0.4);
-  pointer-events: none;
+  display: none;
 }
 
 :root[data-theme="dark"] .player-bio-container::after,
 :root[data-theme="dark"] .career-highs-container::after,
 :root[data-theme="dark"] .career-totals-container::after {
-  border: 1px solid rgba(255,255,255,0.05);
+  display: none;
 }
 
 .player-bio-container:hover,
