@@ -1537,18 +1537,28 @@ class BMetricsApp {
       teamSumStl += stat.spg;
       teamSumBlk += stat.bpg;
       
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="text-align: left; font-weight: bold; color: var(--text-primary);">${stat.name}</td>
-        <td>${stat.gp}</td>
-        <td>${stat.ppg.toFixed(1)}</td>
-        <td>${stat.rpg.toFixed(1)}</td>
-        <td>${stat.apg.toFixed(1)}</td>
-        <td>${stat.spg.toFixed(1)}</td>
-        <td>${stat.bpg.toFixed(1)}</td>
-        <td>${stat.ts}%</td>
+      const initials = stat.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      
+      const row = document.createElement("div");
+      row.className = "roster-player-card";
+      row.innerHTML = `
+        <div class="rpc-header">
+          <div class="rpc-avatar">${initials}</div>
+          <div class="rpc-name-group">
+            <h3 class="rpc-name">${stat.name}</h3>
+            <p class="rpc-gp">${stat.gp} GP</p>
+          </div>
+        </div>
+        <div class="rpc-stats">
+          <div class="rpc-stat"><span class="rpc-stat-label">PPG</span><span class="rpc-stat-value">${stat.ppg.toFixed(1)}</span></div>
+          <div class="rpc-stat"><span class="rpc-stat-label">RPG</span><span class="rpc-stat-value">${stat.rpg.toFixed(1)}</span></div>
+          <div class="rpc-stat"><span class="rpc-stat-label">APG</span><span class="rpc-stat-value">${stat.apg.toFixed(1)}</span></div>
+          <div class="rpc-stat"><span class="rpc-stat-label">SPG</span><span class="rpc-stat-value">${stat.spg.toFixed(1)}</span></div>
+          <div class="rpc-stat"><span class="rpc-stat-label">BPG</span><span class="rpc-stat-value">${stat.bpg.toFixed(1)}</span></div>
+          <div class="rpc-stat"><span class="rpc-stat-label">TS%</span><span class="rpc-stat-value">${stat.ts}%</span></div>
+        </div>
       `;
-      rosterBody.appendChild(tr);
+      rosterBody.appendChild(row);
     });
     
     // Overall Team Averages
@@ -1566,7 +1576,7 @@ class BMetricsApp {
     
     if (rosterStats.length > 0) {
       anime({
-        targets: "#team-roster-body tr",
+        targets: "#team-roster-body .roster-player-card",
         opacity: [0, 1],
         translateX: [-10, 0],
         delay: anime.stagger(50),
@@ -1574,9 +1584,10 @@ class BMetricsApp {
         easing: "spring(1, 100, 20, 0)",
       });
     } else {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">No game data available for players on this team.</td>`;
-      rosterBody.appendChild(tr);
+      const empty = document.createElement("div");
+      empty.style = "text-align: center; color: var(--text-dim); padding: 24px; font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase;";
+      empty.textContent = "No game data available for players on this team.";
+      rosterBody.appendChild(empty);
     }
   }
 
