@@ -2400,6 +2400,7 @@ select.input-modern option {
   padding: 0 24px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   padding-bottom: 24px;
 }
 
@@ -2415,6 +2416,7 @@ select.input-modern option {
   position: relative;
   overflow: hidden;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .roster-player-card::before {
