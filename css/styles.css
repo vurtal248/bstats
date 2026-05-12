@@ -2398,6 +2398,9 @@ select.input-modern option {
   flex-direction: column;
   gap: 8px;
   padding: 0 24px;
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 24px;
 }
 
 .roster-player-card {
