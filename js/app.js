@@ -1452,6 +1452,134 @@ class BMetricsApp {
     this.#renderMilestones();
   }
 
+  /* ——— Team Dashboard ——————————————— */
+  renderTeamDashboard() {
+    this.#renderTeamDashboard();
+  }
+
+  #renderTeamDashboard() {
+    const activeProfile = this.#profiles.find((p) => p.id === this.#activeProfileId);
+    const teamName = activeProfile?.team || "Free Agents";
+    
+    const titleEl = document.getElementById("team-dashboard-title");
+    if (titleEl) titleEl.textContent = teamName;
+    
+    const rosterBody = document.getElementById("team-roster-body");
+    if (!rosterBody) return;
+    
+    rosterBody.innerHTML = "";
+    
+    // Find all profiles with matching team (case-insensitive)
+    const teamProfiles = this.#profiles.filter(p => {
+       const pt = p.team || "Free Agents";
+       return pt.toLowerCase() === teamName.toLowerCase();
+    });
+    
+    const rosterStats = [];
+    
+    teamProfiles.forEach(p => {
+      // Aggregate data across all seasons for this profile to evaluate their current standing
+      const allData = [];
+      if (p.seasons) {
+        p.seasons.forEach((s) => {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY_PREFIX + p.id + "_" + s.id);
+            if (raw) {
+              const seasonData = JSON.parse(raw);
+              if (Array.isArray(seasonData)) {
+                allData.push(...seasonData);
+              }
+            }
+          } catch { }
+        });
+      }
+
+      if (allData.length === 0) return;
+      
+      let sumPts = 0, sumReb = 0, sumAst = 0, sumStl = 0, sumBlk = 0;
+      let sumFga = 0, sumFta = 0;
+      
+      allData.forEach(r => {
+         sumPts += Number(r.ppg) || 0;
+         sumReb += Number(r.rpg) || 0;
+         sumAst += Number(r.apg) || 0;
+         sumStl += Number(r.spg) || 0;
+         sumBlk += Number(r.bpg) || 0;
+         sumFga += Number(r.fga) || 0;
+         sumFta += Number(r.fta) || 0;
+      });
+      
+      const count = allData.length;
+      const tsDenom = 2 * (sumFga + 0.44 * sumFta);
+      const tsPct = tsDenom > 0 ? ((sumPts / tsDenom) * 100).toFixed(1) : "0.0";
+      
+      rosterStats.push({
+        name: p.name,
+        gp: count,
+        ppg: (sumPts / count),
+        rpg: (sumReb / count),
+        apg: (sumAst / count),
+        spg: (sumStl / count),
+        bpg: (sumBlk / count),
+        ts: tsPct
+      });
+    });
+    
+    // Sort by PPG desc
+    rosterStats.sort((a, b) => b.ppg - a.ppg);
+    
+    let teamSumPts = 0, teamSumReb = 0, teamSumAst = 0, teamSumStl = 0, teamSumBlk = 0;
+    
+    rosterStats.forEach(stat => {
+      teamSumPts += stat.ppg;
+      teamSumReb += stat.rpg;
+      teamSumAst += stat.apg;
+      teamSumStl += stat.spg;
+      teamSumBlk += stat.bpg;
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="text-align: left; font-weight: bold; color: var(--text-primary);">${stat.name}</td>
+        <td>${stat.gp}</td>
+        <td>${stat.ppg.toFixed(1)}</td>
+        <td>${stat.rpg.toFixed(1)}</td>
+        <td>${stat.apg.toFixed(1)}</td>
+        <td>${stat.spg.toFixed(1)}</td>
+        <td>${stat.bpg.toFixed(1)}</td>
+        <td>${stat.ts}%</td>
+      `;
+      rosterBody.appendChild(tr);
+    });
+    
+    // Overall Team Averages
+    document.getElementById("team-avg-gp").textContent = rosterStats.length; // Number of active players
+    document.getElementById("team-avg-ppg").textContent = teamSumPts.toFixed(1);
+    document.getElementById("team-avg-rpg").textContent = teamSumReb.toFixed(1);
+    document.getElementById("team-avg-apg").textContent = teamSumAst.toFixed(1);
+    document.getElementById("team-avg-spg").textContent = teamSumStl.toFixed(1);
+    document.getElementById("team-avg-bpg").textContent = teamSumBlk.toFixed(1);
+    
+    let sumTS = 0;
+    rosterStats.forEach(s => sumTS += parseFloat(s.ts));
+    const teamTS = rosterStats.length > 0 ? (sumTS / rosterStats.length).toFixed(1) : "0.0";
+    document.getElementById("team-avg-ts").textContent = teamTS + "%";
+    
+    if (rosterStats.length > 0) {
+      anime({
+        targets: "#team-roster-body tr",
+        opacity: [0, 1],
+        translateX: [-10, 0],
+        delay: anime.stagger(50),
+        duration: 500,
+        easing: "spring(1, 100, 20, 0)",
+      });
+    } else {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">No game data available for players on this team.</td>`;
+      rosterBody.appendChild(tr);
+    }
+  }
+
   /* ——— Compare View ——————————————— */
   renderCompareView() {
     this.#renderCompareView();
