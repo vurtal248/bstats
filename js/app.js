@@ -1464,7 +1464,7 @@ class BMetricsApp {
     const titleEl = document.getElementById("team-dashboard-title");
     if (titleEl) titleEl.textContent = teamName;
     
-    const rosterBody = document.getElementById("team-roster-body");
+    const rosterBody = document.getElementById("team-roster-list");
     if (!rosterBody) return;
     
     rosterBody.innerHTML = "";
@@ -1576,7 +1576,7 @@ class BMetricsApp {
     
     if (rosterStats.length > 0) {
       anime({
-        targets: "#team-roster-body .roster-player-card",
+        targets: "#team-roster-list .roster-player-card",
         opacity: [0, 1],
         translateX: [-10, 0],
         delay: anime.stagger(50),
