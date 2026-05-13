@@ -149,12 +149,24 @@ self.onmessage = function (e) {
     // Peripherals
     const periphKeys = ["rpg", "apg", "spg", "bpg"];
     const defaults = { rpg: 4, apg: 2, spg: 0.8, bpg: 0.4 };
+
+    // Realistic per-game upper bounds for the player's history (prevent sim-data feedback loops)
+    const avgCaps = {
+      rpg: { PG: 12, SG: 13, G: 13, SF: 16, F: 18, PF: 20, C: 24 },
+      apg: { PG: 15, SG: 10, G: 12, SF: 9,  F: 8,  PF: 7,  C: 5  },
+      spg: { PG: 4,  SG: 4,  G: 4,  SF: 3.5,F: 3,  PF: 3,  C: 2.5 },
+      bpg: { PG: 2,  SG: 2.5,G: 2.5,SF: 4,  F: 4.5,PF: 5,  C: 7  },
+    };
     
     let rec = { mpg: genMpg, fga, tpa, fta, topg, fgm, tpm, ftm };
 
     periphKeys.forEach(key => {
-      let baseAvg = dataLength > 0 ? avg[key] || 0 : defaults[key];
-      let pAvg = baseAvg * currentMinRatio;
+      let rawAvg = dataLength > 0 ? avg[key] || 0 : defaults[key];
+      // Clamp the input average so inflated sim data can't compound
+      const avgCap = avgCaps[key]?.[pos] ?? avgCaps[key]?.["G"] ?? 99;
+      rawAvg = Math.min(rawAvg, avgCap);
+
+      let pAvg = rawAvg * currentMinRatio;
       // Accumulate pVar *additively* outside the loop — stacking archetypes must not
       // multiply variance on top of itself, which causes assists to snowball.
       let baseVar = (dataLength > 0 ? variance[key] || Math.max(pAvg * 0.3, 1) : Math.max(defaults[key] * 0.3, 1)) * Math.sqrt(currentMinRatio);
@@ -217,17 +229,21 @@ self.onmessage = function (e) {
       let pVal = Math.round(pAvg + ranZ() * pVar);
       if (pVal < 0) pVal = 0;
 
-      if (key === "rpg" && pVal > 0.8 * genMpg) pVal = Math.floor(0.8 * genMpg);
-      // Relative cap + hard absolute ceiling — prevents feedback loops when simulated
-      // games get re-ingested and the next sim reads an inflated apg average.
-      if (key === "apg") {
-        if (pVal > 0.5 * genMpg) pVal = Math.floor(0.5 * genMpg);
-        // Dynamic ceiling instead of a hard 15, allowing for realistic historic passing games for true point guards
-        const dynamicCeiling = Math.max(18, Math.floor(baseAvg * 2.5));
-        if (pVal > dynamicCeiling) pVal = dynamicCeiling;
-      }
-      if (key === "spg" && pVal > 0.25 * genMpg) pVal = Math.floor(0.25 * genMpg);
-      if (key === "bpg" && pVal > 0.3 * genMpg) pVal = Math.floor(0.3 * genMpg);
+      // ── Stage 1: Position-keyed absolute ceiling (NBA single-game records) ──
+      const hardCeilings = {
+        rpg: { PG: 9,  SG: 10, G: 10, SF: 14, F: 16, PF: 19, C: 23 },
+        apg: { PG: 21, SG: 11, G: 16, SF: 10, F: 9,  PF: 8,  C: 6  },
+        spg: { PG: 7,  SG: 7,  G: 7,  SF: 6,  F: 6,  PF: 5,  C: 5  },
+        bpg: { PG: 4,  SG: 5,  G: 5,  SF: 7,  F: 8,  PF: 10, C: 14 },
+      };
+      const posCeil = hardCeilings[key]?.[pos] ?? 30;
+      if (pVal > posCeil) pVal = posCeil;
+
+      // ── Stage 2: Minute-proportional soft cap ─────────────────────────────
+      // At 30 min: guards cap at ~12 reb, ~10 ast, ~4 stl, ~4 blk
+      const minCoeffs = { rpg: 0.40, apg: 0.33, spg: 0.13, bpg: 0.13 };
+      const minCap = Math.floor((minCoeffs[key] ?? 0.3) * genMpg);
+      if (pVal > minCap) pVal = minCap;
 
       rec[key] = pVal;
     });
