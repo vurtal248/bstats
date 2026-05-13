@@ -2734,14 +2734,16 @@ class BMetricsApp {
         worker.onmessage = (e) => {
           if (e.data && e.data.type === "generation") {
             const generatedRecords = e.data.records;
-            const startId = Date.now() + Math.floor(Math.random() * 10000);
+            const existingIds = data.map((d) => Number(d.id)).filter((n) => !isNaN(n));
+            let nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
             const today = new Date().toISOString().split("T")[0];
             
-            generatedRecords.forEach((rec, idx) => {
-              rec.id = "sim_" + (startId + idx);
+            generatedRecords.forEach((rec) => {
+              rec.id = nextId++;
               rec.date = today;
               rec.opp = "SIM";
               rec.wl = "SIM";
+              computeDerived(rec);
             });
 
             const updatedData = [...data, ...generatedRecords];
