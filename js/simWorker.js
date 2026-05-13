@@ -16,19 +16,26 @@ self.onmessage = function (e) {
     topg: []
   };
 
-  const ranZ = () => {
+  const _boxMuller = () => {
     let u = 0, v = 0;
     while (u === 0) u = Math.random();
     while (v === 0) v = Math.random();
-    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-    // Widened bounds slightly (-3.5 to 3.5) to allow for rare, realistic historic outlier games
-    return Math.max(-3.5, Math.min(3.5, z));
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   };
 
-  const minRatio = 1.0; 
+  // Projection: wide tails (±3.5σ) — accurate percentile modeling for Monte Carlo
+  const ranZProj = () => Math.max(-3.5, Math.min(3.5, _boxMuller()));
+
+  // Generation: tight tails (±1.8σ) — keeps individual recorded games realistic.
+  // ±1.8σ covers ~93% of real outcomes; eliminates the 2–3σ "2 shots in 26 min" collapse.
+  const ranZGen = () => Math.max(-1.8, Math.min(1.8, _boxMuller()));
 
   const action = e.data.action || "project";
+  // Pick the right sampler once so every call inside the loop is consistent.
+  const ranZ = action === "generate" ? ranZGen : ranZProj;
+
   const fullRecords = [];
+
 
   for (let i = 0; i < iterations; i++) {
     // Game-level variance to simulate realistic momentum and pace
