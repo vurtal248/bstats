@@ -2746,7 +2746,7 @@ class BMetricsApp {
               computeDerived(rec);
             });
 
-            const updatedData = [...data, ...generatedRecords];
+            const updatedData = [...generatedRecords.slice().reverse(), ...data];
             localStorage.setItem(STORAGE_KEY_PREFIX + p.id + "_" + sId, JSON.stringify(updatedData));
             
             if (p.id === this.#activeProfileId) {
