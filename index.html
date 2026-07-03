@@ -1323,7 +1323,7 @@
             type="text"
             id="input-season-name"
             class="input-modern"
-            placeholder="Season name — e.g. 2024-2025"
+            placeholder="Season name &#8212; e.g. 2024-2025"
             autocomplete="off"
             spellcheck="false"
           />
@@ -1331,11 +1331,43 @@
             type="text"
             id="input-season-team"
             class="input-modern"
-            placeholder="Team abbreviation (optional) — e.g. LAL"
+            list="nba-team-list-season"
+            placeholder="Team (optional) &#8212; start typing to search"
             autocomplete="off"
             spellcheck="false"
-            maxlength="8"
           />
+          <datalist id="nba-team-list-season">
+            <option value="Atlanta Hawks"></option>
+            <option value="Boston Celtics"></option>
+            <option value="Brooklyn Nets"></option>
+            <option value="Charlotte Hornets"></option>
+            <option value="Chicago Bulls"></option>
+            <option value="Cleveland Cavaliers"></option>
+            <option value="Dallas Mavericks"></option>
+            <option value="Denver Nuggets"></option>
+            <option value="Detroit Pistons"></option>
+            <option value="Golden State Warriors"></option>
+            <option value="Houston Rockets"></option>
+            <option value="Indiana Pacers"></option>
+            <option value="LA Clippers"></option>
+            <option value="Los Angeles Lakers"></option>
+            <option value="Memphis Grizzlies"></option>
+            <option value="Miami Heat"></option>
+            <option value="Milwaukee Bucks"></option>
+            <option value="Minnesota Timberwolves"></option>
+            <option value="New Orleans Pelicans"></option>
+            <option value="New York Knicks"></option>
+            <option value="Oklahoma City Thunder"></option>
+            <option value="Orlando Magic"></option>
+            <option value="Philadelphia 76ers"></option>
+            <option value="Phoenix Suns"></option>
+            <option value="Portland Trail Blazers"></option>
+            <option value="Sacramento Kings"></option>
+            <option value="San Antonio Spurs"></option>
+            <option value="Toronto Raptors"></option>
+            <option value="Utah Jazz"></option>
+            <option value="Washington Wizards"></option>
+          </datalist>
         </div>
         <div class="modal-footer">
           <button class="btn-ghost" id="btn-cancel-season">Cancel</button>
