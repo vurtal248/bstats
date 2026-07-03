@@ -1279,6 +1279,16 @@ class BMetricsApp {
       );
       if (activeProfile) {
         activeProfile[key] = trimmed;
+
+        // When team changes, freeze the new team onto the active season
+        // so historical seasons retain their own team and aren't affected.
+        if (key === "team") {
+          const activeSeason = activeProfile.seasons?.find(
+            (s) => s.id === this.#activeSeasonId,
+          );
+          if (activeSeason) activeSeason.team = trimmed;
+        }
+
         this.#saveProfiles();
       }
 
@@ -1679,8 +1689,10 @@ class BMetricsApp {
       const tr = document.createElement("tr");
       tr.className = "data-row";
       
-      // Prefer the per-season team; fall back to the current profile team for legacy seasons
-      const teamDisplay = s.team || activeProfile.team || "FA";
+      // Use only the team that was stored on this season — never fall back
+      // to the live profile team, which would bleed across all seasons when
+      // the player changes teams.
+      const teamDisplay = s.team || "—";
       
       tr.innerHTML = `
         <td style="color: var(--text-primary); font-family: var(--font-mono);">${s.name}</td>
