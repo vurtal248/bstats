@@ -1682,7 +1682,7 @@ class BMetricsApp {
     
     if (tbody.children.length === 0) {
       const tr = document.createElement("tr");
-      tr.innerHTML = \`<td colspan="12" style="text-align: center; color: var(--text-dim); padding: 24px;">No season data available</td>\`;
+      tr.innerHTML = `<td colspan="12" style="text-align: center; color: var(--text-dim); padding: 24px;">No season data available</td>`;
       tbody.appendChild(tr);
     } else {
       anime({
