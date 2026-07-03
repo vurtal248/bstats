@@ -1599,6 +1599,103 @@ class BMetricsApp {
     }
   }
 
+  /* ——— Career Seasons ——————————————— */
+  renderCareerSeasons() {
+    this.#renderCareerSeasons();
+  }
+
+  #renderCareerSeasons() {
+    const activeProfile = this.#profiles.find((p) => p.id === this.#activeProfileId);
+    if (!activeProfile || !activeProfile.seasons) return;
+    
+    const tbody = document.getElementById("career-table-body");
+    if (!tbody) return;
+    
+    tbody.innerHTML = "";
+    
+    activeProfile.seasons.forEach((s) => {
+      let seasonData = [];
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + "_" + s.id);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            seasonData = parsed;
+          }
+        }
+      } catch { }
+      
+      const gp = seasonData.length;
+      if (gp === 0) return; // Skip empty seasons based on the image
+      
+      let sumMin = 0, sumPts = 0, sumReb = 0, sumAst = 0, sumStl = 0, sumBlk = 0;
+      let sumFgm = 0, sumFga = 0, sum3pm = 0, sum3pa = 0, sumFtm = 0, sumFta = 0;
+      
+      seasonData.forEach((g) => {
+        sumMin += parseFloat(g.min || 0);
+        sumPts += parseFloat(g.pts || 0);
+        sumReb += parseFloat(g.reb || 0);
+        sumAst += parseFloat(g.ast || 0);
+        sumStl += parseFloat(g.stl || 0);
+        sumBlk += parseFloat(g.blk || 0);
+        
+        sumFgm += parseFloat(g.fgm || 0);
+        sumFga += parseFloat(g.fga || 0);
+        sum3pm += parseFloat(g["3pm"] || 0);
+        sum3pa += parseFloat(g["3pa"] || 0);
+        sumFtm += parseFloat(g.ftm || 0);
+        sumFta += parseFloat(g.fta || 0);
+      });
+      
+      const avgMin = sumMin / gp;
+      const avgPts = sumPts / gp;
+      const avgReb = sumReb / gp;
+      const avgAst = sumAst / gp;
+      const avgStl = sumStl / gp;
+      const avgBlk = sumBlk / gp;
+      
+      const fgPct = sumFga > 0 ? (sumFgm / sumFga) * 100 : 0;
+      const fg3Pct = sum3pa > 0 ? (sum3pm / sum3pa) * 100 : 0;
+      const ftPct = sumFta > 0 ? (sumFtm / sumFta) * 100 : 0;
+      
+      const tr = document.createElement("tr");
+      tr.className = "data-row";
+      
+      const teamDisplay = activeProfile.team || "FA";
+      
+      tr.innerHTML = `
+        <td style="color: var(--text-primary); font-family: var(--font-mono);">${s.name}</td>
+        <td style="color: var(--theme-color, #7EA5F8);">${teamDisplay}</td>
+        <td style="text-align: right; color: var(--text-primary);">${gp}</td>
+        <td style="text-align: right; color: var(--text-primary); font-weight: bold;">${avgMin.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-primary); font-weight: bold;">${avgPts.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-secondary);">${fgPct.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-secondary);">${fg3Pct.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-secondary);">${ftPct.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-primary);">${avgReb.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-primary);">${avgAst.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-primary);">${avgStl.toFixed(1)}</td>
+        <td style="text-align: right; color: var(--text-primary);">${avgBlk.toFixed(1)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    
+    if (tbody.children.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = \`<td colspan="12" style="text-align: center; color: var(--text-dim); padding: 24px;">No season data available</td>\`;
+      tbody.appendChild(tr);
+    } else {
+      anime({
+        targets: "#career-table-body .data-row",
+        opacity: [0, 1],
+        translateX: [-10, 0],
+        delay: anime.stagger(30),
+        duration: 400,
+        easing: "spring(1, 100, 20, 0)",
+      });
+    }
+  }
+
   /* ——— Compare View ——————————————— */
   renderCompareView() {
     this.#renderCompareView();
@@ -2275,6 +2372,7 @@ class BMetricsApp {
     this.refs.tbody.appendChild(fragment);
 
     this.#updateAggregates(false);
+    this.#renderCareerSeasons();
   }
 
   /** Build a single <tr> element from row data */
