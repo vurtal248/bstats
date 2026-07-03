@@ -1636,17 +1636,17 @@ class BMetricsApp {
       let sumFgm = 0, sumFga = 0, sum3pm = 0, sum3pa = 0, sumFtm = 0, sumFta = 0;
       
       seasonData.forEach((g) => {
-        sumMin += parseFloat(g.min || 0);
-        sumPts += parseFloat(g.pts || 0);
-        sumReb += parseFloat(g.reb || 0);
-        sumAst += parseFloat(g.ast || 0);
-        sumStl += parseFloat(g.stl || 0);
-        sumBlk += parseFloat(g.blk || 0);
+        sumMin += parseFloat(g.mpg || 0);
+        sumPts += parseFloat(g.ppg || 0);
+        sumReb += parseFloat(g.rpg || 0);
+        sumAst += parseFloat(g.apg || 0);
+        sumStl += parseFloat(g.spg || 0);
+        sumBlk += parseFloat(g.bpg || 0);
         
         sumFgm += parseFloat(g.fgm || 0);
         sumFga += parseFloat(g.fga || 0);
-        sum3pm += parseFloat(g["3pm"] || 0);
-        sum3pa += parseFloat(g["3pa"] || 0);
+        sum3pm += parseFloat(g.tpm || 0);
+        sum3pa += parseFloat(g.tpa || 0);
         sumFtm += parseFloat(g.ftm || 0);
         sumFta += parseFloat(g.fta || 0);
       });
