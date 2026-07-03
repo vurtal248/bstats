@@ -1615,15 +1615,19 @@ class BMetricsApp {
     
     activeProfile.seasons.forEach((s) => {
       let seasonData = [];
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + "_" + s.id);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            seasonData = parsed;
+      if (s.id === this.#activeSeasonId) {
+        seasonData = this.#state.data;
+      } else {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_PREFIX + activeProfile.id + "_" + s.id);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              seasonData = parsed;
+            }
           }
-        }
-      } catch { }
+        } catch { }
+      }
       
       const gp = seasonData.length;
       if (gp === 0) return; // Skip empty seasons based on the image
