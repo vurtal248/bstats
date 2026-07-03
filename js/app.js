@@ -871,7 +871,11 @@ class BMetricsApp {
   #openSeasonModal() {
     this.#closeSeasonMenu();
     this.refs.inputSeasonName.value = "";
-    if (this.refs.inputSeasonTeam) this.refs.inputSeasonTeam.value = "";
+    if (this.refs.inputSeasonTeam) {
+      // Pre-fill with current profile team so user doesn't start from blank
+      const activeProfile = this.#profiles.find((p) => p.id === this.#activeProfileId);
+      this.refs.inputSeasonTeam.value = activeProfile?.team || "";
+    }
     this.refs.modalNewSeason.showModal();
     this.refs.btnConfirmSeason.disabled = true;
   }
