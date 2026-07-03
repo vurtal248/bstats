@@ -1318,14 +1318,23 @@
       <div class="modal-content">
         <h2 class="modal-title">New Season</h2>
         <p class="modal-desc">Create a new dataset for this player's season.</p>
-        <div class="modal-body">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 10px;">
           <input
             type="text"
             id="input-season-name"
             class="input-modern"
-            placeholder="E.g., 2024-2025"
+            placeholder="Season name — e.g. 2024-2025"
             autocomplete="off"
             spellcheck="false"
+          />
+          <input
+            type="text"
+            id="input-season-team"
+            class="input-modern"
+            placeholder="Team abbreviation (optional) — e.g. LAL"
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="8"
           />
         </div>
         <div class="modal-footer">
