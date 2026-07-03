@@ -208,6 +208,15 @@
           </svg>
           Career Totals
         </div>
+        <div class="sidebar-nav-item" id="nav-career">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Career Stats
+        </div>
         <div class="sidebar-nav-item" id="nav-team">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -527,6 +536,7 @@
             >Overview</span
           >
           <span class="top-bar-tab" id="tab-season" role="tab">Season</span>
+          <span class="top-bar-tab" id="tab-career" role="tab">Career</span>
           <span class="top-bar-tab" id="tab-team" role="tab">Team</span>
           <span class="top-bar-tab" id="tab-advanced" role="tab">Advanced</span>
         </div>
@@ -932,6 +942,40 @@
 
         <div class="team-roster-list" id="team-roster-list" style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px;">
             <!-- Roster rows inserted via JS -->
+        </div>
+      </section>
+
+      <!-- Career Dashboard Panel -->
+      <section id="career-panel" class="data-container" style="display: none;" aria-label="Career Analytics">
+        <header class="editorial-header" style="margin-top: 0; padding-top: 24px; padding-left: 24px; padding-right: 24px; padding-bottom: 0;">
+          <div>
+            <p class="header-command" style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Career Command</p>
+            <h2 class="header-title" id="career-dashboard-title" style="font-family: var(--font-sans); font-weight: 700; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -0.02em; color: var(--text-primary); margin: 0; line-height: 1;">Career Statistics</h2>
+          </div>
+        </header>
+
+        <div class="scroll-context" tabindex="0" role="region" aria-label="Scrollable career table" style="margin-top: 24px; border-top: 1px solid var(--border-mid);">
+          <table class="stats-grid" id="career-stats-table">
+            <thead>
+              <tr>
+                <th>Season</th>
+                <th>Team</th>
+                <th style="text-align: right">GP</th>
+                <th style="text-align: right">MIN</th>
+                <th style="text-align: right">PTS</th>
+                <th style="text-align: right">FG%</th>
+                <th style="text-align: right">3P%</th>
+                <th style="text-align: right">FT%</th>
+                <th style="text-align: right">REB</th>
+                <th style="text-align: right">AST</th>
+                <th style="text-align: right">STL</th>
+                <th style="text-align: right">BLK</th>
+              </tr>
+            </thead>
+            <tbody id="career-table-body" aria-live="polite">
+              <!-- Career rows inserted via JS -->
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -1377,6 +1421,7 @@
             sections.seasonTotals.style.display = "none";
           sections.games.style.display = "none";
           sections.advanced.style.display = "none";
+          if (sections.career) sections.career.style.display = "none";
           if (sections.compare) sections.compare.style.display = "none";
           if (sections.team) sections.team.style.display = "none";
 
@@ -1419,6 +1464,15 @@
             ) {
               window.app.renderTeamDashboard();
             }
+          } else if (viewMode === "career") {
+            sections.career.style.display = "";
+            targetToFlash = sections.career;
+            if (
+              window.app &&
+              typeof window.app.renderCareerSeasons === "function"
+            ) {
+              window.app.renderCareerSeasons();
+            }
           } else if (viewMode === "bio") {
             cluster.style.display = "";
             sections.bio.style.display = "";
@@ -1448,6 +1502,7 @@
           "nav-bio": "bio",
           "nav-highs": "highs",
           "nav-totals": "totals",
+          "nav-career": "career",
           "nav-team": "team",
           "nav-compare": "compare",
         };
@@ -1495,6 +1550,7 @@
         const topTabMap = {
           "tab-overview": "overview",
           "tab-season": "season",
+          "tab-career": "career",
           "tab-team": "team",
           "tab-advanced": "advanced",
         };
