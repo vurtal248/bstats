@@ -715,11 +715,10 @@ class BMetricsApp {
     if (!name) return;
 
     const teamRaw = this.refs.inputSeasonTeam ? this.refs.inputSeasonTeam.value.trim() : "";
-    // Fall back to the profile's current team if user left blank
-    const activeProfile = this.#profiles.find(
-      (p) => p.id === this.#activeProfileId,
-    );
-    const team = teamRaw || activeProfile.team || "";
+    // Only store the team if the user explicitly chose one in the modal.
+    // Do NOT fall back to the profile's current team — that would bake in
+    // the wrong team for seasons created after a trade.
+    const team = teamRaw;
 
     const id =
       "s_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -871,11 +870,7 @@ class BMetricsApp {
   #openSeasonModal() {
     this.#closeSeasonMenu();
     this.refs.inputSeasonName.value = "";
-    if (this.refs.inputSeasonTeam) {
-      // Pre-fill with current profile team so user doesn't start from blank
-      const activeProfile = this.#profiles.find((p) => p.id === this.#activeProfileId);
-      this.refs.inputSeasonTeam.value = activeProfile?.team || "";
-    }
+    if (this.refs.inputSeasonTeam) this.refs.inputSeasonTeam.value = "";
     this.refs.modalNewSeason.showModal();
     this.refs.btnConfirmSeason.disabled = true;
   }
@@ -1689,14 +1684,9 @@ class BMetricsApp {
       const tr = document.createElement("tr");
       tr.className = "data-row";
       
-      // Use only the team that was stored on this season — never fall back
-      // to the live profile team, which would bleed across all seasons when
-      // the player changes teams.
-      const teamDisplay = s.team || "—";
-      
       tr.innerHTML = `
         <td style="color: var(--text-primary); font-family: var(--font-mono);">${s.name}</td>
-        <td style="color: var(--theme-color, #7EA5F8);">${teamDisplay}</td>
+        <td class="career-team-cell" title="Click to edit team" style="color: var(--theme-color, #7EA5F8); cursor: pointer; user-select: none;">${s.team || "—"}</td>
         <td style="text-align: right; color: var(--text-primary);">${gp}</td>
         <td style="text-align: right; color: var(--text-primary); font-weight: bold;">${avgMin.toFixed(1)}</td>
         <td style="text-align: right; color: var(--text-primary); font-weight: bold;">${avgPts.toFixed(1)}</td>
@@ -1708,6 +1698,57 @@ class BMetricsApp {
         <td style="text-align: right; color: var(--text-primary);">${avgStl.toFixed(1)}</td>
         <td style="text-align: right; color: var(--text-primary);">${avgBlk.toFixed(1)}</td>
       `;
+
+      // Make the team cell click-to-edit with the NBA datalist
+      const teamTd = tr.querySelector(".career-team-cell");
+      teamTd.addEventListener("click", () => {
+        if (teamTd.querySelector("input")) return; // already editing
+        const NBA_TEAMS = [
+          "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls",
+          "Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets","Detroit Pistons",
+          "Golden State Warriors","Houston Rockets","Indiana Pacers","LA Clippers",
+          "Los Angeles Lakers","Memphis Grizzlies","Miami Heat","Milwaukee Bucks",
+          "Minnesota Timberwolves","New Orleans Pelicans","New York Knicks",
+          "Oklahoma City Thunder","Orlando Magic","Philadelphia 76ers","Phoenix Suns",
+          "Portland Trail Blazers","Sacramento Kings","San Antonio Spurs",
+          "Toronto Raptors","Utah Jazz","Washington Wizards",
+        ];
+        // Ensure datalist exists
+        const listId = "nba-team-list-career";
+        if (!document.getElementById(listId)) {
+          const dl = document.createElement("datalist");
+          dl.id = listId;
+          dl.innerHTML = NBA_TEAMS.map((t) => `<option value="${t}"></option>`).join("");
+          document.body.appendChild(dl);
+        }
+        const prevText = teamTd.textContent.trim();
+        teamTd.textContent = "";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "input-edit";
+        input.setAttribute("list", listId);
+        input.value = prevText === "—" ? "" : prevText;
+        input.style.cssText = "width: 180px; font-size: inherit; font-family: inherit;";
+        teamTd.appendChild(input);
+        input.focus();
+        input.select();
+
+        let saved = false;
+        const save = () => {
+          if (saved) return;
+          saved = true;
+          const val = input.value.trim();
+          s.team = val; // mutate the season object in-place
+          this.#saveProfiles();
+          teamTd.textContent = val || "—";
+        };
+        input.addEventListener("blur", save);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+          if (e.key === "Escape") { saved = true; input.remove(); teamTd.textContent = prevText; }
+        });
+      });
+
       tbody.appendChild(tr);
     });
     
