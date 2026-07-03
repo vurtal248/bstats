@@ -1613,7 +1613,7 @@ class BMetricsApp {
     
     tbody.innerHTML = "";
     
-    activeProfile.seasons.forEach((s) => {
+    [...activeProfile.seasons].reverse().forEach((s) => {
       let seasonData = [];
       if (s.id === this.#activeSeasonId) {
         seasonData = this.#state.data;
