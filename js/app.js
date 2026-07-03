@@ -720,6 +720,9 @@ class BMetricsApp {
     // the wrong team for seasons created after a trade.
     const team = teamRaw;
 
+    const activeProfile = this.#profiles.find(
+      (p) => p.id === this.#activeProfileId,
+    );
     const id =
       "s_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     activeProfile.seasons.push({ id, name, team });
