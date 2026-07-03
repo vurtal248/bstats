@@ -78,6 +78,7 @@ class BMetricsApp {
       btnNewSeason: document.getElementById("btn-new-season"),
       modalNewSeason: document.getElementById("modal-new-season"),
       inputSeasonName: document.getElementById("input-season-name"),
+      inputSeasonTeam: document.getElementById("input-season-team"),
       btnCancelSeason: document.getElementById("btn-cancel-season"),
       btnConfirmSeason: document.getElementById("btn-confirm-season"),
 
@@ -713,12 +714,16 @@ class BMetricsApp {
     const name = this.refs.inputSeasonName.value.trim();
     if (!name) return;
 
-    const id =
-      "s_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    const teamRaw = this.refs.inputSeasonTeam ? this.refs.inputSeasonTeam.value.trim() : "";
+    // Fall back to the profile's current team if user left blank
     const activeProfile = this.#profiles.find(
       (p) => p.id === this.#activeProfileId,
     );
-    activeProfile.seasons.push({ id, name });
+    const team = teamRaw || activeProfile.team || "";
+
+    const id =
+      "s_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    activeProfile.seasons.push({ id, name, team });
     activeProfile.activeSeasonId = id;
     this.#activeSeasonId = id;
     this.#saveProfiles();
@@ -866,6 +871,7 @@ class BMetricsApp {
   #openSeasonModal() {
     this.#closeSeasonMenu();
     this.refs.inputSeasonName.value = "";
+    if (this.refs.inputSeasonTeam) this.refs.inputSeasonTeam.value = "";
     this.refs.modalNewSeason.showModal();
     this.refs.btnConfirmSeason.disabled = true;
   }
@@ -1669,7 +1675,8 @@ class BMetricsApp {
       const tr = document.createElement("tr");
       tr.className = "data-row";
       
-      const teamDisplay = activeProfile.team || "FA";
+      // Prefer the per-season team; fall back to the current profile team for legacy seasons
+      const teamDisplay = s.team || activeProfile.team || "FA";
       
       tr.innerHTML = `
         <td style="color: var(--text-primary); font-family: var(--font-mono);">${s.name}</td>
