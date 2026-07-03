@@ -1636,19 +1636,23 @@ class BMetricsApp {
       let sumFgm = 0, sumFga = 0, sum3pm = 0, sum3pa = 0, sumFtm = 0, sumFta = 0;
       
       seasonData.forEach((g) => {
-        sumMin += parseFloat(g.mpg || 0);
-        sumPts += parseFloat(g.ppg || 0);
-        sumReb += parseFloat(g.rpg || 0);
-        sumAst += parseFloat(g.apg || 0);
-        sumStl += parseFloat(g.spg || 0);
-        sumBlk += parseFloat(g.bpg || 0);
+        if (g.ppg === undefined || g.tsPct === undefined) {
+          computeDerived(g);
+        }
         
-        sumFgm += parseFloat(g.fgm || 0);
-        sumFga += parseFloat(g.fga || 0);
-        sum3pm += parseFloat(g.tpm || 0);
-        sum3pa += parseFloat(g.tpa || 0);
-        sumFtm += parseFloat(g.ftm || 0);
-        sumFta += parseFloat(g.fta || 0);
+        sumMin += Number(g.mpg) || Number(g.min) || 0;
+        sumPts += Number(g.ppg) || Number(g.pts) || 0;
+        sumReb += Number(g.rpg) || Number(g.reb) || 0;
+        sumAst += Number(g.apg) || Number(g.ast) || 0;
+        sumStl += Number(g.spg) || Number(g.stl) || 0;
+        sumBlk += Number(g.bpg) || Number(g.blk) || 0;
+        
+        sumFgm += Number(g.fgm) || 0;
+        sumFga += Number(g.fga) || 0;
+        sum3pm += Number(g.tpm) || Number(g["3pm"]) || 0;
+        sum3pa += Number(g.tpa) || Number(g["3pa"]) || 0;
+        sumFtm += Number(g.ftm) || 0;
+        sumFta += Number(g.fta) || 0;
       });
       
       const avgMin = sumMin / gp;
